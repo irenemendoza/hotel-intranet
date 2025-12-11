@@ -1,14 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.core.validators import RegexValidator
 
 
-class DepartmentChoices(models.TextChoices):
-    DIRECCION = 'DIR', 'Dirección'
-    RECEPCION = 'REC', 'Recepción'
-    LIMPIEZA = 'LIM', 'Limpieza'
-    MANTENIMIENTO = 'MAN', 'Mantenimiento'
-    RESTAURANTE = 'RES', 'Restaurante'
-
+class ColorChoices(models.TextChoices):
+    AZUL = '#3B82F6', 'Azul'
+    VERDE = '#10B981', 'Verde'
+    AMARILLO = '#F59E0B', 'Amarillo'
+    ROJO = '#EF4444', 'Rojo'
+    PURPURA = '#8B5CF6', 'Púrpura'
+    ROSA = '#EC4899', 'Rosa'
+    NARANJA = '#F97316', 'Naranja'
+    CYAN = '#06B6D4', 'Cyan'
+    INDIGO = '#6366F1', 'Índigo'
+    LIMA = '#84CC16', 'Lima'
+    ESMERALDA = '#059669', 'Esmeralda'
+    GRIS = '#6B7280', 'Gris'
+    
 
 class Department(models.Model):
     # Departamentos del hotel:
@@ -16,11 +26,23 @@ class Department(models.Model):
     'Nombre', 
     max_length=50,
     )
+    color = models.CharField(
+    'Color', 
+    max_length=7,
+    choices=ColorChoices.choices, 
+    default=ColorChoices.AZUL)
     code = models.CharField(
     'Código', 
     max_length=3, 
-    choices=DepartmentChoices.choices,
-    unique=True
+    unique=True,
+    validators=[
+            RegexValidator(
+                regex='^[A-Z]{3}$',
+                message='El código debe tener exactamente 3 letras mayúsculas',
+                code='invalid_code'
+            )
+        ],
+        help_text='Código de 3 letras mayúsculas (ej: DIR, REC, LIM)'
     )
     description = models.TextField(
         'Descripción',
@@ -38,7 +60,10 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
-
+    def save(self, *args, **kwargs):
+        if self.code:
+            self.code = self.code.upper()
+        super().save(*args, **kwargs)
 
 class UserProfile(models.Model):
     # Perfil del usuario con información del hotel
@@ -104,3 +129,15 @@ class UserProfile(models.Model):
     
     def get_full_name(self):
         return self.user.get_full_name() or self.user.username
+
+
+# Signals para crear perfil automáticamente
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()

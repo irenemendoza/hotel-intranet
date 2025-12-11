@@ -6,7 +6,8 @@ from .models import Department, UserProfile
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = [
         'name', 
-        'code',  
+        'code',
+        'color',  
         'is_active', 
         'created_at'
         ]

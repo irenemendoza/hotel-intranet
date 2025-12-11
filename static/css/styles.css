@@ -1,0 +1,109 @@
+/* static/css/styles.css */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Dashboard Cards */
+.stat-card {
+    border-left: 4px solid var(--primary-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.stat-card .card-body {
+    padding: 1.5rem;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+/* Room Status Colors */
+.room-clean { background-color: #d1e7dd; color: #0a3622; }
+.room-dirty { background-color: #fff3cd; color: #664d03; }
+.room-inspected { background-color: #cfe2ff; color: #084298; }
+.room-maintenance { background-color: #f8d7da; color: #842029; }
+.room-out_of_order { background-color: #e2e3e5; color: #41464b; }
+
+/* Priority Badges */
+.priority-low { background-color: #0dcaf0; }
+.priority-medium { background-color: #ffc107; }
+.priority-high { background-color: #fd7e14; }
+.priority-urgent { background-color: #dc3545; }
+
+/* Status Badges */
+.status-pending { background-color: #6c757d; }
+.status-in_progress { background-color: #0d6efd; }
+.status-completed { background-color: #198754; }
+.status-cancelled { background-color: #dc3545; }
+
+/* Avatar */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-lg {
+    width: 80px;
+    height: 80px;
+}
+
+/* Tables */
+.table-hover tbody tr {
+    transition: background-color 0.2s;
+}
+
+/* Quick Actions */
+.quick-action-btn {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.quick-action-btn i {
+    font-size: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+}

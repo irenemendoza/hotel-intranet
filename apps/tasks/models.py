@@ -97,6 +97,15 @@ class Task(models.Model):
             return timezone.now() > self.due_date
         return False
     
+    def get_priority_color(self):
+        """Retorna un color según la prioridad"""
+        colors = {
+            self.LOW: 'info',
+            self.MEDIUM: 'warning',
+            self.HIGH: 'danger',
+            self.URGENT: 'dark',
+        }
+        return colors.get(self.priority, 'secondary')
    
 
 class TaskComment(models.Model):

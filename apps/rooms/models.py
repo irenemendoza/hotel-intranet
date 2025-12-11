@@ -114,6 +114,16 @@ class Room(models.Model):
     def __str__(self):
         return f"Habitación {self.number} - Piso {self.floor}"
     
+    def get_status_display_color(self):
+        """Retorna un color según el estado"""
+        colors = {
+            self.StatusChoices.CLEAN: 'success',
+            self.StatusChoices.DIRTY: 'warning',
+            self.StatusChoices.INSPECTED: 'info',
+            self.StatusChoices.MAINTENANCE: 'danger',
+            self.StatusChoices.OUT_OF_ORDER: 'dark',
+        }
+        return colors.get(self.status, 'secondary')
 
 class CleaningTask(models.Model):
     """Tareas de limpieza asignadas a habitaciones"""
@@ -308,3 +318,12 @@ class MaintenanceRequest(models.Model):
     def __str__(self):
         return f"{self.room} - {self.title} [{self.get_priority_display()}]"
     
+    def get_priority_color(self):
+        """Retorna un color según la prioridad"""
+        colors = {
+            self.LOW: 'info',
+            self.MEDIUM: 'warning',
+            self.HIGH: 'danger',
+            self.URGENT: 'dark',
+        }
+        return colors.get(self.priority, 'secondary')
