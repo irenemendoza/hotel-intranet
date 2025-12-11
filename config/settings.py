@@ -39,8 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'crispy_forms',
-    'crispy_bootstrap5',
+
 
     'apps.users',
     'apps.dashboard',
@@ -48,9 +47,6 @@ INSTALLED_APPS = [
     'apps.rooms',
 ]
 
-# Crispy forms
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

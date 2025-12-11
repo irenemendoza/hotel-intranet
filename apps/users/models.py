@@ -9,6 +9,13 @@ class DepartmentChoices(models.TextChoices):
     MANTENIMIENTO = 'MAN', 'Mantenimiento'
     RESTAURANTE = 'RES', 'Restaurante'
 
+class ColorChoices(models.TextChoices):
+    AZUL = '#3B82F6', 'Azul'
+    VERDE = '#10B981', 'Verde'
+    AMARILLO = '#F59E0B', 'Amarillo'
+    ROJO = '#EF4444', 'Rojo'
+    PURPURA = '#8B5CF6', 'Púrpura'
+    
 
 class Department(models.Model):
     # Departamentos del hotel:
@@ -16,6 +23,11 @@ class Department(models.Model):
     'Nombre', 
     max_length=50,
     )
+    color = models.CharField(
+    'Color', 
+    max_length=7,
+    choices=ColorChoices.choices, 
+    default=ColorChoices.AZUL)
     code = models.CharField(
     'Código', 
     max_length=3, 
