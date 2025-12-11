@@ -1,0 +1,294 @@
+<!-- templates/dashboard/home.html -->
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Hotel Intranet{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h3">
+            <i class="bi bi-speedometer2"></i> 
+            Bienvenido, {{ user.get_full_name|default:user.username }}
+        </h1>
+        <p class="text-muted">
+            {% if user.profile.department %}
+                Departamento: <strong>{{ user.profile.department.name }}</strong>
+            {% endif %}
+            | {{ user.profile.position|default:"Empleado" }}
+        </p>
+    </div>
+</div>
+
+<!-- Estadísticas Generales -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                    <i class="bi bi-door-open"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_rooms }}</h3>
+                    <small class="text-muted">Total Habitaciones</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm" style="border-left-color: #198754 !important;">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ clean_rooms }}</h3>
+                    <small class="text-muted">Habitaciones Limpias</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm" style="border-left-color: #ffc107 !important;">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ dirty_rooms }}</h3>
+                    <small class="text-muted">Pendientes de Limpieza</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm" style="border-left-color: #dc3545 !important;">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                    <i class="bi bi-tools"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ maintenance_rooms }}</h3>
+                    <small class="text-muted">En Mantenimiento</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenido específico por departamento -->
+<div class="row g-3">
+    <!-- Mis Tareas Pendientes -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-task"></i> Mis Tareas Pendientes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if my_pending_tasks %}
+                    <div class="list-group list-group-flush">
+                        {% for task in my_pending_tasks %}
+                        <a href="{% url 'tasks:task_detail' task.pk %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ task.title }}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-building"></i> {{ task.department.name }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge priority-{{ task.priority }}">
+                                        {{ task.get_priority_display }}
+                                    </span>
+                                    {% if task.due_date %}
+                                    <br>
+                                    <small class="{% if task.is_overdue %}text-danger{% else %}text-muted{% endif %}">
+                                        <i class="bi bi-calendar"></i> 
+                                        {{ task.due_date|date:"d/m/Y" }}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-outline-primary">
+                            Ver todas las tareas
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-check-circle display-4"></i>
+                        <p class="mt-2">No tienes tareas pendientes</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tareas del Departamento -->
+    {% if dept_tasks %}
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-people"></i> Tareas del Departamento
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for task in dept_tasks %}
+                    <a href="{% url 'tasks:task_detail' task.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ task.title }}</h6>
+                                <small class="text-muted">
+                                    {% if task.assigned_to %}
+                                        <i class="bi bi-person"></i> {{ task.assigned_to.get_full_name }}
+                                    {% else %}
+                                        <i class="bi bi-person-x"></i> Sin asignar
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <span class="badge priority-{{ task.priority }}">
+                                {{ task.get_priority_display }}
+                            </span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-outline-primary">
+                        Ver todas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Limpieza (solo para departamento de limpieza) -->
+    {% if user.profile.department.code == 'LIM' and my_cleaning_tasks %}
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-droplet"></i> Mis Tareas de Limpieza
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for cleaning in my_cleaning_tasks %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ cleaning.room }}</h6>
+                                <small class="text-muted">
+                                    {{ cleaning.get_cleaning_type_display }} | 
+                                    {{ cleaning.scheduled_time|date:"H:i" }}
+                                </small>
+                            </div>
+                            <span class="badge status-{{ cleaning.status }}">
+                                {{ cleaning.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'rooms:cleaning_list' %}" class="btn btn-sm btn-outline-primary">
+                        Ver todas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Mantenimiento (solo para departamento de mantenimiento) -->
+    {% if user.profile.department.code == 'MAN' and urgent_maintenance %}
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Mantenimiento Urgente
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for maintenance in urgent_maintenance %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ maintenance.room }} - {{ maintenance.title }}</h6>
+                                <small class="text-muted">
+                                    {{ maintenance.created_at|date:"d/m/Y H:i" }}
+                                </small>
+                            </div>
+                            <span class="badge bg-danger">URGENTE</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'rooms:maintenance_list' %}" class="btn btn-sm btn-danger">
+                        Ver todas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Acciones Rápidas -->
+<div class="row mt-4">
+    <div class="col">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning"></i> Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <a href="{% url 'tasks:task_create' %}" class="btn btn-outline-primary quick-action-btn">
+                            <i class="bi bi-plus-circle"></i>
+                            <span>Nueva Tarea</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'rooms:room_list' %}" class="btn btn-outline-success quick-action-btn">
+                            <i class="bi bi-door-open"></i>
+                            <span>Ver Habitaciones</span>
+                        </a>
+                    </div>
+                    {% if user.profile.department.code == 'MAN' %}
+                    <div class="col-md-3">
+                        <a href="{% url 'rooms:maintenance_create' %}" class="btn btn-outline-danger quick-action-btn">
+                            <i class="bi bi-tools"></i>
+                            <span>Reportar Mantenimiento</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <div class="col-md-3">
+                        <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary quick-action-btn">
+                            <i class="bi bi-gear"></i>
+                            <span>Panel Admin</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

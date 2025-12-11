@@ -117,11 +117,11 @@ class Room(models.Model):
     def get_status_display_color(self):
         """Retorna un color según el estado"""
         colors = {
-            self.CLEAN: 'success',
-            self.DIRTY: 'warning',
-            self.INSPECTED: 'info',
-            self.MAINTENANCE: 'danger',
-            self.OUT_OF_ORDER: 'dark',
+            self.StatusChoices.CLEAN: 'success',
+            self.StatusChoices.DIRTY: 'warning',
+            self.StatusChoices.INSPECTED: 'info',
+            self.StatusChoices.MAINTENANCE: 'danger',
+            self.StatusChoices.OUT_OF_ORDER: 'dark',
         }
         return colors.get(self.status, 'secondary')
 
