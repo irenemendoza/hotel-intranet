@@ -93,7 +93,7 @@
                 {% if my_pending_tasks %}
                     <div class="list-group list-group-flush">
                         {% for task in my_pending_tasks %}
-                        <a href="{% url 'tasks:task_detail' task.pk %}" class="list-group-item list-group-item-action">
+                        <a href="#" class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between align-items-center">
                                 <div>
                                     <h6 class="mb-1">{{ task.title }}</h6>
@@ -118,7 +118,7 @@
                         {% endfor %}
                     </div>
                     <div class="text-center mt-3">
-                        <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-outline-primary">
+                        <a href="#" class="btn btn-sm btn-outline-primary">
                             Ver todas las tareas
                         </a>
                     </div>
@@ -144,7 +144,7 @@
             <div class="card-body">
                 <div class="list-group list-group-flush">
                     {% for task in dept_tasks %}
-                    <a href="{% url 'tasks:task_detail' task.pk %}" class="list-group-item list-group-item-action">
+                    <a href="#" class="list-group-item list-group-item-action">
                         <div class="d-flex w-100 justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-1">{{ task.title }}</h6>
@@ -164,7 +164,7 @@
                     {% endfor %}
                 </div>
                 <div class="text-center mt-3">
-                    <a href="{% url 'tasks:task_list' %}" class="btn btn-sm btn-outline-primary">
+                    <a href="#" class="btn btn-sm btn-outline-primary">
                         Ver todas
                     </a>
                 </div>
@@ -202,7 +202,7 @@
                     {% endfor %}
                 </div>
                 <div class="text-center mt-3">
-                    <a href="{% url 'rooms:cleaning_list' %}" class="btn btn-sm btn-outline-primary">
+                    <a href="#" class="btn btn-sm btn-outline-primary">
                         Ver todas
                     </a>
                 </div>
@@ -237,7 +237,7 @@
                     {% endfor %}
                 </div>
                 <div class="text-center mt-3">
-                    <a href="{% url 'rooms:maintenance_list' %}" class="btn btn-sm btn-danger">
+                    <a href="#" class="btn btn-sm btn-danger">
                         Ver todas
                     </a>
                 </div>
@@ -259,20 +259,20 @@
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col-md-3">
-                        <a href="{% url 'tasks:task_create' %}" class="btn btn-outline-primary quick-action-btn">
+                        <a href="#" class="btn btn-outline-primary quick-action-btn">
                             <i class="bi bi-plus-circle"></i>
                             <span>Nueva Tarea</span>
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{% url 'rooms:room_list' %}" class="btn btn-outline-success quick-action-btn">
+                        <a href="#" class="btn btn-outline-success quick-action-btn">
                             <i class="bi bi-door-open"></i>
                             <span>Ver Habitaciones</span>
                         </a>
                     </div>
                     {% if user.profile.department.code == 'MAN' %}
                     <div class="col-md-3">
-                        <a href="{% url 'rooms:maintenance_create' %}" class="btn btn-outline-danger quick-action-btn">
+                        <a href="#" class="btn btn-outline-danger quick-action-btn">
                             <i class="bi bi-tools"></i>
                             <span>Reportar Mantenimiento</span>
                         </a>
@@ -280,7 +280,7 @@
                     {% endif %}
                     {% if user.is_staff %}
                     <div class="col-md-3">
-                        <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary quick-action-btn">
+                        <a href="#" class="btn btn-outline-secondary quick-action-btn">
                             <i class="bi bi-gear"></i>
                             <span>Panel Admin</span>
                         </a>

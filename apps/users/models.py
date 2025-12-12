@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.core.validators import RegexValidator
 
 
 class ColorChoices(models.TextChoices):
@@ -10,10 +11,13 @@ class ColorChoices(models.TextChoices):
     AMARILLO = '#F59E0B', 'Amarillo'
     ROJO = '#EF4444', 'Rojo'
     PURPURA = '#8B5CF6', 'Púrpura'
-    CYAN = '#27F5E4', 'Cyan'
-    ORANGE = '#F59C27', 'Orange'
-    PINK = '#D44E96', 'Pink'
-    BROWN = '#693A10', 'Brown'
+    ROSA = '#EC4899', 'Rosa'
+    NARANJA = '#F97316', 'Naranja'
+    CYAN = '#06B6D4', 'Cyan'
+    INDIGO = '#6366F1', 'Índigo'
+    LIMA = '#84CC16', 'Lima'
+    ESMERALDA = '#059669', 'Esmeralda'
+    GRIS = '#6B7280', 'Gris'
     
 
 class Department(models.Model):
@@ -30,7 +34,15 @@ class Department(models.Model):
     code = models.CharField(
     'Código', 
     max_length=3, 
-    unique=True
+    unique=True,
+    validators=[
+            RegexValidator(
+                regex='^[A-Z]{3}$',
+                message='El código debe tener exactamente 3 letras mayúsculas',
+                code='invalid_code'
+            )
+        ],
+        help_text='Código de 3 letras mayúsculas (ej: DIR, REC, LIM)'
     )
     description = models.TextField(
         'Descripción',
@@ -48,7 +60,10 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
-
+    def save(self, *args, **kwargs):
+        if self.code:
+            self.code = self.code.upper()
+        super().save(*args, **kwargs)
 
 class UserProfile(models.Model):
     # Perfil del usuario con información del hotel

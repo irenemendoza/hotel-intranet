@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block title %}Detalle de habitación{% endblock %}
+
+{% block content %}
+    <h1>HABITACIÓN {{ room.code }}</h2>
+    <section>
+        <h1>Departamento: {{ departamento }}</h1>
+        <p>
+            <a href="{% url 'rooms:list' %}">Volver al listado de habitaciones</a>
+        </p>
+    </section>
+{% endblock %}

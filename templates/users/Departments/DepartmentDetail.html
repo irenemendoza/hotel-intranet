@@ -1,12 +1,210 @@
 {% extends 'layout.html' %}
+{% load static %}
 
-{% block title %}Detalle de departamento{% endblock %}
+{% block title %}{{ department.name }} - Departamentos{% endblock %}
 
 {% block content %}
-    <section>
-        <h1>Departamento: {{ departamento }}</h1>
-        <p>
-            <a href="{% url 'department:list' %}">Volver al listado de departamento</a>
-        </p>
-    </section>
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'departments:list' %}">Departamentos</a></li>
+            <li class="breadcrumb-item active">{{ department.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex align-items-center">
+                    <div class="rounded me-3" 
+                         style="width: 60px; height: 60px; background-color: {{ departamento.color }};"></div>
+                    <div>
+                        <h1 class="h3 mb-1">{{ department.name }}</h1>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-secondary">{{ department.code }}</span>
+                            {% if department.is_active %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactivo</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'departments:update' department.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a href="{% url 'departments:delete' department.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información del Departamento -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información General</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Nombre del Departamento</label>
+                            <p class="mb-0 fw-semibold">{{ department.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Código</label>
+                            <p class="mb-0"><span class="badge bg-secondary">{{ department.code }}</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Color Identificativo</label>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded me-2" 
+                                     style="width: 30px; height: 30px; background-color: {{ departamento.color }};"></div>
+                                <span>{{ department.get_color_display }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Estado</label>
+                            <p class="mb-0">
+                                {% if department.is_active %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="text-muted small mb-1">Descripción</label>
+                            <p class="mb-0">
+                                {% if department.description %}
+                                    {{ department.description }}
+                                {% else %}
+                                    <span class="text-muted fst-italic">Sin descripción</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Fecha de Creación</label>
+                            <p class="mb-0">{{ department.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empleados del Departamento -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-people me-2"></i>Empleados ({{ total_empleados }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if empleados %}
+                        <div class="list-group list-group-flush">
+                            {% for empleado in empleados %}
+                            <div class="list-group-item px-0">
+                                <div class="d-flex align-items-center">
+                                    {% if empleado.avatar %}
+                                        <img src="{{ empleado.avatar.url }}" 
+                                             alt="{{ empleado.get_full_name }}" 
+                                             class="rounded-circle me-3"
+                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3"
+                                             style="width: 50px; height: 50px;">
+                                            <span class="fw-bold">{{ empleado.user.first_name.0 }}{{ empleado.user.last_name.0 }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">{{ empleado.get_full_name }}</h6>
+                                        <small class="text-muted">
+                                            {% if empleado.position %}{{ empleado.position }}{% else %}Sin cargo{% endif %}
+                                            {% if empleado.employee_number %} • #{{ empleado.employee_number }}{% endif %}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        {% if empleado.is_available %}
+                                            <span class="badge bg-success">Disponible</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">No disponible</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-person-x display-4 text-muted"></i>
+                            <p class="text-muted mt-2">No hay empleados asignados a este departamento</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar con estadísticas -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Estadísticas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Total Empleados</span>
+                            <span class="fs-4 fw-bold text-primary">{{ total_empleados }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" 
+                                 style="width: {{ total_empleados|default:0 }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Disponibles</span>
+                            <span class="fs-5 fw-bold text-success">
+                                {{ empleados_disponibles }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">No Disponibles</span>
+                            <span class="fs-5 fw-bold text-warning">
+                                {{ empleados_no_disponibles }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm" 
+                 style="background-color: {{ departamento.color }}; color: white;">
+                <div class="card-body text-center py-5">
+                    <div class="display-1 mb-3">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h4 class="mb-2">{{ department.code }}</h4>
+                    <p class="mb-0 opacity-75">Código del Departamento</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

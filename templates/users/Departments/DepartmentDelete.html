@@ -1,15 +1,100 @@
 {% extends 'layout.html' %}
+{% load static %}
 
-{% block title %}Eliminar departamento{% endblock %}
+{% block title %}Eliminar Departamento - {{ department.name }}{% endblock %}
 
 {% block content %}
-    <h1>ELIMINAR DEPARTAMENTO</h2>
-    <section>
-        <form method="post">{% csrf_token %}
-            <p>¿Seguro que quieres eliminar el departamento: "{{ departamento }}"?</p>
-            {{ form }}
-            <input type="submit" value="Confirmar">
-            <a href="{% url 'department:list' %}">Cancelar</a>
-        </form>
-    </section>
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'departments:list' %}">Departamentos</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'departments:detail' departamento.pk %}">{{ department.name }}</a></li>
+            <li class="breadcrumb-item active">Eliminar</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm border-danger">
+                <div class="card-header bg-danger text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Confirmar Eliminación
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="rounded mx-auto mb-3" 
+                             style="width: 80px; height: 80px; background-color: {{ departamento.color }};"></div>
+                        <h5>{{ department.name }}</h5>
+                        <span class="badge bg-secondary">{{ department.code }}</span>
+                    </div>
+
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                    </div>
+
+                    <p class="text-center mb-4">
+                        ¿Estás seguro de que deseas eliminar el departamento <strong>{{ department.name }}</strong>?
+                    </p>
+
+                    {% if departamento.userprofile_set.count > 0 %}
+                        <div class="alert alert-danger" role="alert">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-people me-2"></i>
+                                Empleados Asignados
+                            </h6>
+                            <p class="mb-0">
+                                Este departamento tiene <strong>{{ department.userprofile_set.count }} empleado(s)</strong> asignado(s). 
+                                Al eliminarlo, estos empleados quedarán sin departamento asignado.
+                            </p>
+                        </div>
+
+                        <div class="list-group mb-4">
+                            {% for empleado in departamento.userprofile_set.all|slice:":5" %}
+                            <div class="list-group-item">
+                                <div class="d-flex align-items-center">
+                                    {% if empleado.avatar %}
+                                        <img src="{{ empleado.avatar.url }}" 
+                                             alt="{{ empleado.get_full_name }}" 
+                                             class="rounded-circle me-2"
+                                             style="width: 30px; height: 30px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                             style="width: 30px; height: 30px; font-size: 0.75rem;">
+                                            {{ empleado.user.first_name.0 }}{{ empleado.user.last_name.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <small>{{ empleado.get_full_name }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% if departamento.userprofile_set.count > 5 %}
+                                <div class="list-group-item text-center text-muted">
+                                    <small>Y {{ departamento.userprofile_set.count|add:"-5" }} más...</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash me-2"></i>
+                                Sí, Eliminar Departamento
+                            </button>
+                            <a href="{% url 'departments:detail' department.pk %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>
+                                No, Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
