@@ -10,6 +10,7 @@ urlpatterns = [
     path('users/', include(('apps.users.urls', "users"), namespace="users")),
     path('rooms/', include(('apps.rooms.urls', "rooms"), namespace="rooms")),
     path('tasks/', include(('apps.tasks.urls', "tasks"), namespace="tasks")),
+    path('departments/', include(('apps.users.urls.departments_urls', "department"), namespace="users")),
 ]
 
 # Servir archivos media en desarrollo

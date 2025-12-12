@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block title %}Listado de departamento{% endblock %}
+
+{% block content %}
+    <h1>DEPARTAMENTOS</h2>
+    <ul>
+        {% for departamento in departamentos %}
+            <li>
+                <a href="{% url 'departmento:detail' departamento.pk %}">{{ departamento }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'departmento:create' %}">Crear nuevo departamento</a>
+{% endblock %}

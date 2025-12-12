@@ -34,24 +34,24 @@
                 <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard:home' %}">
+                            <a class="nav-link" href="#">
                                 <i class="bi bi-house-door"></i> Inicio
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'rooms:room_list' %}">
+                            <a class="nav-link" href="#">
                                 <i class="bi bi-door-open"></i> Habitaciones
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'tasks:task_list' %}">
+                            <a class="nav-link" href="#">
                                 <i class="bi bi-list-check"></i> Tareas
                             </a>
                         </li>
                         
                         {% if user.profile.department.code == 'LIM' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'rooms:cleaning_list' %}">
+                            <a class="nav-link" href="#">
                                 <i class="bi bi-droplet"></i> Limpieza
                             </a>
                         </li>
@@ -59,7 +59,7 @@
                         
                         {% if user.profile.department.code == 'MAN' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'rooms:maintenance_list' %}">
+                            <a class="nav-link" href="#">
                                 <i class="bi bi-tools"></i> Mantenimiento
                             </a>
                         </li>
@@ -79,13 +79,13 @@
                                 {% endif %}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="bi bi-person"></i> Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Mi Perfil</a></li>
                                 {% if user.is_staff %}
-                                <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear"></i> Admin</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Admin</a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="post" action="{% url 'users:logout' %}" class="d-inline">
+                                    <form method="post" action="#" class="d-inline">
                                         {% csrf_token %}
                                         <button type="submit" class="dropdown-item text-danger">
                                             <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
@@ -96,7 +96,7 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'users:login' %}">
+                            <a class="nav-link" href="#">
                                 <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
                             </a>
                         </li>

@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block title %}Detalle de departamento{% endblock %}
+
+{% block content %}
+    <section>
+        <h1>Departamento: {{ departamento }}</h1>
+        <p>
+            <a href="{% url 'department:list' %}">Volver al listado de departamento</a>
+        </p>
+    </section>
+{% endblock %}

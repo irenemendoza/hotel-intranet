@@ -3,12 +3,6 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
-class DepartmentChoices(models.TextChoices):
-    DIRECCION = 'DIR', 'Dirección'
-    RECEPCION = 'REC', 'Recepción'
-    LIMPIEZA = 'LIM', 'Limpieza'
-    MANTENIMIENTO = 'MAN', 'Mantenimiento'
-    RESTAURANTE = 'RES', 'Restaurante'
 
 class ColorChoices(models.TextChoices):
     AZUL = '#3B82F6', 'Azul'
@@ -16,6 +10,10 @@ class ColorChoices(models.TextChoices):
     AMARILLO = '#F59E0B', 'Amarillo'
     ROJO = '#EF4444', 'Rojo'
     PURPURA = '#8B5CF6', 'Púrpura'
+    CYAN = '#27F5E4', 'Cyan'
+    ORANGE = '#F59C27', 'Orange'
+    PINK = '#D44E96', 'Pink'
+    BROWN = '#693A10', 'Brown'
     
 
 class Department(models.Model):
@@ -32,7 +30,6 @@ class Department(models.Model):
     code = models.CharField(
     'Código', 
     max_length=3, 
-    choices=DepartmentChoices.choices,
     unique=True
     )
     description = models.TextField(

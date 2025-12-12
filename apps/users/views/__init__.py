@@ -1,0 +1,1 @@
+from .departments_views import *
