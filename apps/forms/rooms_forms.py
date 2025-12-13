@@ -1,6 +1,6 @@
 from django import forms
 from django.utils import timezone
-from .models import Room, RoomType, CleaningTask, MaintenanceRequest
+from apps.rooms.models import Room, RoomType, CleaningTask, MaintenanceRequest
 from apps.users.models import UserProfile
 
 class RoomTypeForm(forms.ModelForm):

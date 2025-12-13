@@ -45,7 +45,7 @@ class RoomType(models.Model):
 class Reservation(models.Model):
     """Reservas de habitaciones"""
     room = models.ForeignKey(
-        Room, 
+        'Room', 
         on_delete=models.CASCADE, 
         related_name='reservations'
         )
@@ -86,45 +86,45 @@ class Reservation(models.Model):
         return self.status == 'checked_in'
 
     def get_current_reservation(self):
-    """Obtiene la reserva activa actual"""
-    from django.utils import timezone
-    return self.reservations.filter(
-        status='checked_in',
-        actual_check_in__isnull=False,
-        actual_check_out__isnull=True
-    ).first()
-
-def nights_stayed(self):
-    """Calcula cuántas noches lleva el huésped"""
-    reservation = self.get_current_reservation()
-    if reservation and reservation.actual_check_in:
+        """Obtiene la reserva activa actual"""
         from django.utils import timezone
-        delta = timezone.now() - reservation.actual_check_in
-        return delta.days
-    return 0
+        return self.reservations.filter(
+            status='checked_in',
+            actual_check_in__isnull=False,
+            actual_check_out__isnull=True
+        ).first()
 
-def needs_linen_change(self):
-    """Determina si necesita cambio de sábanas (cada 3 días)"""
-    return self.nights_stayed() >= 3
+    def nights_stayed(self):
+        """Calcula cuántas noches lleva el huésped"""
+        reservation = self.get_current_reservation()
+        if reservation and reservation.actual_check_in:
+            from django.utils import timezone
+            delta = timezone.now() - reservation.actual_check_in
+            return delta.days
+        return 0
 
-def get_cleaning_type_needed(self):
-    """Determina qué tipo de limpieza necesita"""
-    reservation = self.get_current_reservation()
-    if not reservation:
-        return None
+    def needs_linen_change(self):
+        """Determina si necesita cambio de sábanas (cada 3 días)"""
+        return self.nights_stayed() >= 3
+
+    def get_cleaning_type_needed(self):
+        """Determina qué tipo de limpieza necesita"""
+        reservation = self.get_current_reservation()
+        if not reservation:
+            return None
     
-    from django.utils import timezone
-    today = timezone.now().date()
+        from django.utils import timezone
+        today = timezone.now().date()
     
-    # Departure (salida)
-    if reservation.check_out == today:
-        return 'checkout'
-    # Stay over con cambio de sábanas
-    elif self.needs_linen_change():
-        return 'deep_cleaning'
-    # Stay over normal
-    else:
-        return 'stay_over'
+        # Departure (salida)
+        if reservation.check_out == today:
+            return 'checkout'
+        # Stay over con cambio de sábanas
+        elif self.needs_linen_change():
+            return 'deep_cleaning'
+        # Stay over normal
+        else:
+            return 'stay_over'
 
 class Room(models.Model):
 
