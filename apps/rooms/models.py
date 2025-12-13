@@ -42,6 +42,90 @@ class RoomType(models.Model):
         return f"{self.name} ({self.code})"
 
 
+class Reservation(models.Model):
+    """Reservas de habitaciones"""
+    room = models.ForeignKey(
+        Room, 
+        on_delete=models.CASCADE, 
+        related_name='reservations'
+        )
+    guest_name = models.CharField(
+        'Nombre del huésped', 
+        max_length=200
+        )
+    check_in = models.DateField(
+        'Fecha de entrada'
+        )
+    check_out = models.DateField(
+        'Fecha de salida'
+        )
+    actual_check_in = models.DateTimeField(
+        'Check-in real', 
+        null=True, 
+        blank=True
+        )
+    actual_check_out = models.DateTimeField(
+        'Check-out real', 
+        null=True, 
+        blank=True
+        )
+    nights = models.PositiveIntegerField(
+        'Noches'
+        )
+    status = models.CharField(
+        max_length=20, 
+        choices=[
+        ('confirmed', 'Confirmada'),
+        ('checked_in', 'En estancia'),
+        ('checked_out', 'Finalizada'),
+        ('cancelled', 'Cancelada'),
+        ], 
+        default='confirmed')
+    
+    def is_active(self):
+        return self.status == 'checked_in'
+
+    def get_current_reservation(self):
+    """Obtiene la reserva activa actual"""
+    from django.utils import timezone
+    return self.reservations.filter(
+        status='checked_in',
+        actual_check_in__isnull=False,
+        actual_check_out__isnull=True
+    ).first()
+
+def nights_stayed(self):
+    """Calcula cuántas noches lleva el huésped"""
+    reservation = self.get_current_reservation()
+    if reservation and reservation.actual_check_in:
+        from django.utils import timezone
+        delta = timezone.now() - reservation.actual_check_in
+        return delta.days
+    return 0
+
+def needs_linen_change(self):
+    """Determina si necesita cambio de sábanas (cada 3 días)"""
+    return self.nights_stayed() >= 3
+
+def get_cleaning_type_needed(self):
+    """Determina qué tipo de limpieza necesita"""
+    reservation = self.get_current_reservation()
+    if not reservation:
+        return None
+    
+    from django.utils import timezone
+    today = timezone.now().date()
+    
+    # Departure (salida)
+    if reservation.check_out == today:
+        return 'checkout'
+    # Stay over con cambio de sábanas
+    elif self.needs_linen_change():
+        return 'deep_cleaning'
+    # Stay over normal
+    else:
+        return 'stay_over'
+
 class Room(models.Model):
 
     class StatusChoices(models.TextChoices):
