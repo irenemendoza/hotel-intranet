@@ -65,40 +65,50 @@ class EmployeeDetailView(LoginRequiredMixin, DetailView):
     model = UserProfile
     template_name = 'users/employees/EmployeeDetail.html'
     context_object_name = 'employee'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # Asistencias recientes
         context['recent_attendances'] = self.object.attendances.all()[:10]
-        
+
         # Asistencia actual
         context['current_attendance'] = self.object.get_current_attendance()
-        
+
         # Permisos
         context['pending_leaves'] = self.object.leaves.filter(status='pending')
         context['approved_leaves'] = self.object.leaves.filter(status='approved').order_by('-start_date')[:5]
-        
+
         # Estadísticas del mes actual
         today = timezone.now()
         first_day_month = today.replace(day=1)
-        
+
         monthly_attendances = self.object.attendances.filter(
             check_in__gte=first_day_month,
             check_out__isnull=False
         )
-        
+
         total_hours = timedelta()
         for attendance in monthly_attendances:
             total_hours += attendance.duration()
-        
+
+        count_days = monthly_attendances.count()
+        average_hours = total_hours / count_days if count_days > 0 else timedelta()
+
+        # Convertir a horas y minutos
+        total_seconds = int(total_hours.total_seconds())
+        average_seconds = int(average_hours.total_seconds())
+
         context['monthly_stats'] = {
-            'days_worked': monthly_attendances.count(),
-            'total_hours': total_hours,
-            'average_hours': total_hours / monthly_attendances.count() if monthly_attendances.count() > 0 else timedelta()
+            'days_worked': count_days,
+            'total_hours_h': total_seconds // 3600,
+            'total_hours_m': (total_seconds % 3600) // 60,
+            'average_hours_h': average_seconds // 3600,
+            'average_hours_m': (average_seconds % 3600) // 60,
         }
-        
+
         return context
+
 
 
 class EmployeeCreateView(LoginRequiredMixin, CreateView):
@@ -232,6 +242,15 @@ class MyAttendanceView(LoginRequiredMixin, View):
         profile = request.user.profile
         current_attendance = profile.get_current_attendance()
         today_hours = profile.get_today_work_hours()
+
+        if today_hours:
+            total_seconds = int(today_hours.total_seconds())
+            today_hours_h = total_seconds // 3600
+            today_hours_m = (total_seconds % 3600) // 60
+        else:
+            today_hours_h = 0
+            today_hours_m = 0
+
         
         # Historial reciente
         recent_attendances = profile.attendances.all()[:10]
@@ -240,12 +259,13 @@ class MyAttendanceView(LoginRequiredMixin, View):
             'profile': profile,
             'current_attendance': current_attendance,
             'is_checked_in': profile.is_checked_in(),
-            'today_hours': today_hours,
             'recent_attendances': recent_attendances,
             'check_in_form': AttendanceCheckInForm(),
-            'check_out_form': AttendanceCheckOutForm()
+            'check_out_form': AttendanceCheckOutForm(),
+            'today_hours_h': today_hours_h,
+            'today_hours_m': today_hours_m,
         }
-        
+
         return render(request, self.template_name, context)
 
 
@@ -258,7 +278,7 @@ class AttendanceCheckInView(LoginRequiredMixin, View):
         # Verificar que no esté ya fichado
         if profile.is_checked_in():
             messages.warning(request, 'Ya has fichado tu entrada. Debes fichar la salida primero.')
-            return redirect('users:my-attendance')
+            return redirect('attendance:my-attendance')
         
         form = AttendanceCheckInForm(request.POST)
         
@@ -282,7 +302,7 @@ class AttendanceCheckInView(LoginRequiredMixin, View):
         else:
             messages.error(request, 'Error al registrar la entrada.')
         
-        return redirect('users:my-attendance')
+        return redirect('attendance:my-attendance')
 
 
 class AttendanceCheckOutView(LoginRequiredMixin, View):
@@ -294,7 +314,7 @@ class AttendanceCheckOutView(LoginRequiredMixin, View):
         
         if not attendance:
             messages.warning(request, 'No tienes una entrada registrada hoy.')
-            return redirect('users:my-attendance')
+            return redirect('attendance:my-attendance')
         
         form = AttendanceCheckOutForm(request.POST, instance=attendance)
         
@@ -308,7 +328,7 @@ class AttendanceCheckOutView(LoginRequiredMixin, View):
         else:
             messages.error(request, 'Error al registrar la salida.')
         
-        return redirect('users:my-attendance')
+        return redirect('attendance:my-attendance')
 
 
 class AttendanceHistoryView(LoginRequiredMixin, ListView):
@@ -368,7 +388,7 @@ class LeaveCreateView(LoginRequiredMixin, CreateView):
     model = Leave
     form_class = LeaveRequestForm
     template_name = 'users/leaves/LeaveForm.html'
-    success_url = reverse_lazy('users:leave-list')
+    success_url = reverse_lazy('attendance:leave-list')
     
     def form_valid(self, form):
         form.instance.employee = self.request.user.profile
@@ -423,7 +443,7 @@ class LeaveApprovalView(LoginRequiredMixin, UpdateView):
     model = Leave
     form_class = LeaveApprovalForm
     template_name = 'users/leaves/LeaveApproval.html'
-    success_url = reverse_lazy('users:leave-management')
+    success_url = reverse_lazy('attendance:leave-management')
     
     def form_valid(self, form):
         form.save(user=self.request.user)
