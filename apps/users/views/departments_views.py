@@ -13,7 +13,7 @@ from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from apps.forms.users_forms import DepartmentForm
+from apps.users.forms import DepartmentForm
 
 class DepartmentListView(LoginRequiredMixin, ListView):
     model = Department

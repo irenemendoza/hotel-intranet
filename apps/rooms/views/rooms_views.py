@@ -9,7 +9,8 @@ from django.http import JsonResponse
 
 from apps.rooms.models import Room, RoomType
 
-from apps.forms.rooms_forms import RoomForm, RoomTypeForm
+from apps.rooms.forms import RoomForm, RoomTypeForm
+from apps.rooms.models import CleaningTask, MaintenanceRequest 
 
 
 
@@ -17,7 +18,7 @@ from apps.forms.rooms_forms import RoomForm, RoomTypeForm
 
 class RoomDashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard principal de habitaciones con vista de pisos"""
-    template_name = 'rooms/RoomDashboard.html'
+    template_name = 'rooms/type/RoomDashboard.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -57,7 +58,7 @@ class RoomDashboardView(LoginRequiredMixin, TemplateView):
         # Tareas pendientes
         context['pending_cleanings'] = CleaningTask.objects.filter(
             status__in=[CleaningTask.StatusChoices.PENDING, CleaningTask.StatusChoices.IN_PROGRESS]
-        ).select_related('room', 'assigned_to').order_by('priority', 'scheduled_time')[:5]
+        ).select_related('room', 'assigned_to').order_by('priority')[:5]
         
         context['pending_maintenance'] = MaintenanceRequest.objects.filter(
             status__in=[MaintenanceRequest.StatusChoices.PENDING, MaintenanceRequest.StatusChoices.ASSIGNED]
@@ -70,7 +71,7 @@ class RoomDashboardView(LoginRequiredMixin, TemplateView):
 
 class RoomTypeListView(LoginRequiredMixin, ListView):
     model = RoomType
-    template_name = 'rooms/type/RoomtypeList.html'
+    template_name = 'rooms/type/RoomTypeList.html'
     context_object_name = 'room_types'
     
     def get_queryset(self):
@@ -86,7 +87,7 @@ class RoomTypeDetailView(LoginRequiredMixin, DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['rooms'] = self.object.room_set.filter(is_active=True)
+        context['rooms'] = Room.objects.filter(room_type=self.object)
         return context
 
 
@@ -94,7 +95,7 @@ class RoomTypeCreateView(LoginRequiredMixin, CreateView):
     model = RoomType
     form_class = RoomTypeForm
     template_name = 'rooms/type/RoomTypeForm.html'
-    success_url = reverse_lazy('rooms:roomtype_list')
+    success_url = reverse_lazy('rooms:typelist')
     
     def form_valid(self, form):
         messages.success(self.request, f'Tipo de habitación "{form.instance.name}" creado exitosamente.')
@@ -111,7 +112,7 @@ class RoomTypeUpdateView(LoginRequiredMixin, UpdateView):
     model = RoomType
     form_class = RoomTypeForm
     template_name = 'rooms/type/RoomTypeForm.html'
-    success_url = reverse_lazy('rooms:roomtype_list')
+    success_url = reverse_lazy('rooms:typelist')
     
     def form_valid(self, form):
         messages.success(self.request, f'Tipo de habitación "{form.instance.name}" actualizado exitosamente.')
@@ -128,7 +129,7 @@ class RoomTypeDeleteView(LoginRequiredMixin, DeleteView):
     model = RoomType
     template_name = 'rooms/type/RoomTypeDelete.html'
     context_object_name = 'room_type'
-    success_url = reverse_lazy('rooms:roomtype_list')
+    success_url = reverse_lazy('rooms:typelist')
     
     def delete(self, request, *args, **kwargs):
         room_type = self.get_object()
@@ -138,7 +139,7 @@ class RoomTypeDeleteView(LoginRequiredMixin, DeleteView):
                 request, 
                 f'No se puede eliminar "{room_type.name}" porque tiene habitaciones asociadas.'
             )
-            return redirect('rooms:roomtype_detail', pk=room_type.pk)
+            return redirect('rooms:typedetail', pk=room_type.pk)
         
         messages.success(request, f'Tipo de habitación "{room_type.name}" eliminado exitosamente.')
         return super().delete(request, *args, **kwargs)
@@ -148,7 +149,7 @@ class RoomTypeDeleteView(LoginRequiredMixin, DeleteView):
 
 class RoomListView(LoginRequiredMixin, ListView):
     model = Room
-    template_name = 'rooms/RoomList.html'
+    template_name = 'rooms/type/RoomList.html'
     context_object_name = 'rooms'
     paginate_by = 20
     
@@ -189,7 +190,7 @@ class RoomListView(LoginRequiredMixin, ListView):
 
 class RoomDetailView(LoginRequiredMixin, DetailView):
     model = Room
-    template_name = 'rooms/RoomDetail.html'
+    template_name = 'rooms/type/RoomDetail.html'
     context_object_name = 'room'
     
     def get_context_data(self, **kwargs):
@@ -219,8 +220,8 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
 class RoomCreateView(LoginRequiredMixin, CreateView):
     model = Room
     form_class = RoomForm
-    template_name = 'rooms/RoomForm.html'
-    success_url = reverse_lazy('rooms:room_list')
+    template_name = 'rooms/type/RoomForm.html'
+    success_url = reverse_lazy('rooms:list')
     
     def form_valid(self, form):
         messages.success(self.request, f'Habitación {form.instance.number} creada exitosamente.')
@@ -236,10 +237,10 @@ class RoomCreateView(LoginRequiredMixin, CreateView):
 class RoomUpdateView(LoginRequiredMixin, UpdateView):
     model = Room
     form_class = RoomForm
-    template_name = 'rooms/RoomForm.html'
+    template_name = 'rooms/type/RoomForm.html'
     
     def get_success_url(self):
-        return reverse_lazy('rooms:room_detail', kwargs={'pk': self.object.pk})
+        return reverse_lazy('rooms:detail', kwargs={'pk': self.object.pk})
     
     def form_valid(self, form):
         messages.success(self.request, f'Habitación {form.instance.number} actualizada exitosamente.')
@@ -254,9 +255,9 @@ class RoomUpdateView(LoginRequiredMixin, UpdateView):
 
 class RoomDeleteView(LoginRequiredMixin, DeleteView):
     model = Room
-    template_name = 'rooms/RoomDelete.html'
+    template_name = 'rooms/type/RoomDelete.html'
     context_object_name = 'room'
-    success_url = reverse_lazy('rooms:room_list')
+    success_url = reverse_lazy('rooms:list')
     
     def delete(self, request, *args, **kwargs):
         room = self.get_object()

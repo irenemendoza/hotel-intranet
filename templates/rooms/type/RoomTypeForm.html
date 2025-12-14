@@ -1,0 +1,165 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Tipos de Habitación{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'rooms:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'rooms:typelist' %}">Tipos de Habitación</a></li>
+            <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0"><i class="bi bi-tag me-2"></i>{{ title }}</h4>
+                </div>
+                <div class="card-body p-4">
+                    {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Error:</strong> Por favor, corrige los errores a continuación.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Nombre -->
+                        <div class="mb-4">
+                            <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.name.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Nombre descriptivo del tipo de habitación</small>
+                        </div>
+
+                        <div class="row">
+                            <!-- Código -->
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.code.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.code.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.code }}
+                                {% if form.code.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.code.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Código único (ej: SUI, DBL, IND)</small>
+                            </div>
+
+                            <!-- Capacidad -->
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.capacity.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.capacity.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.capacity }}
+                                {% if form.capacity.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.capacity.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Número máximo de huéspedes</small>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Descripción general del tipo de habitación</small>
+                        </div>
+
+                        <!-- Comodidades -->
+                        <div class="mb-4">
+                            <label for="{{ form.amenities.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.amenities.label }}
+                            </label>
+                            {{ form.amenities }}
+                            {% if form.amenities.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.amenities.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Lista las comodidades incluidas (WiFi, TV, Minibar, etc.)
+                            </small>
+                        </div>
+
+                        <!-- Estado Activo -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    {{ form.is_active.label }}
+                                </label>
+                            </div>
+                            {% if form.is_active.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.is_active.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Los tipos inactivos no estarán disponibles para nuevas habitaciones</small>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'rooms:typelist' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i> {{ button_text }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Ayuda -->
+            <div class="card border-0 bg-light mt-4">
+                <div class="card-body">
+                    <h6 class="mb-2"><i class="bi bi-info-circle me-2"></i>Ejemplos de Tipos de Habitación</h6>
+                    <div class="row small text-muted">
+                        <div class="col-md-6">
+                            <ul class="mb-0">
+                                <li><strong>Individual</strong> (IND) - 1 persona</li>
+                                <li><strong>Doble</strong> (DBL) - 2 personas</li>
+                                <li><strong>Suite</strong> (SUI) - 2-4 personas</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="mb-0">
+                                <li><strong>Junior Suite</strong> (JSU) - 2 personas</li>
+                                <li><strong>Suite Presidencial</strong> (SPR) - 4+ personas</li>
+                                <li><strong>Familiar</strong> (FAM) - 4-6 personas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

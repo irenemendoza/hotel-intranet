@@ -1,0 +1,139 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Eliminar Habitación {{ room.number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'rooms:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'rooms:list' %}">Habitaciones</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'rooms:detail' room.pk %}">{{ room.number }}</a></li>
+            <li class="breadcrumb-item active">Eliminar</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm border-danger">
+                <div class="card-header bg-danger text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Confirmar Eliminación
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="rounded mx-auto mb-3 d-flex align-items-center justify-content-center border border-3 border-danger" 
+                             style="width: 100px; height: 100px; font-size: 2.5rem;">
+                            <strong>{{ room.number }}</strong>
+                        </div>
+                        <h5>Habitación {{ room.number }}</h5>
+                        <p class="text-muted mb-0">
+                            {{ room.room_type.name }} - Piso {{ room.floor }}
+                        </p>
+                        <div class="mt-2">
+                            <span class="badge bg-{{ room.get_status_display_color }}">
+                                {{ room.get_status_display }}
+                            </span>
+                            {% if room.occupancy == 'occupied' %}
+                                <span class="badge bg-danger">Ocupada</span>
+                            {% elif room.occupancy == 'reserved' %}
+                                <span class="badge bg-warning">Reservada</span>
+                            {% else %}
+                                <span class="badge bg-success">Vacante</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                    </div>
+
+                    <p class="text-center mb-4">
+                        ¿Estás seguro de que deseas eliminar la habitación <strong>{{ room.number }}</strong>?
+                    </p>
+
+                    <!-- Alertas según el estado -->
+                    {% if room.occupancy == 'occupied' %}
+                        <div class="alert alert-danger" role="alert">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-person-fill me-2"></i>
+                                Habitación Ocupada
+                            </h6>
+                            <p class="mb-0">
+                                Esta habitación está actualmente <strong>ocupada</strong>. 
+                                No se recomienda eliminarla hasta que esté vacante.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    {% if room.occupancy == 'reserved' %}
+                        <div class="alert alert-warning" role="alert">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-bookmark-fill me-2"></i>
+                                Habitación Reservada
+                            </h6>
+                            <p class="mb-0">
+                                Esta habitación tiene una <strong>reserva activa</strong>. 
+                                Asegúrate de cancelar la reserva antes de eliminarla.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Información de tareas pendientes -->
+                    {% if room.cleaning_tasks.count > 0 or room.maintenance_requests.count > 0 %}
+                        <div class="alert alert-info" role="alert">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Registros Asociados
+                            </h6>
+                            <p class="mb-2">Esta habitación tiene registros asociados que también serán eliminados:</p>
+                            <ul class="mb-0">
+                                {% if room.cleaning_tasks.count > 0 %}
+                                    <li><strong>{{ room.cleaning_tasks.count }}</strong> tarea(s) de limpieza</li>
+                                {% endif %}
+                                {% if room.maintenance_requests.count > 0 %}
+                                    <li><strong>{{ room.maintenance_requests.count }}</strong> solicitud(es) de mantenimiento</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash me-2"></i>
+                                Sí, Eliminar Habitación
+                            </button>
+                            <a href="{% url 'rooms:detail' room.pk %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>
+                                No, Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Alternativas -->
+            <div class="card border-0 bg-light mt-4">
+                <div class="card-body">
+                    <h6 class="mb-2"><i class="bi bi-lightbulb me-2"></i>¿Consideras estas alternativas?</h6>
+                    <ul class="mb-0 small text-muted">
+                        <li>En lugar de eliminar, puedes <strong>desactivar</strong> la habitación temporalmente</li>
+                        <li>Marca la habitación como <strong>"Fuera de servicio"</strong> si está en remodelación</li>
+                        <li>Actualiza el estado de ocupación en lugar de eliminarla</li>
+                    </ul>
+                    <a href="{% url 'rooms:update' room.pk %}" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="bi bi-pencil me-1"></i> Editar en su lugar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,282 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{{ room_type.name }} - Tipos de Habitación{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'rooms:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'rooms:typelist' %}">Tipos de Habitación</a></li>
+            <li class="breadcrumb-item active">{{ room_type.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="h3 mb-1">{{ room_type.name }}</h1>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary">{{ room_type.code }}</span>
+                        {% if room_type.is_active %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactivo</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'rooms:typeupdate' room_type.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a href="{% url 'rooms:typedelete' room_type.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información Principal -->
+        <div class="col-lg-8">
+            <!-- Información General -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información General</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Nombre del Tipo</label>
+                            <p class="mb-0 fw-semibold fs-5">{{ room_type.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Código</label>
+                            <p class="mb-0">
+                                <span class="badge bg-secondary fs-6">{{ room_type.code }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Capacidad Máxima</label>
+                            <p class="mb-0">
+                                <i class="bi bi-people text-primary me-2"></i>
+                                <strong>{{ room_type.capacity }}</strong> 
+                                {% if room_type.capacity == 1 %}persona{% else %}personas{% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="text-muted small mb-1">Descripción</label>
+                            {% if room_type.description %}
+                                <p class="mb-0">{{ room_type.description }}</p>
+                            {% else %}
+                                <p class="mb-0 text-muted fst-italic">Sin descripción</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Estado</label>
+                            <p class="mb-0">
+                                {% if room_type.is_active %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comodidades -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-star me-2"></i>Comodidades Incluidas</h5>
+                </div>
+                <div class="card-body">
+                    {% if room_type.amenities %}
+                        <div style="white-space: pre-line;">{{ room_type.amenities }}</div>
+                    {% else %}
+                        <p class="text-muted fst-italic mb-0">No se han especificado comodidades</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Habitaciones de este tipo -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-door-closed me-2"></i>
+                        Habitaciones ({{ rooms.count }})
+                    </h5>
+                    <a href="{% url 'rooms:create' %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nueva Habitación
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if rooms %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Número</th>
+                                        <th>Piso</th>
+                                        <th>Estado Limpieza</th>
+                                        <th>Ocupación</th>
+                                        <th class="text-end pe-4">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for room in rooms %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded me-2 d-flex align-items-center justify-content-center border" 
+                                                     style="width: 40px; height: 40px;">
+                                                    <strong>{{ room.number }}</strong>
+                                                </div>
+                                                Habitación {{ room.number }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">Piso {{ room.floor }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ room.get_status_display_color }}">
+                                                {{ room.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if room.occupancy == 'occupied' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="bi bi-person-fill"></i> Ocupada
+                                                </span>
+                                            {% elif room.occupancy == 'reserved' %}
+                                                <span class="badge bg-warning">
+                                                    <i class="bi bi-bookmark-fill"></i> Reservada
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-door-open"></i> Vacante
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{% url 'rooms:detail' room.pk %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-door-closed display-4 text-muted"></i>
+                            <p class="text-muted mt-2">No hay habitaciones de este tipo</p>
+                            <a href="{% url 'rooms:create' %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus-circle"></i> Crear Primera Habitación
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Card visual -->
+            <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white text-center py-5">
+                    <div class="display-1 mb-3">
+                        <i class="bi bi-tag"></i>
+                    </div>
+                    <h3 class="mb-2">{{ room_type.code }}</h3>
+                    <p class="mb-0 opacity-75">{{ room_type.name }}</p>
+                    <hr class="my-3 bg-white opacity-25">
+                    <div class="row">
+                        <div class="col-6">
+                            <i class="bi bi-people fs-4"></i>
+                            <p class="mb-0 small">{{ room_type.capacity }} personas</p>
+                        </div>
+                        <div class="col-6">
+                            <i class="bi bi-door-closed fs-4"></i>
+                            <p class="mb-0 small">{{ rooms.count }} hab.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Estadísticas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Total Habitaciones</span>
+                            <span class="fs-4 fw-bold text-primary">{{ rooms.count }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Ocupadas</span>
+                            <span class="fs-5 fw-bold text-danger">
+                                {% for room in rooms %}
+                                    {{ room.number }}
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Vacantes</span>
+                            <span class="fs-5 fw-bold text-success">
+                                {% widthratio rooms.count 1 1 %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acciones</h5>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'rooms:typeupdate' room_type.pk %}" class="btn btn-outline-warning">
+                        <i class="bi bi-pencil me-2"></i>Editar Tipo
+                    </a>
+                    <a href="{% url 'rooms:create' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Habitación
+                    </a>
+                    <a href="{% url 'rooms:typelist' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Volver a Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

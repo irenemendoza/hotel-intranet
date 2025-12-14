@@ -1,0 +1,284 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Habitaciones - Intranet Hotel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Dashboard de Habitaciones</h1>
+                    <p class="text-muted mb-0">Vista general del estado de las habitaciones</p>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'rooms:create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nueva Habitación
+                    </a>
+                    <a href="{% url 'rooms:list' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-list"></i> Lista Completa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 rounded p-3">
+                                <i class="bi bi-door-closed text-primary fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Total Habitaciones</h6>
+                            <h3 class="mb-0">{{ stats.total }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 rounded p-3">
+                                <i class="bi bi-check-circle text-success fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Ocupación</h6>
+                            <h3 class="mb-0">{{ stats.occupancy_rate }}%</h3>
+                            <small class="text-muted">{{ stats.occupied }} ocupadas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 rounded p-3">
+                                <i class="bi bi-sparkles text-info fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Limpias</h6>
+                            <h3 class="mb-0">{{ stats.clean_rate }}%</h3>
+                            <small class="text-muted">{{ stats.clean }} habitaciones</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 rounded p-3">
+                                <i class="bi bi-exclamation-triangle text-warning fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Mantenimiento</h6>
+                            <h3 class="mb-0">{{ stats.maintenance }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa de Pisos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-building me-2"></i>Mapa de Habitaciones por Piso</h5>
+                        <div class="d-flex gap-3">
+                            <span class="badge bg-success">Limpia</span>
+                            <span class="badge bg-warning">Sucia</span>
+                            <span class="badge bg-info">Inspeccionada</span>
+                            <span class="badge bg-danger">Mantenimiento</span>
+                            <span class="badge bg-dark">Fuera de servicio</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    {% for floor, rooms in floors.items %}
+                    <div class="mb-4">
+                        <h5 class="mb-3 pb-2 border-bottom">
+                            <i class="bi bi-layers me-2"></i>Piso {{ floor }}
+                        </h5>
+                        <div class="row g-3">
+                            {% for room in rooms %}
+                            <div class="col-md-2 col-sm-3 col-6">
+                                <a href="{% url 'rooms:detail' room.pk %}" 
+                                   class="text-decoration-none">
+                                    <div class="card h-100 border-2 shadow-sm hover-shadow" 
+                                         style="border-color: {% if room.status == 'clean' %}#198754{% elif room.status == 'dirty' %}#ffc107{% elif room.status == 'inspected' %}#0dcaf0{% elif room.status == 'maintenance' %}#dc3545{% else %}#212529{% endif %} !important;">
+                                        <div class="card-body p-3 text-center">
+                                            <!-- Número de habitación -->
+                                            <h4 class="mb-2">{{ room.number }}</h4>
+                                            
+                                            <!-- Estado de ocupación -->
+                                            <div class="mb-2">
+                                                {% if room.occupancy == 'occupied' %}
+                                                    <i class="bi bi-person-fill text-danger" title="Ocupada"></i>
+                                                {% elif room.occupancy == 'reserved' %}
+                                                    <i class="bi bi-bookmark-fill text-warning" title="Reservada"></i>
+                                                {% else %}
+                                                    <i class="bi bi-door-open text-success" title="Vacante"></i>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <!-- Tipo de habitación -->
+                                            <small class="text-muted d-block mb-2">{{ room.room_type.code }}</small>
+                                            
+                                            <!-- Estado de limpieza -->
+                                            <span class="badge bg-{{ room.get_status_display_color }} w-100">
+                                                {{ room.get_status_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted"></i>
+                        <h5 class="mt-3">No hay habitaciones registradas</h5>
+                        <p class="text-muted">Comienza creando tu primera habitación</p>
+                        <a href="{% url 'rooms:create' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-circle"></i> Crear Habitación
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tareas Pendientes -->
+    <div class="row">
+        <!-- Limpieza Pendiente -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-broom me-2"></i>Limpieza Pendiente</h5>
+                        <a href="{% url 'rooms:cleaning-list' %}" class="btn btn-sm btn-outline-primary">
+                            Ver todas
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if pending_cleanings %}
+                        <div class="list-group list-group-flush">
+                            {% for task in pending_cleanings %}
+                            <a href="{% url 'rooms:cleaning-detail' task.pk %}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">Habitación {{ task.room.number }}</h6>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>{{ task.scheduled_time|date:"H:i" }}
+                                            • {{ task.get_cleaning_type_display }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-{% if task.status == 'in_progress' %}info{% else %}warning{% endif %}">
+                                            {{ task.get_status_display }}
+                                        </span>
+                                        {% if task.assigned_to %}
+                                            <small class="d-block text-muted mt-1">
+                                                {{ task.assigned_to.get_full_name }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-check-circle display-4 text-success"></i>
+                            <p class="text-muted mt-2">No hay tareas de limpieza pendientes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Mantenimiento Pendiente -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Mantenimiento Pendiente</h5>
+                        <a href="{% url 'rooms:maintenance-list' %}" class="btn btn-sm btn-outline-primary">
+                            Ver todas
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if pending_maintenance %}
+                        <div class="list-group list-group-flush">
+                            {% for request in pending_maintenance %}
+                            <a href="{% url 'rooms:maintenance-detail' request.pk %}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ request.title }}</h6>
+                                        <small class="text-muted">
+                                            Habitación {{ request.room.number }}
+                                            • {{ request.created_at|date:"d/m/Y" }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-{% if request.priority == 'urgent' %}danger{% elif request.priority == 'high' %}warning{% else %}info{% endif %}">
+                                            {{ request.get_priority_display }}
+                                        </span>
+                                        <small class="d-block text-muted mt-1">
+                                            {{ request.get_status_display }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-check-circle display-4 text-success"></i>
+                            <p class="text-muted mt-2">No hay solicitudes de mantenimiento pendientes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+</style>
+{% endblock %}
