@@ -1,0 +1,428 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Habitación {{ room.number }} - Detalle{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'rooms:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'rooms:list' %}">Habitaciones</a></li>
+            <li class="breadcrumb-item active">Habitación {{ room.number }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex align-items-center">
+                    <div class="rounded me-3 d-flex align-items-center justify-content-center border border-3" 
+                         style="width: 80px; height: 80px; font-size: 2rem; border-color: {% if room.status == 'clean' %}#198754{% elif room.status == 'dirty' %}#ffc107{% elif room.status == 'inspected' %}#0dcaf0{% elif room.status == 'maintenance' %}#dc3545{% else %}#212529{% endif %} !important;">
+                        <strong>{{ room.number }}</strong>
+                    </div>
+                    <div>
+                        <h1 class="h3 mb-1">Habitación {{ room.number }}</h1>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-{{ room.get_status_display_color }}">
+                                {{ room.get_status_display }}
+                            </span>
+                            {% if room.occupancy == 'occupied' %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-person-fill"></i> Ocupada
+                                </span>
+                            {% elif room.occupancy == 'reserved' %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-bookmark-fill"></i> Reservada
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-door-open"></i> Vacante
+                                </span>
+                            {% endif %}
+                            <span class="badge bg-info">Piso {{ room.floor }}</span>
+                            {% if not room.is_active %}
+                                <span class="badge bg-secondary">Inactiva</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'rooms:update' room.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a href="{% url 'rooms:delete' room.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información Principal -->
+        <div class="col-lg-8">
+            <!-- Información General -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información General</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Número de Habitación</label>
+                            <p class="mb-0 fw-semibold fs-4">{{ room.number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Piso</label>
+                            <p class="mb-0"><span class="badge bg-info fs-6">Piso {{ room.floor }}</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Tipo de Habitación</label>
+                            <p class="mb-0">
+                                <a href="{% url 'rooms:typedetail' room.room_type.pk %}" class="text-decoration-none">
+                                    {{ room.room_type.name }}
+                                </a>
+                                <span class="badge bg-secondary ms-2">{{ room.room_type.code }}</span>
+                            </p>
+                            <small class="text-muted">Capacidad: {{ room.room_type.capacity }} personas</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Estado de Limpieza</label>
+                            <p class="mb-0">
+                                <span class="badge bg-{{ room.get_status_display_color }} fs-6">
+                                    {{ room.get_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Estado de Ocupación</label>
+                            <p class="mb-0">
+                                {% if room.occupancy == 'occupied' %}
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="bi bi-person-fill"></i> Ocupada
+                                    </span>
+                                {% elif room.occupancy == 'reserved' %}
+                                    <span class="badge bg-warning fs-6">
+                                        <i class="bi bi-bookmark-fill"></i> Reservada
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success fs-6">
+                                        <i class="bi bi-door-open"></i> Vacante
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Última Limpieza</label>
+                            <p class="mb-0">
+                                {% if room.last_cleaned %}
+                                    {{ room.last_cleaned|date:"d/m/Y H:i" }}
+                                    <small class="text-muted d-block">{{ room.last_cleaned|timesince }} atrás</small>
+                                {% else %}
+                                    <span class="text-muted fst-italic">No registrada</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Última Inspección</label>
+                            <p class="mb-0">
+                                {% if room.last_inspected %}
+                                    {{ room.last_inspected|date:"d/m/Y H:i" }}
+                                    <small class="text-muted d-block">{{ room.last_inspected|timesince }} atrás</small>
+                                {% else %}
+                                    <span class="text-muted fst-italic">No registrada</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if room.notes %}
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="text-muted small mb-1">Notas</label>
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-info-circle me-2"></i>{{ room.notes }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <hr class="my-3">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Fecha de Creación</label>
+                            <p class="mb-0">{{ room.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Última Actualización</label>
+                            <p class="mb-0">{{ room.updated_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comodidades -->
+            {% if room.room_type.amenities %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-star me-2"></i>Comodidades</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0" style="white-space: pre-line;">{{ room.room_type.amenities }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tareas de Limpieza -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-broom me-2"></i>Historial de Limpieza</h5>
+                    <a href="{% url 'rooms:cleaning-create' %}?room={{ room.pk }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nueva Tarea
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if pending_cleaning %}
+                        <div class="alert alert-warning m-3 mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="alert-heading mb-1">
+                                        <i class="bi bi-clock-history me-2"></i>Limpieza Pendiente
+                                    </h6>
+                                    <p class="mb-0">
+                                        <strong>{{ pending_cleaning.get_cleaning_type_display }}</strong>
+                                        • Programada: {{ pending_cleaning.scheduled_time|date:"d/m/Y H:i" }}
+                                        {% if pending_cleaning.assigned_to %}
+                                            <br><small>Asignado a: {{ pending_cleaning.assigned_to.get_full_name }}</small>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <a href="{% url 'rooms:cleaning-detail' pending_cleaning.pk %}" class="btn btn-sm btn-outline-warning">
+                                    Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if cleaning_history %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Asignado a</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                        <th class="text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for task in cleaning_history %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ task.get_cleaning_type_display }}</span>
+                                        </td>
+                                        <td>
+                                            {% if task.assigned_to %}
+                                                {{ task.assigned_to.get_full_name }}
+                                            {% else %}
+                                                <span class="text-muted fst-italic">Sin asignar</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if task.status == 'completed' %}success{% elif task.status == 'in_progress' %}info{% elif task.status == 'verified' %}primary{% else %}warning{% endif %}">
+                                                {{ task.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small>{{ task.scheduled_time|date:"d/m/Y H:i" }}</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'rooms:cleaning-detail' task.pk %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-broom display-4 text-muted"></i>
+                            <p class="text-muted mt-2">No hay historial de limpieza</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Mantenimiento -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Historial de Mantenimiento</h5>
+                    <a href="{% url 'rooms:maintenance-create' %}?room={{ room.pk }}" class="btn btn-sm btn-danger">
+                        <i class="bi bi-plus-circle"></i> Reportar Incidencia
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if pending_maintenance %}
+                        <div class="alert alert-danger m-3 mb-0">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Mantenimiento{% if pending_maintenance.count > 1 %}s{% endif %} Pendiente{% if pending_maintenance.count > 1 %}s{% endif %}
+                            </h6>
+                            {% for request in pending_maintenance %}
+                            <div class="d-flex justify-content-between align-items-center {% if not forloop.last %}mb-2 pb-2 border-bottom{% endif %}">
+                                <div>
+                                    <strong>{{ request.title }}</strong>
+                                    <span class="badge bg-{% if request.priority == 'urgent' %}danger{% elif request.priority == 'high' %}warning{% else %}info{% endif %} ms-2">
+                                        {{ request.get_priority_display }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">{{ request.get_status_display }} • {{ request.created_at|date:"d/m/Y" }}</small>
+                                </div>
+                                <a href="{% url 'rooms:maintenance-detail' request.pk %}" class="btn btn-sm btn-outline-danger">
+                                    Ver
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if maintenance_history %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Prioridad</th>
+                                        <th>Estado</th>
+                                        <th>Reportado</th>
+                                        <th class="text-end">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request in maintenance_history %}
+                                    <tr>
+                                        <td>{{ request.title }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if request.priority == 'urgent' %}danger{% elif request.priority == 'high' %}warning{% elif request.priority == 'medium' %}info{% else %}secondary{% endif %}">
+                                                {{ request.get_priority_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if request.status == 'completed' %}success{% elif request.status == 'in_progress' %}info{% elif request.status == 'cancelled' %}secondary{% else %}warning{% endif %}">
+                                                {{ request.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small>{{ request.created_at|date:"d/m/Y" }}</small>
+                                            {% if request.reported_by %}
+                                                <br><small class="text-muted">{{ request.reported_by.get_full_name }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'rooms:maintenance-detail' request.pk %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-tools display-4 text-muted"></i>
+                            <p class="text-muted mt-2">No hay historial de mantenimiento</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Acciones Rápidas -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h5>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'rooms:cleaning-create' %}?room={{ room.pk }}" class="btn btn-outline-primary">
+                        <i class="bi bi-broom me-2"></i>Programar Limpieza
+                    </a>
+                    <a href="{% url 'rooms:maintenance-create' %}?room={{ room.pk }}" class="btn btn-outline-danger">
+                        <i class="bi bi-tools me-2"></i>Reportar Mantenimiento
+                    </a>
+                    <a href="{% url 'rooms:update' room.pk %}" class="btn btn-outline-warning">
+                        <i class="bi bi-pencil me-2"></i>Editar Habitación
+                    </a>
+                </div>
+            </div>
+
+            <!-- Estado Visual -->
+            <div class="card border-0 shadow-sm text-white mb-4" 
+                 style="background: linear-gradient(135deg, {% if room.status == 'clean' %}#198754, #20c997{% elif room.status == 'dirty' %}#ffc107, #fd7e14{% elif room.status == 'inspected' %}#0dcaf0, #0d6efd{% elif room.status == 'maintenance' %}#dc3545, #d63384{% else %}#212529, #495057{% endif %});">
+                <div class="card-body text-center py-5">
+                    <div class="display-1 mb-3">
+                        <i class="bi bi-door-closed"></i>
+                    </div>
+                    <h3 class="mb-2">{{ room.number }}</h3>
+                    <p class="mb-0 opacity-75">{{ room.get_status_display }}</p>
+                    <hr class="my-3 bg-white opacity-25">
+                    <div class="d-flex justify-content-around">
+                        <div>
+                            <i class="bi bi-people fs-4"></i>
+                            <p class="mb-0 small">Cap. {{ room.room_type.capacity }}</p>
+                        </div>
+                        <div>
+                            <i class="bi bi-layers fs-4"></i>
+                            <p class="mb-0 small">Piso {{ room.floor }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Tipo -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-tag me-2"></i>Tipo de Habitación</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-2">{{ room.room_type.name }}</h6>
+                    <p class="text-muted small mb-3">{{ room.room_type.description }}</p>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Código:</span>
+                        <span class="badge bg-secondary">{{ room.room_type.code }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Capacidad:</span>
+                        <strong>{{ room.room_type.capacity }} personas</strong>
+                    </div>
+                                   
+                    <a href="{% url 'rooms:typedetail' room.room_type.pk %}" class="btn btn-sm btn-outline-primary w-100 mt-3">
+                        Ver Tipo Completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

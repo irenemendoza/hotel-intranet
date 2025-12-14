@@ -18,11 +18,6 @@ class RoomType(models.Model):
         'Capacidad', 
         help_text='Número máximo de huéspedes'
         )
-    base_price = models.DecimalField(
-        'Precio base', 
-        max_digits=10, 
-        decimal_places=2
-        )
     description = models.TextField(
         'Descripción', 
         blank=True
@@ -51,7 +46,9 @@ class Reservation(models.Model):
         )
     guest_name = models.CharField(
         'Nombre del huésped', 
-        max_length=200
+        max_length=200,
+        null=True, 
+        blank=True
         )
     check_in = models.DateField(
         'Fecha de entrada'
@@ -221,7 +218,7 @@ class CleaningTask(models.Model):
     # Tipos de limpieza
     class TypeChoices(models.TextChoices):
         CHECKOUT = 'checkout', 'Salida'
-        STAY_OVER = 'stay_over', 'Estadía'
+        STAY_OVER = 'stay_over', 'Cliente'
         DEEP_CLEANING = 'deep_cleaning', 'Limpieza profunda'
     
     
@@ -254,19 +251,6 @@ class CleaningTask(models.Model):
         'Prioridad', 
         default=1, 
         help_text='1 = Alta, 5 = Baja'
-        )
-    scheduled_time = models.DateTimeField(
-        'Hora programada'
-        )
-    started_at = models.DateTimeField(
-        'Hora de inicio', 
-        null=True, 
-        blank=True
-        )
-    completed_at = models.DateTimeField(
-        'Hora de finalización', 
-        null=True, 
-        blank=True
         )
     verified_by = models.ForeignKey(
         User, 
@@ -303,12 +287,7 @@ class CleaningTask(models.Model):
     def __str__(self):
         return f"{self.room} - {self.get_status_display()} ({self.scheduled_time.strftime('%d/%m/%Y %H:%M')})"
     
-    def duration(self):
-        """Calcula la duración de la limpieza"""
-        if self.started_at and self.completed_at:
-            return self.completed_at - self.started_at
-        return None
-
+   
 
 class MaintenanceRequest(models.Model):
     """Solicitudes de mantenimiento para habitaciones"""
@@ -387,16 +366,7 @@ class MaintenanceRequest(models.Model):
         null=True, 
         blank=True
         )
-    started_at = models.DateTimeField(
-        'Fecha de inicio', 
-        null=True, 
-        blank=True
-        )
-    resolved_at = models.DateTimeField(
-        'Fecha de resolución', 
-        null=True, 
-        blank=True
-        )
+    
    
     
     def __str__(self):

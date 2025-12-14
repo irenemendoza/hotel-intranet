@@ -6,7 +6,7 @@ from apps.users.models import UserProfile
 class RoomTypeForm(forms.ModelForm):
     class Meta:
         model = RoomType
-        fields = ['name', 'code', 'capacity', 'base_price', 'description', 'amenities', 'is_active']
+        fields = ['name', 'code', 'capacity', 'description', 'amenities', 'is_active']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -22,11 +22,6 @@ class RoomTypeForm(forms.ModelForm):
                 'class': 'form-control',
                 'min': '1',
                 'max': '10'
-            }),
-            'base_price': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -87,7 +82,7 @@ class RoomForm(forms.ModelForm):
 class CleaningTaskForm(forms.ModelForm):
     class Meta:
         model = CleaningTask
-        fields = ['room', 'assigned_to', 'cleaning_type', 'priority', 'scheduled_time', 'notes']
+        fields = ['room', 'assigned_to', 'cleaning_type', 'priority', 'notes']
         widgets = {
             'room': forms.Select(attrs={
                 'class': 'form-control'
@@ -102,10 +97,6 @@ class CleaningTaskForm(forms.ModelForm):
                 'class': 'form-control',
                 'min': '1',
                 'max': '5'
-            }),
-            'scheduled_time': forms.DateTimeInput(attrs={
-                'class': 'form-control',
-                'type': 'datetime-local'
             }),
             'notes': forms.Textarea(attrs={
                 'class': 'form-control',

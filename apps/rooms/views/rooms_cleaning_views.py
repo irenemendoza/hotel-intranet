@@ -5,8 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.utils import timezone
 
-from .models import CleaningTask
-from .forms import (
+from apps.rooms.models import CleaningTask
+from apps.rooms.forms import (
     CleaningTaskForm, CleaningTaskUpdateForm
 )
 
@@ -66,8 +66,8 @@ class CleaningTaskDetailView(LoginRequiredMixin, DetailView):
 class CleaningTaskCreateView(LoginRequiredMixin, CreateView):
     model = CleaningTask
     form_class = CleaningTaskForm
-    template_name = 'rooms/cleaning/RoomCleaningForm.html'
-    success_url = reverse_lazy('rooms:cleaning_list')
+    template_name = 'templates/rooms/cleaning/RoomCleaningForm.html'
+    success_url = reverse_lazy('rooms:cleaning-list')
     
     def form_valid(self, form):
         # Actualizar el estado de la habitación
@@ -90,7 +90,7 @@ class CleaningTaskUpdateView(LoginRequiredMixin, UpdateView):
     model = CleaningTask
     form_class = CleaningTaskUpdateForm
     template_name = 'rooms/cleaning/RoomCleaningForm.html'
-    success_url = reverse_lazy('rooms:cleaning_list')
+    success_url = reverse_lazy('rooms:cleaning-list')
     
     def form_valid(self, form):
         messages.success(self.request, 'Tarea de limpieza actualizada exitosamente.')
@@ -106,7 +106,7 @@ class CleaningTaskDeleteView(LoginRequiredMixin, DeleteView):
     model = CleaningTask
     template_name = 'rooms/cleaning/RoomCleaningDelete.html'
     context_object_name = 'task'
-    success_url = reverse_lazy('rooms:cleaning_list')
+    success_url = reverse_lazy('rooms:cleaning-list')
     
     def delete(self, request, *args, **kwargs):
         task = self.get_object()

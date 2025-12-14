@@ -11,9 +11,9 @@ from apps.rooms.views.rooms_cleaning_views import (
 
 urlpatterns = [
     path('list/', CleaningTaskListView.as_view(), name="cleaning-list"),
-    path('<pk>/', CleaningTaskDetailView.as_view(), name="cleaning-detail"),
-    path('create/', CleaningTaskCreate.as_view(), name="cleaning-create"),
-    path('update/<pk>', CleaningTaskUpdateView.as_view(), name="cleaning-update"),
-    path('delete/', CleaningTaskDeleteView.as_view(), name="cleaning-delete"),
+    path('create/', CleaningTaskCreateView.as_view(), name="cleaning-create"),
     path('mycleaningtasks/',MyCleaningTasksView.as_view(), name="cleaning-tasks"),
+    path('update/<pk>/', CleaningTaskUpdateView.as_view(), name="cleaning-update"),
+    path('delete/<pk>/', CleaningTaskDeleteView.as_view(), name="cleaning-delete"),
+    path('<pk>/', CleaningTaskDetailView.as_view(), name="cleaning-detail"),
     ]

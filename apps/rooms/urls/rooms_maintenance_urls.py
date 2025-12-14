@@ -1,18 +1,18 @@
 from django.urls import path
 from apps.rooms.views.rooms_maintenance_views import (
-    MaintenanceTaskDetailView,
-    MaintenanceTaskCreateView, 
-    MaintenanceTaskUpdateView,
-    MaintenanceTaskDeleteView,
+    MaintenanceRequestListView,
+    MaintenanceRequestDetailView,
+    MaintenanceRequestCreateView,
+    MaintenanceRequestUpdateView,
+    MaintenanceRequestDeleteView,
     MyMaintenanceTasksView
 )
 
-
 urlpatterns = [
-    path('list/', MaintenanceTaskListView.as_view(), name="maintenance-list"),
-    path('<pk>/', MaintenanceTaskDetailView.as_view(), name="maintenance-detail"),
-    path('create/', MaintenanceTaskCreate.as_view(), name="maintenance-create"),
-    path('update/<pk>', MaintenanceTaskUpdateView.as_view(), name="maintenance-update"),
-    path('delete/', MaintenanceTaskDeleteView.as_view(), name="maintenance-delete"),
-    path('mymaintenancetasks/',MyMaintenanceTasksView.as_view(), name="maintenance-tasks"),
-    ]
+    path('list/', MaintenanceRequestListView.as_view(), name="maintenance-list"),
+    path('create/', MaintenanceRequestCreateView.as_view(), name="maintenance-create"),
+    path('mymaintenancetasks/', MyMaintenanceTasksView.as_view(), name="maintenance-tasks"),
+    path('update/<pk>/', MaintenanceRequestUpdateView.as_view(), name="maintenance-update"),
+    path('delete/<pk>/', MaintenanceRequestDeleteView.as_view(), name="maintenance-delete"),
+    path('<pk>/', MaintenanceRequestDetailView.as_view(), name="maintenance-detail"),
+]

@@ -9,7 +9,6 @@ class RoomTypeAdmin(admin.ModelAdmin):
         'name', 
         'code', 
         'capacity', 
-        'base_price', 
         'is_active'
         ]
     list_filter = ['is_active']
@@ -48,7 +47,6 @@ class CleaningTaskAdmin(admin.ModelAdmin):
         'cleaning_type', 
         'status', 
         'priority', 
-        'scheduled_time'
         ]
     list_filter = [
         'status', 

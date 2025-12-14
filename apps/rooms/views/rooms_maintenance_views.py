@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 
 from apps.rooms.models import MaintenanceRequest
-from apps.forms.rooms_forms import (
+from apps.rooms.forms import (
     MaintenanceRequestForm, MaintenanceRequestUpdateForm
 )
 
@@ -63,7 +63,7 @@ class MaintenanceRequestCreateView(LoginRequiredMixin, CreateView):
     model = MaintenanceRequest
     form_class = MaintenanceRequestForm
     template_name = 'rooms/maintenance/RoomMaintenanceForm.html'
-    success_url = reverse_lazy('rooms:maintenance_list')
+    success_url = reverse_lazy('rooms:maintenance-list')
     
     def form_valid(self, form):
         form.save(user=self.request.user)
@@ -84,7 +84,7 @@ class MaintenanceRequestUpdateView(LoginRequiredMixin, UpdateView):
     model = MaintenanceRequest
     form_class = MaintenanceRequestUpdateForm
     template_name = 'rooms/maintenance/RoomMaintenanceForm.html'
-    success_url = reverse_lazy('rooms:maintenance_list')
+    success_url = reverse_lazy('rooms:maintenance-list')
     
     def form_valid(self, form):
         messages.success(self.request, 'Solicitud de mantenimiento actualizada.')
@@ -100,7 +100,7 @@ class MaintenanceRequestDeleteView(LoginRequiredMixin, DeleteView):
     model = MaintenanceRequest
     template_name = 'rooms/maintenance/RoomMaintenanceDelete.html'
     context_object_name = 'request'
-    success_url = reverse_lazy('rooms:maintenance_list')
+    success_url = reverse_lazy('rooms:maintenance-list')
     
     def delete(self, request, *args, **kwargs):
         maintenance = self.get_object()
