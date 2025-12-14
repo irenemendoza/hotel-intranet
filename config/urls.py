@@ -7,7 +7,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(('apps.dashboard.urls', "dashboard"), namespace="dashboard")),
-    path('users/', include(('apps.users.urls', "users"), namespace="users")),
+    path('employees/', include(('apps.users.urls.employees_urls', "employees"), namespace="employees")),
+    path('attendance/', include(('apps.users.urls.attendance_urls', "attendance"), namespace="'attendance")),
     path('rooms/', include(('apps.rooms.urls', "rooms"), namespace="rooms")),
     path('tasks/', include(('apps.tasks.urls', "tasks"), namespace="tasks")),
     path('departments/', include(('apps.users.urls.departments_urls', "department"), namespace="departments")),
@@ -16,3 +17,4 @@ urlpatterns = [
 # Servir archivos media en desarrollo
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
