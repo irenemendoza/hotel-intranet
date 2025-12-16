@@ -14,8 +14,12 @@ from apps.users.models import Department
 def home(request):
     """Dashboard principal con estadísticas"""
     user = request.user
-    user_dept = user.profile.department
-    
+
+    try:
+        user_dept = user.profile.department
+    except:
+        user_dept = None
+        
     # Estadísticas generales
     context = {
         'total_rooms': Room.objects.filter(is_active=True).count(),

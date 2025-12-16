@@ -118,7 +118,7 @@
                         {% endfor %}
                     </div>
                     <div class="text-center mt-3">
-                        <a href="#" class="btn btn-sm btn-outline-primary">
+                        <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-outline-primary">
                             Ver todas las tareas
                         </a>
                     </div>
@@ -259,13 +259,13 @@
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col-md-3">
-                        <a href="#" class="btn btn-outline-primary quick-action-btn">
+                        <a href="{% url 'tasks:create' %}" class="btn btn-outline-primary quick-action-btn">
                             <i class="bi bi-plus-circle"></i>
                             <span>Nueva Tarea</span>
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="#" class="btn btn-outline-success quick-action-btn">
+                        <a href="{% url 'rooms:list' %}" class="btn btn-outline-success quick-action-btn">
                             <i class="bi bi-door-open"></i>
                             <span>Ver Habitaciones</span>
                         </a>

@@ -47,7 +47,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{% url 'tasks:list' %}">
                                 <i class="bi bi-list-check"></i> Tareas
                             </a>
                         </li>
@@ -88,7 +88,7 @@
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="post" action="#" class="d-inline">
+                                    <form method="post" action="{% url 'logout' %}" class="d-inline">
                                         {% csrf_token %}
                                         <button type="submit" class="dropdown-item text-danger">
                                             <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
@@ -99,7 +99,7 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{% url 'login' %}">
                                 <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
                             </a>
                         </li>

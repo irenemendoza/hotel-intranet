@@ -1,0 +1,182 @@
+<!-- templates/tasks/task_list.html -->
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Tareas - Hotel Intranet{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h3">
+            <i class="bi bi-list-check"></i> Gestión de Tareas
+        </h1>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'tasks:create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nueva Tarea
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Buscar</label>
+                <input type="text" class="form-control" name="search" 
+                       placeholder="Título o descripción..." 
+                       value="{{ current_filters.search|default:'' }}">
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">Estado</label>
+                <select class="form-select" name="status">
+                    <option value="">Todos</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if current_filters.status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">Prioridad</label>
+                <select class="form-select" name="priority">
+                    <option value="">Todas</option>
+                    {% for value, label in priority_choices %}
+                    <option value="{{ value }}" {% if current_filters.priority == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">Departamento</label>
+                <select class="form-select" name="department">
+                    <option value="">Todos</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if current_filters.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">Asignación</label>
+                <select class="form-select" name="assigned">
+                    <option value="">Todas</option>
+                    <option value="me" {% if current_filters.assigned == 'me' %}selected{% endif %}>Mis tareas</option>
+                    <option value="unassigned" {% if current_filters.assigned == 'unassigned' %}selected{% endif %}>Sin asignar</option>
+                </select>
+            </div>
+            
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Tareas -->
+<div class="row">
+    <div class="col-12">
+        {% if tasks %}
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Departamento</th>
+                                    <th>Asignado a</th>
+                                    <th>Prioridad</th>
+                                    <th>Estado</th>
+                                    <th>Fecha límite</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in tasks %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'tasks:detail' task.pk %}" class="text-decoration-none">
+                                            <strong>{{ task.title }}</strong>
+                                        </a>
+                                        {% if task.is_overdue %}
+                                        <span class="badge bg-danger ms-2">
+                                            <i class="bi bi-clock"></i> Vencida
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge" style="background-color: {{ task.department.color }};">
+                                            {{ task.department.code }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if task.assigned_to %}
+                                            <i class="bi bi-person"></i> {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                                        {% else %}
+                                            <span class="text-muted">
+                                                <i class="bi bi-person-x"></i> Sin asignar
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ task.get_priority_color }}">
+                                            {{ task.get_priority_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'in_progress' %}bg-primary{% elif task.status == 'cancelled' %}bg-secondary{% else %}bg-warning{% endif %}">
+                                            {{ task.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if task.due_date %}
+                                            <small class="{% if task.is_overdue %}text-danger fw-bold{% endif %}">
+                                                <i class="bi bi-calendar"></i> {{ task.due_date|date:"d/m/Y H:i" }}
+                                            </small>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'tasks:detail' task.pk %}" class="btn btn-outline-primary" title="Ver">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'tasks:edit' task.pk %}" class="btn btn-outline-secondary" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <h5 class="mt-3">No hay tareas</h5>
+                    <p class="text-muted">No se encontraron tareas con los filtros aplicados.</p>
+                    <a href="{% url 'tasks:create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Crear primera tarea
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

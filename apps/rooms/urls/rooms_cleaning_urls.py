@@ -8,6 +8,7 @@ from apps.rooms.views.rooms_cleaning_views import (
     MyCleaningTasksView
 )
 
+app_name = "cleaning"
 
 urlpatterns = [
     path('list/', CleaningTaskListView.as_view(), name="cleaning-list"),

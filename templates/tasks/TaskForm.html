@@ -1,0 +1,202 @@
+<!-- templates/tasks/task_form.html -->
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Editar{% else %}Nueva{% endif %} Tarea - Hotel Intranet{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'tasks:list' %}">Tareas</a></li>
+                <li class="breadcrumb-item active">
+                    {% if is_edit %}Editar: {{ task.title }}{% else %}Nueva Tarea{% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-{% if is_edit %}pencil{% else %}plus-circle{% endif %}"></i>
+                    {% if is_edit %}Editar Tarea{% else %}Nueva Tarea{% endif %}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Título -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label">
+                            <i class="bi bi-card-text"></i> Título <span class="text-danger">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="title" 
+                            name="title"
+                            value="{% if is_edit %}{{ task.title }}{% endif %}"
+                            required
+                            placeholder="Ej: Revisar sistema de aire acondicionado"
+                        >
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="bi bi-text-paragraph"></i> Descripción <span class="text-danger">*</span>
+                        </label>
+                        <textarea 
+                            class="form-control" 
+                            id="description" 
+                            name="description"
+                            rows="4"
+                            required
+                            placeholder="Describe detalladamente la tarea..."
+                        >{% if is_edit %}{{ task.description }}{% endif %}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <!-- Departamento -->
+                        <div class="col-md-6 mb-3">
+                            <label for="department" class="form-label">
+                                <i class="bi bi-building"></i> Departamento <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="department" name="department" required>
+                                <option value="">Selecciona un departamento</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}" 
+                                        {% if is_edit and task.department.id == dept.id %}selected{% endif %}>
+                                    {{ dept.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Asignado a -->
+                        <div class="col-md-6 mb-3">
+                            <label for="assigned_to" class="form-label">
+                                <i class="bi bi-person"></i> Asignar a
+                            </label>
+                            <select class="form-select" id="assigned_to" name="assigned_to">
+                                <option value="">Sin asignar</option>
+                                {% for u in users %}
+                                <option value="{{ u.id }}" 
+                                        {% if is_edit and task.assigned_to and task.assigned_to.id == u.id %}selected{% endif %}>
+                                    {{ u.get_full_name|default:u.username }}
+                                    {% if u.profile.department %}({{ u.profile.department.code }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Prioridad -->
+                        <div class="col-md-4 mb-3">
+                            <label for="priority" class="form-label">
+                                <i class="bi bi-flag"></i> Prioridad
+                            </label>
+                            <select class="form-select" id="priority" name="priority">
+                                {% for value, label in priority_choices %}
+                                <option value="{{ value }}" 
+                                        {% if is_edit and task.priority == value %}selected{% endif %}
+                                        {% if not is_edit and value == 'medium' %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Estado (solo en edición) -->
+                        {% if is_edit %}
+                        <div class="col-md-4 mb-3">
+                            <label for="status" class="form-label">
+                                <i class="bi bi-circle"></i> Estado
+                            </label>
+                            <select class="form-select" id="status" name="status">
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" 
+                                        {% if task.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <!-- Fecha límite -->
+                        <div class="col-md-{% if is_edit %}4{% else %}8{% endif %} mb-3">
+                            <label for="due_date" class="form-label">
+                                <i class="bi bi-calendar"></i> Fecha límite
+                            </label>
+                            <input 
+                                type="datetime-local" 
+                                class="form-control" 
+                                id="due_date" 
+                                name="due_date"
+                                value="{% if is_edit and task.due_date %}{{ task.due_date|date:'Y-m-d\TH:i' }}{% endif %}"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Notas adicionales -->
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">
+                            <i class="bi bi-sticky"></i> Notas adicionales
+                        </label>
+                        <textarea 
+                            class="form-control" 
+                            id="notes" 
+                            name="notes"
+                            rows="3"
+                            placeholder="Información adicional, instrucciones especiales, etc."
+                        >{% if is_edit %}{{ task.notes }}{% endif %}</textarea>
+                    </div>
+
+                    <!-- Archivo adjunto -->
+                    <div class="mb-4">
+                        <label for="attachments" class="form-label">
+                            <i class="bi bi-paperclip"></i> Archivo adjunto
+                        </label>
+                        {% if is_edit and task.attachments %}
+                        <div class="alert alert-info mb-2">
+                            <i class="bi bi-file-earmark"></i> 
+                            Archivo actual: <a href="{{ task.attachments.url }}" target="_blank">Ver archivo</a>
+                            <br>
+                            <small>Si subes un nuevo archivo, reemplazará al actual</small>
+                        </div>
+                        {% endif %}
+                        <input 
+                            type="file" 
+                            class="form-control" 
+                            id="attachments" 
+                            name="attachments"
+                        >
+                        <small class="text-muted">Formatos permitidos: PDF, imágenes, documentos (máx. 10MB)</small>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            {% if is_edit %}Guardar Cambios{% else %}Crear Tarea{% endif %}
+                        </button>
+                        <a href="{% if is_edit %}{% url 'tasks:detail' task.pk %}{% else %}{% url 'tasks:list' %}{% endif %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
