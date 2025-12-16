@@ -1,0 +1,77 @@
+<!-- templates/tasks/task_confirm_delete.html -->
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Eliminar Tarea - Hotel Intranet{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'tasks:list' %}">Tareas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a></li>
+                <li class="breadcrumb-item active">Eliminar</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                </div>
+
+                <h5 class="mb-3">¿Estás seguro que deseas eliminar esta tarea?</h5>
+                
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h6><strong>{{ task.title }}</strong></h6>
+                        <p class="text-muted mb-2">{{ task.description|truncatewords:30 }}</p>
+                        <div>
+                            <span class="badge" style="background-color: {{ task.department.color }};">
+                                {{ task.department.name }}
+                            </span>
+                            <span class="badge bg-{{ task.get_priority_color }}">
+                                {{ task.get_priority_display }}
+                            </span>
+                            <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'in_progress' %}bg-primary{% else %}bg-warning{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <p><strong>Se eliminarán también:</strong></p>
+                    <ul>
+                        <li>{{ task.comments.count }} comentario(s) asociado(s)</li>
+                        <li>Archivos adjuntos (si los hay)</li>
+                        <li>Todo el historial de la tarea</li>
+                    </ul>
+                </div>
+
+                <form method="post" class="d-flex gap-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Sí, eliminar tarea
+                    </button>
+                    <a href="{% url 'tasks:detail' task.pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+<!-- templates/rooms/cleaning/RoomCleaningDelete.html -->
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Eliminar Tarea de Limpieza - Hotel Intranet{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cleaning:list' %}">Tareas de Limpieza</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cleaning:detail' task.pk %}">{{ task.room.number }}</a></li>
+                <li class="breadcrumb-item active">Eliminar</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                </div>
+
+                <h5 class="mb-3">¿Estás seguro que deseas eliminar esta tarea de limpieza?</h5>
+                
+                <!-- Información de la tarea -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-2">Habitación</h6>
+                                <h4 class="mb-3">
+                                    <i class="bi bi-door-open"></i> {{ task.room.number }}
+                                </h4>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-2">Piso</h6>
+                                <h4 class="mb-3">{{ task.room.floor }}</h4>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <span class="badge {% if task.cleaning_type == 'checkout' %}bg-danger{% elif task.cleaning_type == 'deep_cleaning' %}bg-warning{% else %}bg-info{% endif %} me-2">
+                                {{ task.get_cleaning_type_display }}
+                            </span>
+                            <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'verified' %}bg-info{% elif task.status == 'in_progress' %}bg-primary{% else %}bg-warning{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </div>
+
+                        {% if task.assigned_to %}
+                        <hr>
+                        <p class="mb-0">
+                            <strong>Asignado a:</strong> {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                        </p>
+                        {% endif %}
+
+                        {% if task.scheduled_time %}
+                        <p class="mb-0">
+                            <strong>Programada:</strong> {{ task.scheduled_time|date:"d/m/Y H:i" }}
+                        </p>
+                        {% endif %}
+
+                        {% if task.notes %}
+                        <hr>
+                        <p class="mb-0">
+                            <strong>Notas:</strong><br>
+                            {{ task.notes|truncatewords:30 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Advertencias -->
+                <div class="mb-3">
+                    <p><strong>Se eliminará:</strong></p>
+                    <ul>
+                        <li>La tarea de limpieza completa</li>
+                        <li>Las fotos adjuntas (si las hay)</li>
+                        <li>Todo el historial relacionado</li>
+                    </ul>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="bi bi-lightbulb"></i>
+                    <strong>Nota:</strong> La habitación {{ task.room.number }} mantendrá su estado actual de limpieza. Esta acción solo elimina la tarea, no afecta el estado de la habitación.
+                </div>
+
+                <!-- Botones de acción -->
+                <form method="post" class="d-flex gap-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Sí, eliminar tarea
+                    </button>
+                    <a href="{% url 'cleaning:detail' task.pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Alternativas -->
+        <div class="card shadow-sm mt-4 border-info">
+            <div class="card-header bg-info bg-opacity-10">
+                <h6 class="mb-0 text-info">
+                    <i class="bi bi-lightbulb"></i> ¿Buscas otra cosa?
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>En lugar de eliminar, puedes:</strong></p>
+                <ul class="mb-3">
+                    <li>Cambiar el estado a "Cancelada" si la tarea ya no es necesaria</li>
+                    <li>Reasignar la tarea a otro empleado</li>
+                    <li>Modificar la fecha programada</li>
+                </ul>
+                <a href="{% url 'cleaning:update' task.pk %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil"></i> Editar en su lugar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

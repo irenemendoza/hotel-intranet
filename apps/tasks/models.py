@@ -93,17 +93,17 @@ class Task(models.Model):
     def is_overdue(self):
         """Verifica si la tarea está vencida"""
         from django.utils import timezone
-        if self.due_date and self.status != self.COMPLETED:
+        if self.due_date and self.status != self.StatusChoices.COMPLETED:
             return timezone.now() > self.due_date
         return False
     
     def get_priority_color(self):
         """Retorna un color según la prioridad"""
         colors = {
-            self.LOW: 'info',
-            self.MEDIUM: 'warning',
-            self.HIGH: 'danger',
-            self.URGENT: 'dark',
+            self.PriorityChoices.LOW: 'info',
+            self.PriorityChoices.MEDIUM: 'warning',
+            self.PriorityChoices.HIGH: 'danger',
+            self.PriorityChoices.URGENT: 'dark',
         }
         return colors.get(self.priority, 'secondary')
    

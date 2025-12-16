@@ -1,0 +1,240 @@
+<!-- templates/tasks/task_detail.html -->
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{{ task.title }} - Hotel Intranet{% endblock %}
+
+{% block content %}
+<!-- Header con acciones -->
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'tasks:list' %}">Tareas</a></li>
+                <li class="breadcrumb-item active">{{ task.title }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group">
+            <a href="{% url 'tasks:edit' task.pk %}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'tasks:delete' task.pk %}" class="btn btn-outline-danger">
+                <i class="bi bi-trash"></i> Eliminar
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Columna principal: Detalles de la tarea -->
+    <div class="col-lg-8">
+        <!-- Información principal -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="mb-1">{{ task.title }}</h3>
+                        <div class="mt-2">
+                            <span class="badge bg-{{ task.get_priority_color }} me-2">
+                                <i class="bi bi-flag-fill"></i> {{ task.get_priority_display }}
+                            </span>
+                            <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'in_progress' %}bg-primary{% elif task.status == 'cancelled' %}bg-secondary{% else %}bg-warning{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                            {% if task.is_overdue %}
+                            <span class="badge bg-danger">
+                                <i class="bi bi-exclamation-triangle"></i> Vencida
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h5 class="mb-3">Descripción</h5>
+                <p class="text-muted" style="white-space: pre-wrap;">{{ task.description }}</p>
+                
+                {% if task.notes %}
+                <hr>
+                <h5 class="mb-3">Notas adicionales</h5>
+                <p class="text-muted" style="white-space: pre-wrap;">{{ task.notes }}</p>
+                {% endif %}
+                
+                {% if task.attachments %}
+                <hr>
+                <h5 class="mb-3">Archivo adjunto</h5>
+                <a href="{{ task.attachments.url }}" class="btn btn-outline-primary" target="_blank">
+                    <i class="bi bi-paperclip"></i> Descargar archivo
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Comentarios -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-chat-left-text"></i> Comentarios ({{ comments.count }})
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Formulario para nuevo comentario -->
+                <form method="post" action="{% url 'tasks:add-comment' task.pk %}" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Agregar comentario</label>
+                        <textarea class="form-control" name="comment" rows="3" 
+                                  placeholder="Escribe tu comentario..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Enviar comentario
+                    </button>
+                </form>
+
+                <!-- Lista de comentarios -->
+                {% if comments %}
+                    <div class="list-group list-group-flush">
+                        {% for comment in comments %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>
+                                        <i class="bi bi-person-circle"></i> 
+                                        {{ comment.user.get_full_name|default:comment.user.username }}
+                                    </strong>
+                                    {% if comment.user.profile.department %}
+                                    <span class="badge" style="background-color: {{ comment.user.profile.department.color }};">
+                                        {{ comment.user.profile.department.code }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock"></i> {{ comment.created_at|date:"d/m/Y H:i" }}
+                                </small>
+                            </div>
+                            <p class="mb-0" style="white-space: pre-wrap;">{{ comment.comment }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-chat display-4"></i>
+                        <p class="mt-2">No hay comentarios aún</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna lateral: Información adicional -->
+    <div class="col-lg-4">
+        <!-- Actualizar estado rápido -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">
+                    <i class="bi bi-arrow-repeat"></i> Cambiar Estado
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'tasks:update-status' task.pk %}" id="statusForm">
+                    {% csrf_token %}
+                    <select class="form-select mb-2" name="status" id="statusSelect">
+                        <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pendiente</option>
+                        <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>En progreso</option>
+                        <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completada</option>
+                        <option value="cancelled" {% if task.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-check-circle"></i> Actualizar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Detalles -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Detalles
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted d-block">Departamento</small>
+                    <span class="badge" style="background-color: {{ task.department.color }};">
+                        {{ task.department.name }}
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Asignado a</small>
+                    {% if task.assigned_to %}
+                        <strong>
+                            <i class="bi bi-person"></i> 
+                            {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                        </strong>
+                    {% else %}
+                        <span class="text-muted">
+                            <i class="bi bi-person-x"></i> Sin asignar
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Creado por</small>
+                    <strong>
+                        <i class="bi bi-person-plus"></i> 
+                        {{ task.created_by.get_full_name|default:task.created_by.username }}
+                    </strong>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Fecha límite</small>
+                    {% if task.due_date %}
+                        <strong class="{% if task.is_overdue %}text-danger{% endif %}">
+                            <i class="bi bi-calendar"></i> 
+                            {{ task.due_date|date:"d/m/Y H:i" }}
+                        </strong>
+                    {% else %}
+                        <span class="text-muted">Sin fecha límite</span>
+                    {% endif %}
+                </div>
+
+                {% if task.completed_at %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Completada el</small>
+                    <strong class="text-success">
+                        <i class="bi bi-check-circle"></i> 
+                        {{ task.completed_at|date:"d/m/Y H:i" }}
+                    </strong>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Creada el</small>
+                    <span>{{ task.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+
+                <div class="mb-0">
+                    <small class="text-muted d-block">Última actualización</small>
+                    <span>{{ task.updated_at|date:"d/m/Y H:i" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-submit al cambiar estado
+    document.getElementById('statusSelect').addEventListener('change', function() {
+        if (confirm('¿Deseas cambiar el estado de esta tarea?')) {
+            document.getElementById('statusForm').submit();
+        }
+    });
+</script>
+{% endblock %}

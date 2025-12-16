@@ -1,0 +1,197 @@
+<!-- templates/rooms/cleaning/RoomCleaningForm.html -->
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:"Tarea de Limpieza" }} - Hotel Intranet{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cleaning:list' %}">Tareas de Limpieza</a></li>
+                <li class="breadcrumb-item active">{{ title|default:"Formulario" }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-droplet"></i> {{ title|default:"Tarea de Limpieza" }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Mostrar errores generales del form -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <!-- Habitación -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.room.id_for_label }}" class="form-label">
+                                <i class="bi bi-door-open"></i> Habitación <span class="text-danger">*</span>
+                            </label>
+                            {{ form.room }}
+                            {% if form.room.errors %}
+                            <div class="text-danger small">{{ form.room.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Selecciona la habitación a limpiar</small>
+                        </div>
+
+                        <!-- Asignado a -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.assigned_to.id_for_label }}" class="form-label">
+                                <i class="bi bi-person"></i> Asignar a
+                            </label>
+                            {{ form.assigned_to }}
+                            {% if form.assigned_to.errors %}
+                            <div class="text-danger small">{{ form.assigned_to.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Personal de limpieza responsable</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Tipo de limpieza -->
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.cleaning_type.id_for_label }}" class="form-label">
+                                <i class="bi bi-droplet-fill"></i> Tipo de Limpieza <span class="text-danger">*</span>
+                            </label>
+                            {{ form.cleaning_type }}
+                            {% if form.cleaning_type.errors %}
+                            <div class="text-danger small">{{ form.cleaning_type.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Prioridad -->
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.priority.id_for_label }}" class="form-label">
+                                <i class="bi bi-flag"></i> Prioridad
+                            </label>
+                            {{ form.priority }}
+                            {% if form.priority.errors %}
+                            <div class="text-danger small">{{ form.priority.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted d-block">1 = Alta, 5 = Baja</small>
+                        </div>
+
+                        <!-- Estado (solo en edición) -->
+                        {% if form.status %}
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">
+                                <i class="bi bi-circle"></i> Estado
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="text-danger small">{{ form.status.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Hora programada (si existe en el form) -->
+                    {% if form.scheduled_time %}
+                    <div class="mb-3">
+                        <label for="{{ form.scheduled_time.id_for_label }}" class="form-label">
+                            <i class="bi bi-clock"></i> Hora Programada
+                        </label>
+                        {{ form.scheduled_time }}
+                        {% if form.scheduled_time.errors %}
+                        <div class="text-danger small">{{ form.scheduled_time.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Notas -->
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            <i class="bi bi-sticky"></i> Notas Adicionales
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="text-danger small">{{ form.notes.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">Instrucciones especiales, observaciones, etc.</small>
+                    </div>
+
+                    <!-- Foto -->
+                    <div class="mb-4">
+                        <label for="{{ form.photos.id_for_label }}" class="form-label">
+                            <i class="bi bi-camera"></i> Evidencia Fotográfica
+                        </label>
+                        {% if form.instance.photos %}
+                        <div class="mb-2">
+                            <img src="{{ form.instance.photos.url }}" alt="Foto actual" class="img-thumbnail" style="max-height: 200px;">
+                            <p class="small text-muted mt-1">Foto actual. Sube una nueva para reemplazarla.</p>
+                        </div>
+                        {% endif %}
+                        {{ form.photos }}
+                        {% if form.photos.errors %}
+                        <div class="text-danger small">{{ form.photos.errors }}</div>
+                        {% endif %}
+                        <small class="text-muted">Foto del estado de la habitación (opcional)</small>
+                    </div>
+
+                    <!-- Información sobre tipos de limpieza -->
+                    <div class="alert alert-info">
+                        <h6 class="mb-2"><i class="bi bi-info-circle"></i> Tipos de Limpieza</h6>
+                        <ul class="mb-0 small">
+                            <li><strong>Salida:</strong> Limpieza completa tras check-out del huésped</li>
+                            <li><strong>Cliente:</strong> Limpieza diaria para habitaciones ocupadas</li>
+                            <li><strong>Limpieza Profunda:</strong> Limpieza exhaustiva con cambio de sábanas</li>
+                        </ul>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            {{ button_text|default:"Guardar" }}
+                        </button>
+                        <a href="{% url 'cleaning:list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ayuda adicional -->
+        <div class="card shadow-sm mt-4 border-info">
+            <div class="card-header bg-info bg-opacity-10">
+                <h6 class="mb-0 text-info">
+                    <i class="bi bi-lightbulb"></i> Consejos
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0 small">
+                    <li>Asigna prioridad <strong>1 (Alta)</strong> para habitaciones con check-in inmediato</li>
+                    <li>La prioridad <strong>2 (Media)</strong> es adecuada para limpiezas rutinarias</li>
+                    <li>Usa <strong>Limpieza de Salida</strong> para habitaciones que acaban de desocuparse</li>
+                    <li>Las fotos ayudan a documentar el estado inicial de la habitación</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Asegurar que los selects tengan la clase form-control */
+    select, textarea, input[type="number"], input[type="datetime-local"] {
+        width: 100%;
+    }
+</style>
+{% endblock %}

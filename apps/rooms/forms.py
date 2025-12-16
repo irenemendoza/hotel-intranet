@@ -2,6 +2,7 @@ from django import forms
 from django.utils import timezone
 from apps.rooms.models import Room, RoomType, CleaningTask, MaintenanceRequest
 from apps.users.models import UserProfile
+from django.contrib.auth.models import User
 
 class RoomTypeForm(forms.ModelForm):
     class Meta:
@@ -107,6 +108,8 @@ class CleaningTaskForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.fields['assigned_to'].required = False
         # Filtrar solo usuarios del departamento de limpieza
         from apps.users.models import Department
         try:
