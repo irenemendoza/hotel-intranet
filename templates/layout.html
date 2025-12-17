@@ -54,7 +54,7 @@
                         
                         {% if user.profile.department.code == 'LIM' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{% url 'cleaning:list' %}">
                                 <i class="bi bi-droplet"></i> Limpieza
                             </a>
                         </li>
@@ -84,7 +84,7 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Mi Perfil</a></li>
                                 {% if user.is_staff %}
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Admin</a></li>
+                                <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear"></i> Admin</a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>

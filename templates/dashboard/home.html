@@ -202,7 +202,7 @@
                     {% endfor %}
                 </div>
                 <div class="text-center mt-3">
-                    <a href="#" class="btn btn-sm btn-outline-primary">
+                    <a href="{% url 'cleaning:list' %}" class="btn btn-sm btn-outline-primary">
                         Ver todas
                     </a>
                 </div>
@@ -280,7 +280,7 @@
                     {% endif %}
                     {% if user.is_staff %}
                     <div class="col-md-3">
-                        <a href="#" class="btn btn-outline-secondary quick-action-btn">
+                        <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary quick-action-btn">
                             <i class="bi bi-gear"></i>
                             <span>Panel Admin</span>
                         </a>

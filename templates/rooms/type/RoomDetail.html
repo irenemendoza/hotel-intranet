@@ -192,7 +192,7 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-broom me-2"></i>Historial de Limpieza</h5>
-                    <a href="{% url 'rooms:cleaning-create' %}?room={{ room.pk }}" class="btn btn-sm btn-primary">
+                    <a href="{% url 'cleaning:create' %}?room={{ room.pk }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-plus-circle"></i> Nueva Tarea
                     </a>
                 </div>
@@ -212,7 +212,7 @@
                                         {% endif %}
                                     </p>
                                 </div>
-                                <a href="{% url 'rooms:cleaning-detail' pending_cleaning.pk %}" class="btn btn-sm btn-outline-warning">
+                                <a href="{% url 'cleaning:detail' pending_cleaning.pk %}" class="btn btn-sm btn-outline-warning">
                                     Ver Detalles
                                 </a>
                             </div>
@@ -253,7 +253,7 @@
                                             <small>{{ task.scheduled_time|date:"d/m/Y H:i" }}</small>
                                         </td>
                                         <td class="text-end">
-                                            <a href="{% url 'rooms:cleaning-detail' task.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{% url 'cleaning:detail' task.pk %}" class="btn btn-sm btn-outline-primary">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                         </td>
@@ -275,7 +275,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Historial de Mantenimiento</h5>
-                    <a href="{% url 'rooms:maintenance-create' %}?room={{ room.pk }}" class="btn btn-sm btn-danger">
+                    <a href="{% url 'maintenance:create' %}?room={{ room.pk }}" class="btn btn-sm btn-danger">
                         <i class="bi bi-plus-circle"></i> Reportar Incidencia
                     </a>
                 </div>
@@ -296,7 +296,7 @@
                                     <br>
                                     <small class="text-muted">{{ request.get_status_display }} • {{ request.created_at|date:"d/m/Y" }}</small>
                                 </div>
-                                <a href="{% url 'rooms:maintenance-detail' request.pk %}" class="btn btn-sm btn-outline-danger">
+                                <a href="{% url 'maintenance:detail' request.pk %}" class="btn btn-sm btn-outline-danger">
                                     Ver
                                 </a>
                             </div>
@@ -337,7 +337,7 @@
                                             {% endif %}
                                         </td>
                                         <td class="text-end">
-                                            <a href="{% url 'rooms:maintenance-detail' request.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{% url 'maintenance:detail' request.pk %}" class="btn btn-sm btn-outline-primary">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                         </td>
@@ -364,10 +364,10 @@
                     <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h5>
                 </div>
                 <div class="card-body d-grid gap-2">
-                    <a href="{% url 'rooms:cleaning-create' %}?room={{ room.pk }}" class="btn btn-outline-primary">
+                    <a href="{% url 'cleaning:create' %}?room={{ room.pk }}" class="btn btn-outline-primary">
                         <i class="bi bi-broom me-2"></i>Programar Limpieza
                     </a>
-                    <a href="{% url 'rooms:maintenance-create' %}?room={{ room.pk }}" class="btn btn-outline-danger">
+                    <a href="{% url 'maintenance:create' %}?room={{ room.pk }}" class="btn btn-outline-danger">
                         <i class="bi bi-tools me-2"></i>Reportar Mantenimiento
                     </a>
                     <a href="{% url 'rooms:update' room.pk %}" class="btn btn-outline-warning">
