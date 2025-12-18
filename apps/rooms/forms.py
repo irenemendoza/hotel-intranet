@@ -199,15 +199,16 @@ class MaintenanceRequestForm(forms.ModelForm):
             })
         }
     
-    def save(self, commit=True, user=None):
+    def save(self, user=None, commit=True):  # ← CAMBIO DE ORDEN: user primero
         instance = super().save(commit=False)
         if user:
             instance.reported_by = user
         if commit:
             instance.save()
             # Actualizar estado de la habitación
-            instance.room.status = Room.StatusChoices.MAINTENANCE
-            instance.room.save()
+            if instance.room:
+                instance.room.status = Room.StatusChoices.MAINTENANCE
+                instance.room.save()
         return instance
 
 
@@ -215,12 +216,22 @@ class MaintenanceRequestUpdateForm(forms.ModelForm):
     """Formulario para actualizar el estado del mantenimiento"""
     class Meta:
         model = MaintenanceRequest
-        fields = ['assigned_to', 'status', 'resolution']
+        fields = ['assigned_to', 'status', 'resolution', 'title', 'description', 'priority']
         widgets = {
             'assigned_to': forms.Select(attrs={
                 'class': 'form-control'
             }),
             'status': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'title': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4
+            }),
+            'priority': forms.Select(attrs={
                 'class': 'form-control'
             }),
             'resolution': forms.Textarea(attrs={
@@ -245,7 +256,8 @@ class MaintenanceRequestUpdateForm(forms.ModelForm):
             )
             self.fields['assigned_to'].label_from_instance = lambda obj: obj.get_full_name() or obj.username
         except Department.DoesNotExist:
-            pass
+            # Si no existe el departamento, mostrar todos los usuarios
+            self.fields['assigned_to'].queryset = User.objects.all()
     
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -258,8 +270,9 @@ class MaintenanceRequestUpdateForm(forms.ModelForm):
         elif instance.status == MaintenanceRequest.StatusChoices.COMPLETED and not instance.resolved_at:
             instance.resolved_at = timezone.now()
             # Actualizar estado de la habitación
-            instance.room.status = Room.StatusChoices.INSPECTED
-            instance.room.save()
+            if instance.room:
+                instance.room.status = Room.StatusChoices.INSPECTED
+                instance.room.save()
         
         if commit:
             instance.save()

@@ -1,0 +1,229 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Detalle de Mantenimiento - Habitación {{ request.room.number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-tools me-2"></i>
+                    Solicitud de Mantenimiento - Habitación {{ request.room.number }}
+                </h1>
+                <div>
+                    <a href="{% url 'maintenance:update' request.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>Editar
+                    </a>
+                    <a href="{% url 'maintenance:list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información Principal -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Información de la Solicitud</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Habitación:</strong>
+                            <p class="mb-0">
+                                {{ request.room.number }} - {{ request.room.room_type.name }}
+                                <br>
+                                <small class="text-muted">{{ request.room.floor }}º piso</small>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Estado:</strong>
+                            <p class="mb-0">
+                                {% if request.status == 'pending' %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                {% elif request.status == 'assigned' %}
+                                    <span class="badge bg-info">Asignada</span>
+                                {% elif request.status == 'in_progress' %}
+                                    <span class="badge bg-primary">En Progreso</span>
+                                {% elif request.status == 'completed' %}
+                                    <span class="badge bg-success">Completada</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelada</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Prioridad:</strong>
+                            <p class="mb-0">
+                                {% if request.priority == 'urgent' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Urgente
+                                    </span>
+                                {% elif request.priority == 'high' %}
+                                    <span class="badge bg-warning">Alta</span>
+                                {% elif request.priority == 'medium' %}
+                                    <span class="badge bg-info">Media</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Baja</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Fecha de Creación:</strong>
+                            <p class="mb-0">
+                                {{ request.created_at|date:"d/m/Y" }} a las {{ request.created_at|time:"H:i" }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <strong>Descripción del Problema:</strong>
+                        <p class="mt-2">{{ request.description }}</p>
+                    </div>
+
+                    {% if request.notes %}
+                        <div class="mb-3">
+                            <strong>Notas Adicionales:</strong>
+                            <p class="mt-2 text-muted">{{ request.notes }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if request.resolution_notes %}
+                        <div class="alert alert-success">
+                            <strong><i class="fas fa-check-circle me-2"></i>Notas de Resolución:</strong>
+                            <p class="mb-0 mt-2">{{ request.resolution_notes }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Imágenes -->
+            {% if request.image %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Imágenes del Problema</h5>
+                    </div>
+                    <div class="card-body">
+                        <img src="{{ request.image.url }}" 
+                             alt="Imagen del problema" 
+                             class="img-fluid rounded shadow-sm"
+                             style="max-height: 500px; object-fit: contain;">
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Personal -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Personal Involucrado</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Reportado por:</strong>
+                        <p class="mb-0">
+                            <i class="fas fa-user me-2"></i>
+                            {{ request.reported_by.get_full_name|default:request.reported_by.username }}
+                        </p>
+                        <small class="text-muted">{{ request.reported_by.email }}</small>
+                    </div>
+
+                    <hr>
+
+                    <div>
+                        <strong>Asignado a:</strong>
+                        {% if request.assigned_to %}
+                            <p class="mb-0">
+                                <i class="fas fa-user-cog me-2"></i>
+                                {{ request.assigned_to.get_full_name|default:request.assigned_to.username }}
+                            </p>
+                            <small class="text-muted">{{ request.assigned_to.email }}</small>
+                        {% else %}
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-user-slash me-2"></i>
+                                Sin asignar
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fechas Importantes -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Fechas Importantes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-calendar-plus text-primary me-2"></i>
+                        <strong>Creada:</strong>
+                        <p class="mb-0 ms-4">{{ request.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+
+                    {% if request.assigned_at %}
+                        <div class="mb-3">
+                            <i class="fas fa-user-check text-info me-2"></i>
+                            <strong>Asignada:</strong>
+                            <p class="mb-0 ms-4">{{ request.assigned_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if request.started_at %}
+                        <div class="mb-3">
+                            <i class="fas fa-play-circle text-warning me-2"></i>
+                            <strong>Iniciada:</strong>
+                            <p class="mb-0 ms-4">{{ request.started_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if request.resolved_at %}
+                        <div class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Completada:</strong>
+                            <p class="mb-0 ms-4">{{ request.resolved_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    {% endif %}
+
+                    <div>
+                        <i class="fas fa-clock text-muted me-2"></i>
+                        <strong>Última actualización:</strong>
+                        <p class="mb-0 ms-4">{{ request.updated_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Acciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'maintenance:update' request.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>Editar Solicitud
+                        </a>
+                        <a href="{% url 'maintenance:delete' request.pk %}" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Eliminar Solicitud
+                        </a>
+                        <a href="{% url 'maintenance:list' %}" class="btn btn-secondary">
+                            <i class="fas fa-list me-2"></i>Ver Todas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

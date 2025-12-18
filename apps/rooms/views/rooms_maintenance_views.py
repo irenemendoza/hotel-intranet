@@ -1,16 +1,11 @@
 from django.shortcuts import redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count
-from django.utils import timezone
-from django.http import JsonResponse
 
 from apps.rooms.models import MaintenanceRequest
-from apps.rooms.forms import (
-    MaintenanceRequestForm, MaintenanceRequestUpdateForm
-)
+from apps.rooms.forms import MaintenanceRequestForm, MaintenanceRequestUpdateForm
 
 
 class MaintenanceRequestListView(LoginRequiredMixin, ListView):
@@ -66,17 +61,27 @@ class MaintenanceRequestCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('maintenance:list')
     
     def form_valid(self, form):
-        form.save(user=self.request.user)
+        # Guardar con el usuario actual
+        instance = form.save(user=self.request.user)
         messages.success(
             self.request, 
-            f'Solicitud de mantenimiento para habitación {form.instance.room.number} creada.'
+            f'Solicitud de mantenimiento para habitación {instance.room.number} creada correctamente.'
         )
         return redirect(self.success_url)
+    
+    def form_invalid(self, form):
+        # Debug: mostrar errores en la consola
+        print("ERRORES DEL FORMULARIO:", form.errors)
+        messages.error(
+            self.request,
+            'Error al crear la solicitud. Por favor, revisa los campos marcados.'
+        )
+        return super().form_invalid(form)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Crear Solicitud de Mantenimiento'
-        context['button_text'] = 'Crear'
+        context['button_text'] = 'Crear Solicitud'
         return context
 
 
@@ -87,12 +92,21 @@ class MaintenanceRequestUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('maintenance:list')
     
     def form_valid(self, form):
-        messages.success(self.request, 'Solicitud de mantenimiento actualizada.')
+        messages.success(self.request, 'Solicitud de mantenimiento actualizada correctamente.')
         return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        print("ERRORES DEL FORMULARIO:", form.errors)
+        messages.error(
+            self.request,
+            'Error al actualizar la solicitud. Por favor, revisa los campos marcados.'
+        )
+        return super().form_invalid(form)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Actualizar Mantenimiento'
+        context['button_text'] = 'Actualizar'
         return context
 
 
@@ -103,16 +117,14 @@ class MaintenanceRequestDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('maintenance:list')
     
     def delete(self, request, *args, **kwargs):
-        maintenance = self.get_object()
-        messages.success(request, 'Solicitud de mantenimiento eliminada.')
+        messages.success(request, 'Solicitud de mantenimiento eliminada correctamente.')
         return super().delete(request, *args, **kwargs)
-
 
 
 class MyMaintenanceTasksView(LoginRequiredMixin, ListView):
     """Vista para que el personal de mantenimiento vea sus tareas asignadas"""
     model = MaintenanceRequest
-    template_name = 'rooms/MyMaintenanceTasks.html'
+    template_name = 'rooms/maintenance/MyMaintenanceTasks.html'
     context_object_name = 'requests'
     
     def get_queryset(self):

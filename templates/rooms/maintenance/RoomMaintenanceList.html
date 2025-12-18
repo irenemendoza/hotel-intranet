@@ -1,0 +1,259 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Solicitudes de Mantenimiento{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">Solicitudes de Mantenimiento</h1>
+                <a href="{% url 'maintenance:create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Nueva Solicitud
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-left-warning">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pendientes</div>
+                            <div class="h5 mb-0 font-weight-bold">{{ stats.pending }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-info">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">En Progreso</div>
+                            <div class="h5 mb-0 font-weight-bold">{{ stats.in_progress }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tools fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-danger">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Urgentes</div>
+                            <div class="h5 mb-0 font-weight-bold">{{ stats.urgent }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Estado</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Todos los estados</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="priority" class="form-label">Prioridad</label>
+                    <select name="priority" id="priority" class="form-select">
+                        <option value="">Todas las prioridades</option>
+                        {% for value, label in priority_choices %}
+                            <option value="{{ value }}" {% if request.GET.priority == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter me-2"></i>Filtrar
+                    </button>
+                    <a href="{% url 'maintenance:list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Solicitudes -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Solicitudes de Mantenimiento</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if requests %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Habitación</th>
+                                <th>Descripción</th>
+                                <th>Prioridad</th>
+                                <th>Estado</th>
+                                <th>Reportado por</th>
+                                <th>Asignado a</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in requests %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ request.room.number }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ request.room.room_type.name }}</small>
+                                    </td>
+                                    <td>
+                                        {{ request.description|truncatewords:10 }}
+                                    </td>
+                                    <td>
+                                        {% if request.priority == 'urgent' %}
+                                            <span class="badge bg-danger">Urgente</span>
+                                        {% elif request.priority == 'high' %}
+                                            <span class="badge bg-warning">Alta</span>
+                                        {% elif request.priority == 'medium' %}
+                                            <span class="badge bg-info">Media</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Baja</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if request.status == 'pending' %}
+                                            <span class="badge bg-warning">Pendiente</span>
+                                        {% elif request.status == 'assigned' %}
+                                            <span class="badge bg-info">Asignada</span>
+                                        {% elif request.status == 'in_progress' %}
+                                            <span class="badge bg-primary">En Progreso</span>
+                                        {% elif request.status == 'completed' %}
+                                            <span class="badge bg-success">Completada</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Cancelada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ request.reported_by.get_full_name|default:request.reported_by.username }}</td>
+                                    <td>
+                                        {% if request.assigned_to %}
+                                            {{ request.assigned_to.get_full_name|default:request.assigned_to.username }}
+                                        {% else %}
+                                            <span class="text-muted">Sin asignar</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ request.created_at|date:"d/m/Y" }}
+                                        <br>
+                                        <small class="text-muted">{{ request.created_at|time:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'maintenance:detail' request.pk %}" 
+                                               class="btn btn-outline-primary" 
+                                               title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'maintenance:update' request.pk %}" 
+                                               class="btn btn-outline-warning" 
+                                               title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'maintenance:delete' request.pk %}" 
+                                               class="btn btn-outline-danger" 
+                                               title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-tools fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay solicitudes de mantenimiento con los filtros seleccionados.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+        <nav aria-label="Paginación" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">
+                            Primera
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">
+                            Anterior
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">
+                            Siguiente
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}">
+                            Última
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+<style>
+.border-left-warning {
+    border-left: 4px solid #ffc107;
+}
+.border-left-info {
+    border-left: 4px solid #17a2b8;
+}
+.border-left-danger {
+    border-left: 4px solid #dc3545;
+}
+</style>
+{% endblock %}

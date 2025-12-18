@@ -285,7 +285,7 @@ class CleaningTask(models.Model):
     
     
     def __str__(self):
-        return f"{self.room} - {self.get_status_display()} ({self.scheduled_time.strftime('%d/%m/%Y %H:%M')})"
+        return f"{self.room} - {self.get_status_display()}"
     
    
 
@@ -298,28 +298,25 @@ class MaintenanceRequest(models.Model):
         URGENT = 'urgent', 'Urgente'
     
     class StatusChoices(models.TextChoices):
-    
         PENDING = 'pending', 'Pendiente'
         ASSIGNED = 'assigned', 'Asignada'
         IN_PROGRESS = 'in_progress', 'En progreso'
         COMPLETED = 'completed', 'Completada'
         CANCELLED = 'cancelled', 'Cancelada'
     
-    
-    
     room = models.ForeignKey(
         Room, 
         on_delete=models.CASCADE, 
         related_name='maintenance_requests',
         verbose_name='Habitación'
-        )
+    )
     reported_by = models.ForeignKey(
         User, 
         on_delete=models.SET_NULL, 
         null=True, 
         related_name='reported_maintenance',
         verbose_name='Reportado por'
-        )
+    )
     assigned_to = models.ForeignKey(
         User, 
         on_delete=models.SET_NULL, 
@@ -327,47 +324,64 @@ class MaintenanceRequest(models.Model):
         blank=True, 
         related_name='assigned_maintenance',
         verbose_name='Asignado a'
-        )
+    )
     title = models.CharField(
         'Título', 
         max_length=200
-        )
+    )
     description = models.TextField(
         'Descripción'
-        )
+    )
     priority = models.CharField(
         'Prioridad', 
         max_length=10, 
         choices=PriorityChoices.choices, 
         default=PriorityChoices.MEDIUM
-        )
+    )
     status = models.CharField(
         'Estado', 
         max_length=20, 
         choices=StatusChoices.choices,
         default=StatusChoices.PENDING
-        )
+    )
     resolution = models.TextField(
         'Resolución', 
         blank=True
-        )
+    )
     photos = models.ImageField(
         'Fotos', 
         upload_to='maintenance/', 
         blank=True, 
         null=True
-        )
+    )
     created_at = models.DateTimeField(
         'Fecha de creación', 
         auto_now_add=True
-        )
+    )
+    updated_at = models.DateTimeField(
+        'Última actualización', 
+        auto_now=True
+    )
     assigned_at = models.DateTimeField(
         'Fecha de asignación', 
         null=True, 
         blank=True
-        )
+    )
+    started_at = models.DateTimeField(
+        'Fecha de inicio', 
+        null=True, 
+        blank=True
+    )
+    resolved_at = models.DateTimeField(
+        'Fecha de resolución', 
+        null=True, 
+        blank=True
+    )
     
-   
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Solicitud de Mantenimiento'
+        verbose_name_plural = 'Solicitudes de Mantenimiento'
     
     def __str__(self):
         return f"{self.room} - {self.title} [{self.get_priority_display()}]"
@@ -375,9 +389,9 @@ class MaintenanceRequest(models.Model):
     def get_priority_color(self):
         """Retorna un color según la prioridad"""
         colors = {
-            self.LOW: 'info',
-            self.MEDIUM: 'warning',
-            self.HIGH: 'danger',
-            self.URGENT: 'dark',
+            self.PriorityChoices.LOW: 'info',
+            self.PriorityChoices.MEDIUM: 'warning',
+            self.PriorityChoices.HIGH: 'danger',
+            self.PriorityChoices.URGENT: 'dark',
         }
         return colors.get(self.priority, 'secondary')
