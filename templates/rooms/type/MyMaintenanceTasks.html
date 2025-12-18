@@ -1,0 +1,211 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Mis Tareas de Mantenimiento{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-tasks me-2"></i>
+                Mis Tareas de Mantenimiento
+            </h1>
+            <p class="text-muted">Tareas asignadas a ti que están pendientes o en progreso</p>
+        </div>
+    </div>
+
+    <!-- Resumen rápido -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-left-warning">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Tareas Asignadas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">
+                                {{ requests|length }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-danger">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Urgentes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">
+                                {% with urgent_count=0 %}
+                                    {% for req in requests %}
+                                        {% if req.priority == 'urgent' %}
+                                            {% with urgent_count=urgent_count|add:1 %}{% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ urgent_count }}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-info">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                En Progreso
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">
+                                {% with in_progress_count=0 %}
+                                    {% for req in requests %}
+                                        {% if req.status == 'in_progress' %}
+                                            {% with in_progress_count=in_progress_count|add:1 %}{% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ in_progress_count }}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-sync-alt fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de tareas -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Tareas Pendientes</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if requests %}
+                <div class="list-group list-group-flush">
+                    {% for request in requests %}
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <h5 class="mb-1">
+                                        <span class="badge bg-secondary">Hab. {{ request.room.number }}</span>
+                                    </h5>
+                                    <small class="text-muted">{{ request.room.room_type.name }}</small>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">{{ request.description|truncatewords:15 }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>
+                                        Reportado por: {{ request.reported_by.get_full_name|default:request.reported_by.username }}
+                                    </small>
+                                </div>
+                                
+                                <div class="col-md-2 text-center">
+                                    {% if request.priority == 'urgent' %}
+                                        <span class="badge bg-danger fs-6">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>URGENTE
+                                        </span>
+                                    {% elif request.priority == 'high' %}
+                                        <span class="badge bg-warning fs-6">Alta</span>
+                                    {% elif request.priority == 'medium' %}
+                                        <span class="badge bg-info fs-6">Media</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-6">Baja</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-2 text-center">
+                                    {% if request.status == 'assigned' %}
+                                        <span class="badge bg-warning">Asignada</span>
+                                    {% elif request.status == 'in_progress' %}
+                                        <span class="badge bg-primary">En Progreso</span>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ request.created_at|date:"d/m/Y" }}
+                                    </small>
+                                </div>
+                                
+                                <div class="col-md-2 text-end">
+                                    <a href="{% url 'maintenance:detail' request.pk %}" 
+                                       class="btn btn-sm btn-outline-primary me-1"
+                                       title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'maintenance:update' request.pk %}" 
+                                       class="btn btn-sm btn-outline-warning"
+                                       title="Actualizar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {% if request.priority == 'urgent' %}
+                                <div class="alert alert-danger mt-3 mb-0 py-2">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Atención urgente requerida:</strong> Esta tarea debe ser atendida lo antes posible.
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5>¡Buen trabajo!</h5>
+                    <p class="text-muted">No tienes tareas de mantenimiento pendientes en este momento.</p>
+                    <a href="{% url 'maintenance:list' %}" class="btn btn-outline-primary mt-2">
+                        <i class="fas fa-list me-2"></i>Ver Todas las Solicitudes
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Botón para ver todas -->
+    {% if requests %}
+        <div class="text-center mt-4">
+            <a href="{% url 'maintenance:list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-list me-2"></i>Ver Todas las Solicitudes de Mantenimiento
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.border-left-warning {
+    border-left: 4px solid #ffc107;
+}
+.border-left-info {
+    border-left: 4px solid #17a2b8;
+}
+.border-left-danger {
+    border-left: 4px solid #dc3545;
+}
+
+.list-group-item {
+    transition: all 0.2s ease-in-out;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+</style>
+{% endblock %}
