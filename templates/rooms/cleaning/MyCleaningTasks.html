@@ -1,0 +1,437 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Mis Tareas de Limpieza - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border-left: 4px solid #6c757d;
+    }
+    .task-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    .task-card.priority-high {
+        border-left-color: #dc3545;
+    }
+    .task-card.priority-medium {
+        border-left-color: #ffc107;
+    }
+    .task-card.priority-low {
+        border-left-color: #28a745;
+    }
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-in-progress {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+    .status-completed {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    .progress-ring {
+        width: 80px;
+        height: 80px;
+    }
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+    .room-badge {
+        background-color: rgba(255,255,255,0.2);
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">Mis Tareas de Limpieza</h1>
+                    <p class="text-muted mb-0">{{ today|date:"l, d de F de Y" }}</p>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <i class="fas fa-filter me-2"></i>Filtrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Personales -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-tasks fa-2x text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Pendientes</h6>
+                            <h2 class="mb-0">{{ stats.pending }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-spinner fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">En Progreso</h6>
+                            <h2 class="mb-0">{{ stats.in_progress }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Completadas Hoy</h6>
+                            <h2 class="mb-0">{{ stats.completed_today }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="mb-2">Progreso del Día</h6>
+                    <div class="progress-ring mx-auto mb-2">
+                        <svg width="80" height="80">
+                            <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/>
+                            <circle cx="40" cy="40" r="35" fill="none" stroke="white" stroke-width="8" 
+                                    stroke-dasharray="{{ stats.progress_percentage|floatformat:0 }} 220" 
+                                    stroke-dashoffset="55" transform="rotate(-90 40 40)"/>
+                        </svg>
+                    </div>
+                    <h3 class="mb-0">{{ stats.progress_percentage|floatformat:0 }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs de Navegación -->
+    <ul class="nav nav-tabs mb-4" id="taskTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button">
+                <i class="fas fa-clock me-2"></i>Pendientes 
+                <span class="badge bg-warning ms-2">{{ stats.pending }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="inprogress-tab" data-bs-toggle="tab" data-bs-target="#inprogress" type="button">
+                <i class="fas fa-spinner me-2"></i>En Progreso
+                <span class="badge bg-primary ms-2">{{ stats.in_progress }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button">
+                <i class="fas fa-check me-2"></i>Completadas
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de Tabs -->
+    <div class="tab-content" id="taskTabsContent">
+        <!-- Pendientes -->
+        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+            <div class="row">
+                {% for task in pending_tasks %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card task-card priority-{{ task.priority }} border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        <i class="fas fa-door-open me-2 text-primary"></i>
+                                        {{ task.room.room_number }}
+                                    </h5>
+                                    <small class="text-muted">{{ task.room.get_room_type_display }}</small>
+                                </div>
+                                <span class="badge bg-{{ task.priority }} bg-opacity-10 text-{{ task.priority }}">
+                                    {{ task.get_priority_display }}
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between text-muted small mb-2">
+                                    <span><i class="fas fa-calendar me-1"></i>{{ task.scheduled_date|date:"d/m/Y" }}</span>
+                                    <span><i class="fas fa-clock me-1"></i>{{ task.scheduled_time|time:"H:i" }}</span>
+                                </div>
+                                {% if task.notes %}
+                                <p class="card-text small text-muted mb-0">
+                                    <i class="fas fa-sticky-note me-1"></i>{{ task.notes|truncatewords:15 }}
+                                </p>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm flex-grow-1" onclick="startTask({{ task.id }})">
+                                    <i class="fas fa-play me-1"></i>Iniciar
+                                </button>
+                                <a href="{% url 'cleaning:task_detail' task.pk %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h4>¡Excelente trabajo!</h4>
+                        <p class="text-muted">No tienes tareas pendientes en este momento</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- En Progreso -->
+        <div class="tab-pane fade" id="inprogress" role="tabpanel">
+            <div class="row">
+                {% for task in inprogress_tasks %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card task-card priority-{{ task.priority }} border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        <i class="fas fa-door-open me-2 text-primary"></i>
+                                        {{ task.room.room_number }}
+                                    </h5>
+                                    <small class="text-muted">{{ task.room.get_room_type_display }}</small>
+                                </div>
+                                <span class="status-badge status-in-progress">
+                                    <i class="fas fa-spinner fa-spin me-1"></i>En Progreso
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between text-muted small mb-2">
+                                    <span><i class="fas fa-hourglass-start me-1"></i>Iniciada: {{ task.started_at|time:"H:i" }}</span>
+                                    <span id="timer-{{ task.id }}">00:00</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ task.completion_percentage }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ task.completion_percentage }}% completado</small>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm flex-grow-1" onclick="completeTask({{ task.id }})">
+                                    <i class="fas fa-check me-1"></i>Completar
+                                </button>
+                                <a href="{% url 'cleaning:task_detail' task.pk %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-clipboard-list fa-4x text-muted mb-3"></i>
+                        <h4>No hay tareas en progreso</h4>
+                        <p class="text-muted">Inicia una tarea pendiente para verla aquí</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Completadas -->
+        <div class="tab-pane fade" id="completed" role="tabpanel">
+            <div class="row">
+                {% for task in completed_tasks %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        <i class="fas fa-door-open me-2 text-success"></i>
+                                        {{ task.room.room_number }}
+                                    </h5>
+                                    <small class="text-muted">{{ task.room.get_room_type_display }}</small>
+                                </div>
+                                <span class="status-badge status-completed">
+                                    <i class="fas fa-check me-1"></i>Completada
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between text-muted small">
+                                    <span><i class="fas fa-clock me-1"></i>{{ task.completed_at|date:"d/m H:i" }}</span>
+                                    <span><i class="fas fa-stopwatch me-1"></i>{{ task.duration }} min</span>
+                                </div>
+                            </div>
+
+                            {% if task.rating %}
+                            <div class="mb-2">
+                                <small class="text-muted">Calificación:</small>
+                                <div class="text-warning">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= task.rating %}
+                                        <i class="fas fa-star"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <a href="{% url 'cleaning:task_detail' task.pk %}" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-eye me-1"></i>Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-history fa-4x text-muted mb-3"></i>
+                        <h4>No hay tareas completadas hoy</h4>
+                        <p class="text-muted">Las tareas completadas aparecerán aquí</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Filtros -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filtrar Tareas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="get">
+                    <div class="mb-3">
+                        <label class="form-label">Prioridad</label>
+                        <select name="priority" class="form-select">
+                            <option value="">Todas</option>
+                            <option value="high">Alta</option>
+                            <option value="medium">Media</option>
+                            <option value="low">Baja</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Habitación</label>
+                        <select name="room_type" class="form-select">
+                            <option value="">Todas</option>
+                            <option value="single">Individual</option>
+                            <option value="double">Doble</option>
+                            <option value="suite">Suite</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" name="date" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function startTask(taskId) {
+    if (confirm('¿Iniciar esta tarea de limpieza?')) {
+        fetch(`/cleaning/tasks/${taskId}/start/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+function completeTask(taskId) {
+    if (confirm('¿Marcar esta tarea como completada?')) {
+        fetch(`/cleaning/tasks/${taskId}/complete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+// Actualizar temporizadores
+function updateTimers() {
+    {% for task in inprogress_tasks %}
+    if (document.getElementById('timer-{{ task.id }}')) {
+        const startTime = new Date('{{ task.started_at|date:"c" }}');
+        const now = new Date();
+        const diff = Math.floor((now - startTime) / 1000);
+        const minutes = Math.floor(diff / 60);
+        const seconds = diff % 60;
+        document.getElementById('timer-{{ task.id }}').textContent = 
+            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+    {% endfor %}
+}
+
+setInterval(updateTimers, 1000);
+updateTimers();
+</script>
+{% endblock %}
