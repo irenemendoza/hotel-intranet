@@ -1,5 +1,5 @@
 from django.urls import path
-from ..views.users_views import (
+from ..views.employees_views import (
     EmployeeListView,
     EmployeeDetailView,
     EmployeeCreateView,
@@ -7,7 +7,7 @@ from ..views.users_views import (
     EmployeeDeleteView
 )
 
-app_name = 'employees'
+app_name = 'users'
 
 urlpatterns = [
     path('', EmployeeListView.as_view(), name='list'),

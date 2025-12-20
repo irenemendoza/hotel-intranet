@@ -255,3 +255,161 @@ main {
         max-width: 160px;
     }
 }
+
+/* ============================================
+   ESTILOS PARA MY CLEANING TASKS
+   ============================================ */
+
+.task-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border-left: 4px solid #6c757d;
+    }
+    .task-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    .task-card.priority-high {
+        border-left-color: #dc3545;
+    }
+    .task-card.priority-medium {
+        border-left-color: #ffc107;
+    }
+    .task-card.priority-low {
+        border-left-color: #28a745;
+    }
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-in-progress {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+    .status-completed {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    .progress-ring {
+        width: 80px;
+        height: 80px;
+    }
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+    .room-badge {
+        background-color: rgba(255,255,255,0.2);
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+    }
+
+/* ============================================
+   ESTILOS PARA ATTENDANCE DASHBOARD
+   ============================================ */
+
+   .stat-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .attendance-status {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    .status-present { background-color: #28a745; }
+    .status-absent { background-color: #dc3545; }
+    .status-late { background-color: #ffc107; }
+    .status-on-leave { background-color: #6c757d; }
+    
+    .time-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+/* ============================================
+   ESTILOS PARA LEAVEFORM
+   ============================================ */
+
+
+   .form-card {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .date-range-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+    }
+    .info-box {
+        background-color: #e7f3ff;
+        border-left: 4px solid #0d6efd;
+        padding: 1rem;
+        border-radius: 5px;
+    }
+    .days-badge {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+/* ============================================
+   ESTILOS PARA LEAVEMANAGEMENT
+   ============================================ */
+
+.leave-card {
+        transition: all 0.3s ease;
+    }
+    .leave-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .filter-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }

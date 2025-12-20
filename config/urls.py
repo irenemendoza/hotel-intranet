@@ -13,6 +13,7 @@ urlpatterns = [
     path('employees/', include(('apps.users.urls.employees_urls', "employees"), namespace="employees")),
     path('attendance/', include(('apps.users.urls.attendance_urls', "attendance"), namespace="attendance")),
     path('rooms/', include(('apps.rooms.urls', "rooms"), namespace="rooms")),
+    path('leave/', include(('apps.users.urls.leave_urls', "leave"), namespace="leave")),
     path('tasks/', include(('apps.tasks.urls', "tasks"), namespace="tasks")),
     path('cleaning/', include(('apps.rooms.urls.rooms_cleaning_urls', "cleaning"), namespace="cleaning")),
     path('maintenance/', include(('apps.rooms.urls.rooms_maintenance_urls', "maintenance"), namespace="maintenance")),

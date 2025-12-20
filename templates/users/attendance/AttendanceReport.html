@@ -1,0 +1,272 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Reportes de Asistencia - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">Reportes de Asistencia</h1>
+                    <p class="text-muted mb-0">Genera y descarga reportes personalizados</p>
+                </div>
+                <a href="{% url 'attendance:attendance_dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Formulario de Generación -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-export me-2"></i>Generar Reporte</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'attendance:generate_report' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tipo de Reporte</label>
+                            <select name="report_type" class="form-select" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="monthly">Reporte Mensual</option>
+                                <option value="weekly">Reporte Semanal</option>
+                                <option value="custom">Período Personalizado</option>
+                                <option value="summary">Resumen Anual</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="monthSelector" style="display: none;">
+                            <label class="form-label fw-semibold">Mes</label>
+                            <input type="month" name="month" class="form-control">
+                        </div>
+
+                        <div class="mb-3" id="dateRangeSelector" style="display: none;">
+                            <label class="form-label fw-semibold">Fecha Inicio</label>
+                            <input type="date" name="start_date" class="form-control mb-2">
+                            <label class="form-label fw-semibold">Fecha Fin</label>
+                            <input type="date" name="end_date" class="form-control">
+                        </div>
+
+                        <div class="mb-3" id="yearSelector" style="display: none;">
+                            <label class="form-label fw-semibold">Año</label>
+                            <select name="year" class="form-select">
+                                {% for year in years %}
+                                <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Formato</label>
+                            <select name="format" class="form-select" required>
+                                <option value="pdf">PDF</option>
+                                <option value="excel">Excel (XLSX)</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Incluir</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="include_summary" id="includeSummary" checked>
+                                <label class="form-check-label" for="includeSummary">
+                                    Resumen estadístico
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="include_details" id="includeDetails" checked>
+                                <label class="form-check-label" for="includeDetails">
+                                    Detalle diario
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="include_charts" id="includeCharts">
+                                <label class="form-check-label" for="includeCharts">
+                                    Gráficos (solo PDF)
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-download me-2"></i>Generar Reporte
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reportes Predefinidos -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Reportes Rápidos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card border shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
+                                            <i class="fas fa-calendar-week fa-2x text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Esta Semana</h6>
+                                            <small class="text-muted">Reporte semanal actual</small>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'attendance:quick_report' %}?type=week" class="btn btn-outline-primary btn-sm w-100">
+                                        <i class="fas fa-file-pdf me-2"></i>Descargar PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-success bg-opacity-10 rounded p-3 me-3">
+                                            <i class="fas fa-calendar-alt fa-2x text-success"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Este Mes</h6>
+                                            <small class="text-muted">Reporte mensual actual</small>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'attendance:quick_report' %}?type=month" class="btn btn-outline-success btn-sm w-100">
+                                        <i class="fas fa-file-pdf me-2"></i>Descargar PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-warning bg-opacity-10 rounded p-3 me-3">
+                                            <i class="fas fa-file-excel fa-2x text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Últimos 30 Días</h6>
+                                            <small class="text-muted">Exportar a Excel</small>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'attendance:quick_report' %}?type=30days&format=excel" class="btn btn-outline-warning btn-sm w-100">
+                                        <i class="fas fa-file-excel me-2"></i>Descargar Excel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-info bg-opacity-10 rounded p-3 me-3">
+                                            <i class="fas fa-chart-line fa-2x text-info"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Resumen Anual</h6>
+                                            <small class="text-muted">Año {{ current_year }}</small>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'attendance:quick_report' %}?type=year" class="btn btn-outline-info btn-sm w-100">
+                                        <i class="fas fa-file-pdf me-2"></i>Descargar PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de Reportes -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Reportes Recientes</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Período</th>
+                                    <th>Formato</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in recent_reports %}
+                                <tr>
+                                    <td>{{ report.created_at|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ report.get_report_type_display }}</span>
+                                    </td>
+                                    <td>{{ report.period_display }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ report.format|upper }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'attendance:download_report' report.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No hay reportes generados aún
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reportTypeSelect = document.querySelector('select[name="report_type"]');
+    const monthSelector = document.getElementById('monthSelector');
+    const dateRangeSelector = document.getElementById('dateRangeSelector');
+    const yearSelector = document.getElementById('yearSelector');
+
+    reportTypeSelect.addEventListener('change', function() {
+        // Ocultar todos
+        monthSelector.style.display = 'none';
+        dateRangeSelector.style.display = 'none';
+        yearSelector.style.display = 'none';
+
+        // Mostrar según selección
+        switch(this.value) {
+            case 'monthly':
+                monthSelector.style.display = 'block';
+                break;
+            case 'custom':
+                dateRangeSelector.style.display = 'block';
+                break;
+            case 'summary':
+                yearSelector.style.display = 'block';
+                break;
+        }
+    });
+});
+</script>
+{% endblock %}

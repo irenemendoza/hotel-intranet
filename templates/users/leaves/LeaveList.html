@@ -1,0 +1,242 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Mis Solicitudes de Ausencia - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Mis Solicitudes de Ausencia</h1>
+            <p class="text-muted mb-0">Gestiona tus solicitudes de vacaciones y permisos</p>
+        </div>
+        <a href="{% url 'leave:create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nueva Solicitud
+        </a>
+    </div>
+
+    <!-- Estadísticas Personales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 rounded p-3">
+                                <i class="fas fa-calendar-alt fa-2x text-info"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Días Disponibles</h6>
+                            <h3 class="mb-0">{{ available_days }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 rounded p-3">
+                                <i class="fas fa-clock fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Pendientes</h6>
+                            <h3 class="mb-0">{{ pending_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 rounded p-3">
+                                <i class="fas fa-check-circle fa-2x text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Aprobadas</h6>
+                            <h3 class="mb-0">{{ approved_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 rounded p-3">
+                                <i class="fas fa-umbrella-beach fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Días Usados</h6>
+                            <h3 class="mb-0">{{ used_days }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Estado</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pendientes</option>
+                        <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Aprobadas</option>
+                        <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Rechazadas</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tipo</label>
+                    <select name="leave_type" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="vacation" {% if request.GET.leave_type == 'vacation' %}selected{% endif %}>Vacaciones</option>
+                        <option value="sick" {% if request.GET.leave_type == 'sick' %}selected{% endif %}>Enfermedad</option>
+                        <option value="personal" {% if request.GET.leave_type == 'personal' %}selected{% endif %}>Personal</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Solicitudes -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Mis Solicitudes</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Días</th>
+                            <th>Estado</th>
+                            <th>Solicitado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in leaves %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ leave.get_leave_type_display }}
+                                </span>
+                            </td>
+                            <td>{{ leave.start_date|date:"d/m/Y" }}</td>
+                            <td>{{ leave.end_date|date:"d/m/Y" }}</td>
+                            <td><strong>{{ leave.duration_days }}</strong> días</td>
+                            <td>
+                                <span class="status-badge status-{{ leave.status }}">
+                                    {{ leave.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ leave.created_at|date:"d/m/Y H:i" }}</small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'leave:detail' leave.pk %}" class="btn btn-outline-primary" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if leave.status == 'pending' %}
+                                    <a href="{% url 'leave:update' leave.pk %}" class="btn btn-outline-secondary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" title="Cancelar" onclick="cancelLeave({{ leave.pk }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">No tienes solicitudes de ausencia</p>
+                                <a href="{% url 'leave:create' %}" class="btn btn-sm btn-primary mt-3">
+                                    <i class="fas fa-plus me-2"></i>Crear Primera Solicitud
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if leaves.has_other_pages %}
+        <div class="card-footer bg-white">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    {% if leaves.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ leaves.previous_page_number }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in leaves.paginator.page_range %}
+                    <li class="page-item {% if leaves.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if leaves.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ leaves.next_page_number }}">Siguiente</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function cancelLeave(leaveId) {
+    if (confirm('¿Está seguro que desea cancelar esta solicitud?')) {
+        fetch(`/leave/${leaveId}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error al cancelar la solicitud');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
