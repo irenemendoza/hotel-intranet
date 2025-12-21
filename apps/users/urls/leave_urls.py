@@ -1,11 +1,5 @@
 from django.urls import path
-from ..views.users_views import (
-    AttendanceDashboardView,
-    MyAttendanceView,
-    AttendanceCheckInView,
-    AttendanceCheckOutView,
-    AttendanceHistoryView,
-    AttendanceReportView,
+from ..views.leave_views import (
     LeaveListView,
     LeaveCreateView,
     LeaveDetailView,

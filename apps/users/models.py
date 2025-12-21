@@ -89,6 +89,7 @@ class UserProfile(models.Model):
         max_length=100,
         blank=True
     )
+    
     avatar = models.ImageField(
         'Avatar', 
         upload_to='avatars/', 

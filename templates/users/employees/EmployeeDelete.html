@@ -1,0 +1,149 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Eliminar Empleado - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="mb-4">
+                <a href="{% url 'employees:detail' employee.pk %}" class="text-decoration-none text-muted">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al perfil
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white py-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div>
+                            <h4 class="mb-0">Confirmar Eliminación</h4>
+                            <small>Esta acción no se puede deshacer</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Información del Empleado -->
+                    <div class="text-center mb-4">
+                        {% if employee.avatar %}
+                        <img src="{{ employee.avatar.url }}" class="rounded-circle mb-3" width="100" height="100">
+                        {% else %}
+                        <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                            <i class="fas fa-user fa-3x text-danger"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <h5 class="mb-1">{{ employee.get_full_name }}</h5>
+                        <p class="text-muted mb-0">{{ employee.position }}</p>
+                        <p class="text-muted small">{{ employee.department }}</p>
+                    </div>
+
+                    <!-- Advertencia -->
+                    <div class="alert alert-danger" role="alert">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-exclamation-circle me-2"></i>¿Está seguro que desea eliminar este empleado?
+                        </h6>
+                        <hr>
+                        <p class="mb-0">Esta acción eliminará permanentemente:</p>
+                        <ul class="mb-0 mt-2">
+                            <li>Toda la información personal del empleado</li>
+                            <li>Su historial de asistencia</li>
+                            <li>Sus solicitudes de ausencia</li>
+                            <li>Acceso al sistema</li>
+                            <li>Cualquier dato asociado</li>
+                        </ul>
+                    </div>
+
+                    <!-- Información Adicional -->
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body">
+                            <h6 class="mb-3">Datos del Empleado a Eliminar:</h6>
+                            <div class="row small">
+                                <div class="col-6 mb-2">
+                                    <strong>Número Empleado:</strong><br>
+                                    {{ employee.employee_number|default:"-" }}
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <strong>Email:</strong><br>
+                                    {{ employee.user.email }}
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <strong>Fecha Contratación:</strong><br>
+                                    {{ employee.hire_date|date:"d/m/Y"|default:"-" }}
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <strong>Departamento:</strong><br>
+                                    {{ employee.department|default:"-" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulario de Confirmación -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Para confirmar, escriba: <code>ELIMINAR</code></label>
+                            <input type="text" name="confirmation" class="form-control" placeholder="Escriba ELIMINAR" required>
+                            <small class="form-text text-muted">Debe escribir exactamente "ELIMINAR" en mayúsculas</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Motivo de la eliminación (opcional)</label>
+                            <textarea name="reason" class="form-control" rows="3" placeholder="Indique el motivo por el cual se elimina este empleado..."></textarea>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between gap-2">
+                            <a href="{% url 'employees:detail' employee.pk %}" class="btn btn-outline-secondary flex-grow-1">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger flex-grow-1">
+                                <i class="fas fa-trash-alt me-2"></i>Eliminar Definitivamente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Alternativa Recomendada -->
+            <div class="card border-info mt-4">
+                <div class="card-body">
+                    <h6 class="text-info">
+                        <i class="fas fa-info-circle me-2"></i>¿Considere una alternativa?
+                    </h6>
+                    <p class="small mb-2">En lugar de eliminar el empleado, puede:</p>
+                    <ul class="small mb-3">
+                        <li><strong>Desactivar la cuenta:</strong> Mantiene el historial pero impide el acceso</li>
+                        <li><strong>Marcar como inactivo:</strong> Conserva todos los datos para futuras referencias</li>
+                    </ul>
+                    <a href="{% url 'employees:update' employee.pk %}" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-edit me-2"></i>Editar Estado del Empleado
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const confirmation = document.querySelector('input[name="confirmation"]').value;
+    if (confirmation !== 'ELIMINAR') {
+        e.preventDefault();
+        alert('Debe escribir exactamente "ELIMINAR" en mayúsculas para confirmar.');
+        return false;
+    }
+    
+    if (!confirm('¿Está completamente seguro? Esta acción NO se puede deshacer.')) {
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
+{% endblock %}

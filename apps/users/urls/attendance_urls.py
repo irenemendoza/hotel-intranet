@@ -1,5 +1,5 @@
 from django.urls import path
-from ..views.users_views import (
+from ..views.attendance_views import (
     AttendanceDashboardView,
     MyAttendanceView,
     AttendanceCheckInView,

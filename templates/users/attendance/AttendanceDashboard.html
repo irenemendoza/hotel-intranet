@@ -12,7 +12,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="h3 mb-1">Dashboard de Asistencia</h1>
-                    <p class="text-muted mb-0">{{ today|date:"l, d de F de Y" }}</p>
+                    <p class="text-muted mb-0">{{ today|date:"l, d" }} de {{ today|date:"F" }} de {{ today|date:"Y" }}</p>
                 </div>
                 <div>
                     <a href="{% url 'attendance:history' %}" class="btn btn-outline-primary me-2">
@@ -179,14 +179,14 @@
                                     <td>{{ attendance.employee.department }}</td>
                                     <td>
                                         {% if attendance.check_in %}
-                                        <span class="badge bg-success">{{ attendance.check_in|time:"H:i" }}</span>
+                                        <span class="badge bg-success">{{ attendance.check_in|date:"d/m/Y H:i" }}</span>
                                         {% else %}
                                         <span class="text-muted">--:--</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if attendance.check_out %}
-                                        <span class="badge bg-info">{{ attendance.check_out|time:"H:i" }}</span>
+                                        <span class="badge bg-info">{{ attendance.check_out|date:"d/m/Y H:i" }}</span>
                                         {% else %}
                                         <span class="text-muted">--:--</span>
                                         {% endif %}

@@ -27,7 +27,7 @@ class AttendanceDashboardView(LoginRequiredMixin, ListView):
         today = timezone.now().date()
         
         # Total de empleados activos
-        total_employees = UserProfile.objects.filter(is_active=True).count()
+        total_employees = Attendance.objects.filter(check_out__isnull=True).count()
         
         # Estadísticas del día actual
         today_stats = {
