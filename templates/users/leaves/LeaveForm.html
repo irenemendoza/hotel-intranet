@@ -4,30 +4,6 @@
 
 {% block title %}{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Solicitud de Ausencia - {{ block.super }}{% endblock %}
 
-{% block extra_css %}
-<style>
-    .form-card {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    .date-range-info {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-    }
-    .info-box {
-        background-color: #e7f3ff;
-        border-left: 4px solid #0d6efd;
-        padding: 1rem;
-        border-radius: 5px;
-    }
-    .days-badge {
-        font-size: 2rem;
-        font-weight: bold;
-    }
-</style>
-{% endblock %}
 
 {% block content %}
 <div class="container-fluid px-4">
