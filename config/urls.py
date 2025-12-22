@@ -9,15 +9,15 @@ urlpatterns = [
 
     path('', include(('apps.dashboard.urls', "dashboard"), namespace="dashboard")),
 
+    path('auth/', include(('apps.auth.auth_urls', 'auth'), namespace='auth')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('employees/', include(('apps.users.urls.employees_urls', "employees"), namespace="employees")),
-    path('attendance/', include(('apps.users.urls.attendance_urls', "attendance"), namespace="attendance")),
+    path('employees/', include(('apps.employees.urls', "employees"), namespace="employees")),
+    path('attendance/', include(('apps.attendance.urls', "attendance"), namespace="attendance")),
     path('rooms/', include(('apps.rooms.urls', "rooms"), namespace="rooms")),
-    path('leave/', include(('apps.users.urls.leave_urls', "leave"), namespace="leave")),
-    path('tasks/', include(('apps.tasks.urls', "tasks"), namespace="tasks")),
+    path('leave/', include(('apps.leave.urls', "leave"), namespace="leave")),
     path('cleaning/', include(('apps.rooms.urls.rooms_cleaning_urls', "cleaning"), namespace="cleaning")),
     path('maintenance/', include(('apps.rooms.urls.rooms_maintenance_urls', "maintenance"), namespace="maintenance")),
-    path('departments/', include(('apps.users.urls.departments_urls', "department"), namespace="departments")),
+    path('departments/', include(('apps.employees.urls.departments_urls', "department"), namespace="departments")),
 ]
 
 # Servir archivos media en desarrollo

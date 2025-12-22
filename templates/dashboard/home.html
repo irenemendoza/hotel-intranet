@@ -15,7 +15,7 @@
             {% if user.profile.department %}
                 Departamento: <strong>{{ user.profile.department.name }}</strong>
             {% endif %}
-            | {{ user.profile.position|default:"Empleado" }}
+            | {{ user.profile.role|default:"Empleado" }}
         </p>
     </div>
 </div>
@@ -118,7 +118,7 @@
                         {% endfor %}
                     </div>
                     <div class="text-center mt-3">
-                        <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-outline-primary">
+                        <a href="#" class="btn btn-sm btn-outline-primary">
                             Ver todas las tareas
                         </a>
                     </div>
@@ -259,7 +259,7 @@
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col-md-3">
-                        <a href="{% url 'tasks:create' %}" class="btn btn-outline-primary quick-action-btn">
+                        <a href="#" class="btn btn-outline-primary quick-action-btn">
                             <i class="bi bi-plus-circle"></i>
                             <span>Nueva Tarea</span>
                         </a>

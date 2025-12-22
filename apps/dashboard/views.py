@@ -6,8 +6,56 @@ from django.utils import timezone
 from datetime import timedelta
 
 from apps.rooms.models import Room, CleaningTask, MaintenanceRequest
-from apps.tasks.models import Task
-from apps.users.models import Department
+from apps.employees.models import Department
+
+
+# apps/dashboard/views.py
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+class HomeView(LoginRequiredMixin, TemplateView):
+    """Dashboard principal que redirige según rol"""
+    
+    def get_template_names(self):
+        if not hasattr(self.request.user, 'profile'):
+            return ['dashboard/home.html']
+        
+        role = self.request.user.profile.role
+        
+        # Mapeo de roles a dashboards
+        dashboard_map = {
+            'director': 'dashboard/director.html',
+            'jefe_recepcion': 'dashboard/jefe_recepcion.html',
+            'jefe_limpieza': 'dashboard/jefe_limpieza.html',
+            'camarero_piso': 'dashboard/camarero_piso.html',
+            'mantenimiento': 'dashboard/mantenimiento.html',
+            'rrhh': 'dashboard/rrhh.html',
+        }
+        
+        return [dashboard_map.get(role, 'dashboard/home.html')]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        if hasattr(self.request.user, 'profile'):
+            profile = self.request.user.profile
+            
+            # Datos comunes
+            context['profile'] = profile
+            context['notifications_count'] = 5  # Ejemplo
+            
+            # Datos específicos por rol
+            if profile.role == 'camarero_piso':
+                from apps.rooms.models import CleaningTask
+                context['pending_tasks'] = CleaningTask.objects.filter(
+                    assigned_to=profile,
+                    status='pending'
+                ).count()
+            
+            elif profile.is_supervisor():
+                context['team_size'] = profile.get_supervised_employees().count()
+        
+        return context
 
 
 @login_required
@@ -30,19 +78,6 @@ def home(request):
             is_active=True
         ).count(),
     }
-    
-    # Tareas pendientes del usuario
-    context['my_pending_tasks'] = Task.objects.filter(
-        assigned_to=user,
-        status__in=[Task.StatusChoices.PENDING, Task.StatusChoices.IN_PROGRESS]
-    ).order_by('due_date')[:5]
-    
-    # Tareas del departamento
-    if user_dept:
-        context['dept_tasks'] = Task.objects.filter(
-            department=user_dept,
-            status__in=[Task.StatusChoices.PENDING, Task.StatusChoices.IN_PROGRESS]
-        ).order_by('-priority', 'due_date')[:5]
     
     # Estadísticas específicas por departamento
     if user_dept and user_dept.code == 'LIM':  # Limpieza
