@@ -1,0 +1,279 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} Empleado - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="mb-4">
+                <a href="{% url 'employees:list' %}" class="text-decoration-none text-muted">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a empleados
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-user-plus fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0">{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} Empleado</h4>
+                            <p class="text-muted mb-0 small">Complete la información del empleado</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ form.non_field_errors }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endif %}
+
+                        <!-- Información Personal -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-user me-2 text-primary"></i>Información Personal
+                                </h5>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Nombre *</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Apellidos *</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">DNI/NIE *</label>
+                                {{ form.dni }}
+                                {% if form.dni.errors %}
+                                <div class="text-danger small mt-1">{{ form.dni.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Email *</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Teléfono</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Fecha de Nacimiento</label>
+                                {{ form.birth_date }}
+                                {% if form.birth_date.errors %}
+                                <div class="text-danger small mt-1">{{ form.birth_date.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Género</label>
+                                {{ form.gender }}
+                                {% if form.gender.errors %}
+                                <div class="text-danger small mt-1">{{ form.gender.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-semibold">Dirección</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                <div class="text-danger small mt-1">{{ form.address.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Información Laboral -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-briefcase me-2 text-primary"></i>Información Laboral
+                                </h5>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Departamento *</label>
+                                {{ form.department }}
+                                {% if form.department.errors %}
+                                <div class="text-danger small mt-1">{{ form.department.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Puesto *</label>
+                                {{ form.role }}
+                                {% if form.role.errors %}
+                                <div class="text-danger small mt-1">{{ form.role.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Fecha de Contratación *</label>
+                                {{ form.hire_date }}
+                                {% if form.hire_date.errors %}
+                                <div class="text-danger small mt-1">{{ form.hire_date.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Salario Base</label>
+                                {{ form.salary }}
+                                {% if form.salary.errors %}
+                                <div class="text-danger small mt-1">{{ form.salary.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Tipo de Contrato</label>
+                                {{ form.contract_type }}
+                                {% if form.contract_type.errors %}
+                                <div class="text-danger small mt-1">{{ form.contract_type.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Estado</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Acceso al Sistema -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-key me-2 text-primary"></i>Acceso al Sistema
+                                </h5>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Usuario *</label>
+                                {{ form.username }}
+                                <small class="form-text text-muted">Nombre de usuario para iniciar sesión</small>
+                                {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            {% if not form.instance.pk %}
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Contraseña *</label>
+                                {{ form.password }}
+                                <small class="form-text text-muted">Mínimo 8 caracteres</small>
+                                {% if form.password.errors %}
+                                <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <div class="col-12 mb-3">
+                                <div class="form-check">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        Usuario activo (puede iniciar sesión)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <div class="form-check">
+                                    {{ form.is_staff }}
+                                    <label class="form-check-label" for="{{ form.is_staff.id_for_label }}">
+                                        Acceso al panel de administración
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Foto de Perfil -->
+                        {% if form.profile_image %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-image me-2 text-primary"></i>Foto de Perfil
+                                </h5>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {% if form.instance.profile_image %}
+                                <div class="mb-3">
+                                    <img src="{{ form.instance.profile_image.url }}" class="rounded-circle" width="100" height="100">
+                                </div>
+                                {% endif %}
+                                {{ form.profile_image }}
+                                {% if form.profile_image.errors %}
+                                <div class="text-danger small mt-1">{{ form.profile_image.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Notas Adicionales -->
+                        {% if form.notes %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-sticky-note me-2 text-primary"></i>Notas Adicionales
+                                </h5>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ form.notes }}
+                                {% if form.notes.errors %}
+                                <div class="text-danger small mt-1">{{ form.notes.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a href="{% url 'employees:employee_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if form.instance.pk %}Actualizar Empleado{% else %}Crear Empleado{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

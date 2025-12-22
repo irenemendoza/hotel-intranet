@@ -1,0 +1,247 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Mi Fichaje - Intranet Hotel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Mi Fichaje</h1>
+                    <p class="text-muted mb-0">{{ profile.get_full_name }} - {{ profile.department.name }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'attendance:history' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-clock-history"></i> Mi Historial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Panel de Fichaje -->
+        <div class="col-lg-8">
+            <!-- Estado Actual -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center py-5">
+                    <!-- Reloj en tiempo real -->
+                    <div id="current-time" class="display-1 fw-bold mb-3"></div>
+                    <p class="text-muted mb-4">{{ now|date:"l, d de F de Y" }}</p>
+
+                    {% if is_checked_in %}
+                        <!-- Ya está fichado -->
+                        <div class="alert alert-success mb-4">
+                            <h5 class="alert-heading">
+                                <i class="bi bi-check-circle me-2"></i>
+                                ¡Entrada Registrada!
+                            </h5>
+                            <p class="mb-2">Fichaste tu entrada a las <strong>{{ current_attendance.check_in|date:"H:i" }}</strong></p>
+                            <small class="text-muted">
+                                Llevas trabajando: <span id="work-duration"></span>
+                            </small>
+                        </div>
+
+                        <!-- Formulario de Salida -->
+                        <form method="post" action="{% url 'attendance:check-out' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ check_out_form.notes }}
+                            </div>
+                            <div class="mb-3">
+                                {{ check_out_form.check_out_location }}
+                            </div>
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Fichar Salida
+                            </button>
+                        </form>
+                    {% else %}
+                        <!-- No ha fichado -->
+                        <div class="alert alert-warning mb-4">
+                            <h5 class="alert-heading">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                No has fichado tu entrada
+                            </h5>
+                            <p class="mb-0">Ficha tu entrada para comenzar tu jornada laboral</p>
+                        </div>
+
+                        <!-- Formulario de Entrada -->
+                        <form method="post" action="{% url 'attendance:check-in' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ check_in_form.notes }}
+                            </div>
+                            <div class="mb-3">
+                                {{ check_in_form.check_in_location }}
+                            </div>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Fichar Entrada
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Historial Reciente -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historial Reciente</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_attendances %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Entrada</th>
+                                        <th>Salida</th>
+                                        <th>Duración</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for attendance in recent_attendances %}
+                                    <tr>
+                                        <td>{{ attendance.check_in|date:"d/m/Y" }}</td>
+                                        <td>{{ attendance.check_in|date:"H:i" }}</td>
+                                        <td>
+                                            {% if attendance.check_out %}
+                                                {{ attendance.check_out|date:"H:i" }}
+                                            {% else %}
+                                                <span class="badge bg-info">En curso</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if attendance.check_out %}
+                                                {{ attendance.duration_formatted }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if attendance.status == 'present' %}success{% elif attendance.status == 'late' %}warning{% else %}secondary{% endif %}">
+                                                {{ attendance.get_status_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-clock display-4 text-muted"></i>
+                            <p class="text-muted mt-2">No hay historial de asistencias</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar con estadísticas -->
+        <div class="col-lg-4">
+            <!-- Horas de hoy -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar-day me-2"></i>Hoy</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <small class="text-muted">Horas trabajadas</small>
+                        <h2 class="mb-0 text-primary">
+                            {{ today_hours_h }}h {{ today_hours_m }}m
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info del empleado -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" 
+                             alt="{{ profile.get_full_name }}" 
+                             class="rounded-circle mb-3"
+                             style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                             style="width: 100px; height: 100px; font-size: 2rem;">
+                            {{ profile.user.first_name.0 }}{{ profile.user.last_name.0 }}
+                        </div>
+                    {% endif %}
+                    <h5 class="mb-1">{{ profile.get_full_name }}</h5>
+                    <p class="text-muted mb-2">{{ profile.role }}</p>
+                    {% if profile.department %}
+                        <span class="badge" style="background-color: {{ profile.department.color }};">
+                            {{ profile.department.name }}
+                        </span>
+                    {% endif %}
+                    {% if profile.employee_number %}
+                        <p class="text-muted mt-2 mb-0">
+                            <small>#{{ profile.employee_number }}</small>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Accesos rápidos -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Accesos Rápidos</h5>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'attendance:history' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-clock-history me-2"></i>Ver Mi Historial
+                    </a>
+                    <a href="{% url 'leave:list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-calendar-check me-2"></i>Mis Permisos
+                    </a>
+                    <a href="{% url 'leave:create' %}" class="btn btn-outline-warning">
+                        <i class="bi bi-plus-circle me-2"></i>Solicitar Permiso
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Reloj en tiempo real
+function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+{% if is_checked_in and current_attendance %}
+// Calcular duración del trabajo en tiempo real
+function updateWorkDuration() {
+    const checkInTime = new Date('{{ current_attendance.check_in|date:"c" }}');
+    const now = new Date();
+    const diff = now - checkInTime;
+    
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    
+    const durationElement = document.getElementById('work-duration');
+    if (durationElement) {
+        durationElement.textContent = `${hours}h ${minutes}m`;
+    }
+}
+
+setInterval(updateWorkDuration, 60000); // Actualizar cada minuto
+updateWorkDuration();
+{% endif %}
+</script>
+{% endblock %}

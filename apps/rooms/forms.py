@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 from apps.rooms.models import Room, RoomType, CleaningTask, MaintenanceRequest
-from apps.users.models import UserProfile
+from apps.employees.models import Employee
 from django.contrib.auth.models import User
 
 class RoomTypeForm(forms.ModelForm):
@@ -111,10 +111,10 @@ class CleaningTaskForm(forms.ModelForm):
 
         self.fields['assigned_to'].required = False
         # Filtrar solo usuarios del departamento de limpieza
-        from apps.users.models import Department
+        from apps.employees.models import Department
         try:
             limpieza_dept = Department.objects.get(code='LIM')
-            cleaning_staff = UserProfile.objects.filter(
+            cleaning_staff = Employee.objects.filter(
                 department=limpieza_dept,
                 is_available=True
             ).select_related('user')
@@ -244,10 +244,10 @@ class MaintenanceRequestUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Filtrar solo usuarios del departamento de mantenimiento
-        from apps.users.models import Department
+        from apps.employees.models import Department
         try:
             mant_dept = Department.objects.get(code='MAN')
-            maintenance_staff = UserProfile.objects.filter(
+            maintenance_staff = Employee.objects.filter(
                 department=mant_dept,
                 is_available=True
             ).select_related('user')

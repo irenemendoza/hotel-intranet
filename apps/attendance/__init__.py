@@ -1,0 +1,2 @@
+# Puede estar vacío o con:
+default_app_config = 'apps.attendance.apps.AttendanceConfig'
