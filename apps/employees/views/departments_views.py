@@ -60,7 +60,7 @@ class DepartmentCreateView(CreateView):
     model = Department
     form_class = DepartmentForm
     template_name = "users/Departments/DepartmentForm.html"
-    success_url = reverse_lazy('department:list')
+    success_url = reverse_lazy('departments:list')
     
     def form_valid(self, form):
         messages.success(self.request, f'Departamento "{form.instance.name}" creado exitosamente.')
@@ -77,7 +77,7 @@ class DepartmentUpdateView(LoginRequiredMixin, UpdateView):
     form_class = DepartmentForm
     template_name = "users/Departments/DepartmentForm.html"
     context_object_name = "department"
-    success_url = reverse_lazy('department:list')
+    success_url = reverse_lazy('departments:list')
     
     def form_valid(self, form):
         messages.success(self.request, f'Departamento "{form.instance.name}" actualizado exitosamente.')
@@ -92,9 +92,9 @@ class DepartmentUpdateView(LoginRequiredMixin, UpdateView):
 
 class DepartmentDeleteView(DeleteView):
     model = Department
-    success_url =reverse_lazy('department:List')
+    success_url =reverse_lazy('departments:list')
     context_object_name = "department"
-    template_name = "users/Departments/DepartmentDelete.html"
+    template_name = "employees/Departments/DepartmentDelete.html"
 
     def delete(self, request, *args, **kwargs):
         department = self.get_object()

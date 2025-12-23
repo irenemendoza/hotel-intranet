@@ -62,7 +62,7 @@ class AttendanceDashboardView(LoginRequiredMixin, ListView):
         context['today'] = today
         
         # Asistencia del usuario actual
-        if hasattr(self.request.user, 'profile'):
+        if hasattr(self.request.user, 'employee'):
             context['today_attendance'] = Attendance.objects.filter(
                 employee=self.request.user.employee,
                 check_in__date=today
@@ -126,7 +126,7 @@ class MyAttendanceView(LoginRequiredMixin, View):
     template_name = 'attendance/MyAttendance.html'
     
     def get(self, request):
-        profile = request.user.employee
+        employee = request.user.employee
         
         # Obtener asistencia actual del día
         today = timezone.now().date()
@@ -157,7 +157,7 @@ class MyAttendanceView(LoginRequiredMixin, View):
         ).order_by('-check_in')[:10]
         
         context = {
-            'profile': profile,
+            'employee': employee,
             'current_attendance': current_attendance,
             'is_checked_in': current_attendance is not None and current_attendance.check_out is None,
             'recent_attendances': recent_attendances,
@@ -172,7 +172,7 @@ class AttendanceCheckInView(LoginRequiredMixin, View):
     """Vista para fichar entrada"""
     
     def post(self, request):
-        profile = request.user.employee
+        employee = request.user.employee
         today = timezone.now().date()
         
         # Verificar que no esté ya fichado
@@ -211,7 +211,7 @@ class AttendanceCheckOutView(LoginRequiredMixin, View):
     """Vista para fichar salida"""
     
     def post(self, request):
-        profile = request.user.employee
+        employee = request.user.employee
         today = timezone.now().date()
         
         # Buscar asistencia del día sin salida registrada

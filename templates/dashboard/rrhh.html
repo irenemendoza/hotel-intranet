@@ -1,0 +1,307 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Dashboard RRHH - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">{{ greeting }}, {{ user.get_full_name }}</h1>
+                    <p class="text-muted mb-0">Gestión de Recursos Humanos - {{ today|date:"l, d de F de Y" }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'employees:create' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Nuevo Empleado
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs de Personal -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Total Empleados</h6>
+                            <h2 class="mb-0">{{ total_employees }}</h2>
+                            <small class="text-success">{{ active_employees }} activos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-user-check fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Presentes Hoy</h6>
+                            <h2 class="mb-0">{{ present_today }}</h2>
+                            <small class="text-muted">{{ late_today }} llegadas tarde</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-danger bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-user-times fa-2x text-danger"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Ausentes Hoy</h6>
+                            <h2 class="mb-0">{{ absent_today }}</h2>
+                            <small class="text-muted">Sin fichar</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-calendar-times fa-2x text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Permisos Pendientes</h6>
+                            <h2 class="mb-0">{{ pending_leaves }}</h2>
+                            <small class="text-muted">Requieren aprobación</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distribución por Departamentos -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Empleados por Departamento</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="departmentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Detalle por Departamento</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Departamento</th>
+                                    <th class="text-center">Empleados</th>
+                                    <th class="text-center">Presentes</th>
+                                    <th class="text-center">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dept in departments %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-circle me-2" style="color: {{ dept.color }}"></i>
+                                        {{ dept.name }}
+                                    </td>
+                                    <td class="text-center">{{ dept.employee_count }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success">-</span>
+                                    </td>
+                                    <td class="text-center">
+                                        {{ dept.employee_count|mul:100|div:total_employees|floatformat:0 }}%
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas y Alertas -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Acciones Pendientes</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Permisos pendientes -->
+                    {% if pending_leaves > 0 %}
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div class="flex-grow-1">
+                            <strong>{{ pending_leaves }} solicitudes de permiso pendientes</strong>
+                            <p class="mb-0 small">Requieren tu aprobación</p>
+                        </div>
+                        <a href="{% url 'leave:management' %}" class="btn btn-warning">
+                            Revisar <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Nuevos empleados -->
+                    {% if new_employees_month > 0 %}
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="fas fa-user-plus fa-2x me-3"></i>
+                        <div class="flex-grow-1">
+                            <strong>{{ new_employees_month }} nuevos empleados este mes</strong>
+                            <p class="mb-0 small">Asegúrate de completar su onboarding</p>
+                        </div>
+                        <a href="{% url 'employees:list' %}?new=true" class="btn btn-info">
+                            Ver <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if pending_leaves == 0 and new_employees_month == 0 %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                        <p class="text-muted mb-0">No hay acciones pendientes</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Accesos Rápidos</h6>
+                </div>
+                <div class="card-body p-2">
+                    <a href="{% url 'employees:list' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-users me-2 text-primary"></i>Gestión de Empleados
+                    </a>
+                    <a href="{% url 'leave:management' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-calendar-alt me-2 text-warning"></i>Gestión de Permisos
+                    </a>
+                    <a href="{% url 'attendance:dashboard' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-clock me-2 text-success"></i>Control de Asistencia
+                    </a>
+                    <a href="{% url 'attendance:report' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-file-alt me-2 text-info"></i>Reportes
+                    </a>
+                    <a href="{% url 'departments:list' %}" class="btn btn-light w-100 text-start">
+                        <i class="fas fa-building me-2 text-secondary"></i>Departamentos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas del Mes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Estadísticas del Mes</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="border-end">
+                                <h3 class="text-primary mb-1">{{ approved_leaves_month }}</h3>
+                                <small class="text-muted">Permisos Aprobados</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="border-end">
+                                <h3 class="text-success mb-1">{{ new_employees_month }}</h3>
+                                <small class="text-muted">Nuevas Contrataciones</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="border-end">
+                                <h3 class="text-warning mb-1">{{ late_today }}</h3>
+                                <small class="text-muted">Llegadas Tarde Hoy</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-info mb-1">96%</h3>
+                            <small class="text-muted">Tasa de Asistencia</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Gráfico de empleados por departamento
+const ctx = document.getElementById('departmentsChart').getContext('2d');
+
+const departmentLabels = [
+    {% for dept in departments %}'{{ dept.name }}'{% if not forloop.last %},{% endif %}{% endfor %}
+];
+const departmentData = [
+    {% for dept in departments %}{{ dept.employee_count }}{% if not forloop.last %},{% endif %}{% endfor %}
+];
+const departmentColors = [
+    {% for dept in departments %}'{{ dept.color }}'{% if not forloop.last %},{% endif %}{% endfor %}
+];
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: departmentLabels,
+        datasets: [{
+            label: 'Empleados',
+            data: departmentData,
+            backgroundColor: departmentColors,
+            borderColor: departmentColors,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from apps.rooms.models import Room, RoomType
 
 from apps.rooms.forms import RoomForm, RoomTypeForm
-from apps.rooms.models import CleaningTask, MaintenanceRequest 
+from apps.rooms.models import CleaningTask, MaintenanceTask
 
 
 
@@ -60,8 +60,8 @@ class RoomDashboardView(LoginRequiredMixin, TemplateView):
             status__in=[CleaningTask.StatusChoices.PENDING, CleaningTask.StatusChoices.IN_PROGRESS]
         ).select_related('room', 'assigned_to').order_by('priority')[:5]
         
-        context['pending_maintenance'] = MaintenanceRequest.objects.filter(
-            status__in=[MaintenanceRequest.StatusChoices.PENDING, MaintenanceRequest.StatusChoices.ASSIGNED]
+        context['pending_maintenance'] = MaintenanceTask.objects.filter(
+            status__in=[MaintenanceTask.StatusChoices.PENDING, MaintenanceTask.StatusChoices.ASSIGNED]
         ).select_related('room', 'reported_by').order_by('-priority', 'created_at')[:5]
         
         return context
@@ -209,9 +209,9 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         
         # Mantenimiento pendiente
         context['pending_maintenance'] = self.object.maintenance_requests.filter(
-            status__in=[MaintenanceRequest.StatusChoices.PENDING, 
-                       MaintenanceRequest.StatusChoices.ASSIGNED,
-                       MaintenanceRequest.StatusChoices.IN_PROGRESS]
+            status__in=[MaintenanceTask.StatusChoices.PENDING, 
+                       MaintenanceTask.StatusChoices.ASSIGNED,
+                       MaintenanceTask.StatusChoices.IN_PROGRESS]
         ).order_by('-priority', 'created_at')
         
         return context

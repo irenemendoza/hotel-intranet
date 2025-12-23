@@ -1,6 +1,6 @@
 from django import forms
 from django.utils import timezone
-from apps.rooms.models import Room, RoomType, CleaningTask, MaintenanceRequest
+from apps.rooms.models import Room, RoomType, CleaningTask, MaintenanceTask
 from apps.employees.models import Employee
 from django.contrib.auth.models import User
 
@@ -175,7 +175,7 @@ class CleaningTaskUpdateForm(forms.ModelForm):
 
 class MaintenanceRequestForm(forms.ModelForm):
     class Meta:
-        model = MaintenanceRequest
+        model = MaintenanceTask
         fields = ['room', 'title', 'description', 'priority', 'photos']
         widgets = {
             'room': forms.Select(attrs={
@@ -215,7 +215,7 @@ class MaintenanceRequestForm(forms.ModelForm):
 class MaintenanceRequestUpdateForm(forms.ModelForm):
     """Formulario para actualizar el estado del mantenimiento"""
     class Meta:
-        model = MaintenanceRequest
+        model = MaintenanceTask
         fields = ['assigned_to', 'status', 'resolution', 'title', 'description', 'priority']
         widgets = {
             'assigned_to': forms.Select(attrs={
@@ -263,11 +263,11 @@ class MaintenanceRequestUpdateForm(forms.ModelForm):
         instance = super().save(commit=False)
         
         # Actualizar fechas según el estado
-        if instance.status == MaintenanceRequest.StatusChoices.ASSIGNED and not instance.assigned_at:
+        if instance.status == MaintenanceTask.StatusChoices.ASSIGNED and not instance.assigned_at:
             instance.assigned_at = timezone.now()
-        elif instance.status == MaintenanceRequest.StatusChoices.IN_PROGRESS and not instance.started_at:
+        elif instance.status == MaintenanceTask.StatusChoices.IN_PROGRESS and not instance.started_at:
             instance.started_at = timezone.now()
-        elif instance.status == MaintenanceRequest.StatusChoices.COMPLETED and not instance.resolved_at:
+        elif instance.status == MaintenanceTask.StatusChoices.COMPLETED and not instance.resolved_at:
             instance.resolved_at = timezone.now()
             # Actualizar estado de la habitación
             if instance.room:

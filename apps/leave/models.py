@@ -75,13 +75,3 @@ class Leave(models.Model):
         """Calcula la duración en días"""
         return (self.end_date - self.start_date).days + 1
 
-# Signals para crear perfil automáticamente
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Employee.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'profile'):
-        instance.profile.save()

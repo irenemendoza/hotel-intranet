@@ -112,12 +112,17 @@ class CleaningTaskDeleteView(LoginRequiredMixin, DeleteView):
 class MyCleaningTasksView(LoginRequiredMixin, ListView):
     """Vista para que el personal de limpieza vea sus tareas asignadas"""
     model = CleaningTask
-    template_name = 'rooms/MyCleaningTasks.html'
+    template_name = 'rooms/cleaning/MyCleaningTasks.html'
     context_object_name = 'tasks'
     
     def get_queryset(self):
+        user = self.request.user
+
+        if not hasattr(user, 'employee'):
+            return CleaningTask.objects.none()
+
         return CleaningTask.objects.filter(
-            assigned_to=self.request.user,
+            assigned_to=self.request.user.employee,
             status__in=[CleaningTask.StatusChoices.PENDING, CleaningTask.StatusChoices.IN_PROGRESS]
         ).select_related('room', 'room__room_type').order_by('priority')
 

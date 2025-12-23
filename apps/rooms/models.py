@@ -1,6 +1,7 @@
 # apps/rooms/models.py
 from django.db import models
 from django.contrib.auth.models import User
+from apps.employees.models import Employee
     
   
 class RoomType(models.Model):
@@ -229,7 +230,7 @@ class CleaningTask(models.Model):
         verbose_name='Habitación'
         )
     assigned_to = models.ForeignKey(
-        User, 
+        Employee, 
         on_delete=models.SET_NULL, 
         null=True, 
         related_name='cleaning_tasks',
@@ -289,7 +290,7 @@ class CleaningTask(models.Model):
     
    
 
-class MaintenanceRequest(models.Model):
+class MaintenanceTask(models.Model):
     """Solicitudes de mantenimiento para habitaciones"""
     class PriorityChoices(models.TextChoices):
         LOW = 'low', 'Baja'
@@ -318,7 +319,7 @@ class MaintenanceRequest(models.Model):
         verbose_name='Reportado por'
     )
     assigned_to = models.ForeignKey(
-        User, 
+        Employee, 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 

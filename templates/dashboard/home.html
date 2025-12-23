@@ -1,10 +1,19 @@
-<!-- templates/dashboard/home.html -->
 {% extends 'layout.html' %}
 {% load static %}
 
 {% block title %}Dashboard - Hotel Intranet{% endblock %}
 
 {% block content %}
+
+<!-- templates/dashboard/home.html -->
+ <div class="alert alert-info">
+    <h4>Debug Info:</h4>
+    <p>User: {{ user.username }}</p>
+    <p>Has employee: {{ user.employee|default:"NO" }}</p>
+    <p>Role: {{ user.employee.role|default:"N/A" }}</p>
+    <p>Total Rooms: {{ total_rooms|default:"MISSING" }}</p>
+</div>
+
 <div class="row mb-4">
     <div class="col">
         <h1 class="h3">
