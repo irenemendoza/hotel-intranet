@@ -1,0 +1,312 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Recepción - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">{{ greeting }}, {{ user.first_name }}</h1>
+                    <p class="text-muted mb-0">Recepción - {{ today|date:"d/m/Y" }}</p>
+                </div>
+                <div>
+                    {% if my_attendance_today %}
+                        {% if not my_attendance_today.check_out %}
+                        <span class="badge bg-success fs-6 me-2">
+                            <i class="fas fa-clock"></i> Fichado desde {{ my_attendance_today.check_in|time:"H:i" }}
+                        </span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado de Habitaciones -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 bg-success bg-gradient text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-door-open fa-3x mb-2"></i>
+                    <h2 class="mb-1">{{ available_rooms }}</h2>
+                    <p class="mb-0">Disponibles</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 bg-primary bg-gradient text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-bed fa-3x mb-2"></i>
+                    <h2 class="mb-1">{{ occupied_rooms }}</h2>
+                    <p class="mb-0">Ocupadas</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 bg-warning bg-gradient text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-broom fa-3x mb-2"></i>
+                    <h2 class="mb-1">{{ cleaning_rooms }}</h2>
+                    <p class="mb-0">En Limpieza</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-3x text-primary mb-2"></i>
+                    <h2 class="mb-1">{{ occupied_rooms|mul:100|div:available_rooms|add:occupied_rooms|floatformat:0 }}%</h2>
+                    <p class="text-muted mb-0">Ocupación</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Habitaciones por Tipo -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Disponibilidad por Tipo de Habitación</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th class="text-center">Total</th>
+                                    <th class="text-center">Disponibles</th>
+                                    <th class="text-center">Ocupadas</th>
+                                    <th style="width: 30%">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for room_type in rooms_by_type %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ room_type.room_type__name }}</strong>
+                                    </td>
+                                    <td class="text-center">{{ room_type.total }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success">{{ room_type.available }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary">{{ room_type.total|add:room_type.available|mul:-1|add:room_type.total }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: {{ room_type.available|mul:100|div:room_type.total }}%">
+                                                {{ room_type.available }}
+                                            </div>
+                                            <div class="progress-bar bg-primary" 
+                                                 style="width: {{ room_type.total|add:room_type.available|mul:-1|add:room_type.total|mul:100|div:room_type.total }}%">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No hay tipos de habitación registrados
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accesos Rápidos -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Acciones Rápidas</h6>
+                </div>
+                <div class="card-body p-2">
+                    <a href="{% url 'rooms:list' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-door-open me-2 text-success"></i>
+                        Ver Todas las Habitaciones
+                    </a>
+                    <button class="btn btn-light w-100 text-start mb-2" data-bs-toggle="modal" data-bs-target="#checkInModal">
+                        <i class="fas fa-sign-in-alt me-2 text-primary"></i>
+                        Nuevo Check-In
+                    </button>
+                    <button class="btn btn-light w-100 text-start mb-2" data-bs-toggle="modal" data-bs-target="#checkOutModal">
+                        <i class="fas fa-sign-out-alt me-2 text-danger"></i>
+                        Realizar Check-Out
+                    </button>
+                    <a href="{% url 'attendance:my-attendance' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-clock me-2 text-info"></i>
+                        Mi Asistencia
+                    </a>
+                    <a href="{% url 'leave:list' %}" class="btn btn-light w-100 text-start">
+                        <i class="fas fa-calendar-alt me-2 text-warning"></i>
+                        Mis Permisos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Día -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Información del Día</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="border-end">
+                                <h3 class="text-primary mb-1">
+                                    <i class="fas fa-door-open"></i>
+                                </h3>
+                                <p class="text-muted mb-1">Habitaciones</p>
+                                <h4 class="mb-0">{{ available_rooms|add:occupied_rooms }}</h4>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="border-end">
+                                <h3 class="text-success mb-1">
+                                    <i class="fas fa-check-circle"></i>
+                                </h3>
+                                <p class="text-muted mb-1">Check-Ins Hoy</p>
+                                <h4 class="mb-0">0</h4>
+                                <small class="text-muted">Previstos: 0</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="border-end">
+                                <h3 class="text-danger mb-1">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </h3>
+                                <p class="text-muted mb-1">Check-Outs Hoy</p>
+                                <h4 class="mb-0">0</h4>
+                                <small class="text-muted">Previstos: 0</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-warning mb-1">
+                                <i class="fas fa-broom"></i>
+                            </h3>
+                            <p class="text-muted mb-1">Limpieza Pendiente</p>
+                            <h4 class="mb-0">{{ cleaning_rooms }}</h4>
+                            <small class="text-muted">Habitaciones</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mi Turno -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Mi Turno</h6>
+                </div>
+                <div class="card-body">
+                    {% if my_attendance_today %}
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <p class="text-muted mb-1">Entrada</p>
+                                <h4>{{ my_attendance_today.check_in|time:"H:i" }}</h4>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="text-muted mb-1">Salida</p>
+                                <h4>
+                                    {% if my_attendance_today.check_out %}
+                                    {{ my_attendance_today.check_out|time:"H:i" }}
+                                    {% else %}
+                                    <span class="badge bg-success">En turno</span>
+                                    {% endif %}
+                                </h4>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="text-muted mb-1">Horas</p>
+                                <h4>
+                                    {% if my_attendance_today.check_out %}
+                                    {{ my_attendance_today.duration }}
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </h4>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="text-muted mb-3">No has fichado tu entrada hoy</p>
+                            <a href="{% url 'attendance:my-attendance' %}" class="btn btn-primary">
+                                <i class="fas fa-clock me-2"></i>Fichar Ahora
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Check-In (Placeholder) -->
+<div class="modal fade" id="checkInModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Check-In</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Funcionalidad de Check-In en desarrollo</p>
+                <p>Aquí podrás:</p>
+                <ul>
+                    <li>Buscar reservas</li>
+                    <li>Asignar habitación</li>
+                    <li>Registrar entrada del huésped</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Check-Out (Placeholder) -->
+<div class="modal fade" id="checkOutModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Check-Out</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Funcionalidad de Check-Out en desarrollo</p>
+                <p>Aquí podrás:</p>
+                <ul>
+                    <li>Buscar habitación ocupada</li>
+                    <li>Generar factura</li>
+                    <li>Procesar check-out</li>
+                    <li>Marcar habitación para limpieza</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

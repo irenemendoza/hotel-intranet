@@ -106,7 +106,6 @@ class Employee(models.Model):
         'Rol',
         max_length=30,
         choices=RoleChoices.choices,
-        default=RoleChoices.CAMARERO_PISO,
         help_text='Rol del empleado en el hotel'
     )
     phone = models.CharField(

@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from apps.rooms.models import Room, RoomType
 
 from apps.rooms.forms import RoomForm, RoomTypeForm
-from apps.rooms.models import CleaningTask, MaintenanceRequest 
+from apps.rooms.models import CleaningTask, MaintenanceTask
 
 
 
@@ -209,9 +209,9 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         
         # Mantenimiento pendiente
         context['pending_maintenance'] = self.object.maintenance_requests.filter(
-            status__in=[MaintenanceRequest.StatusChoices.PENDING, 
-                       MaintenanceRequest.StatusChoices.ASSIGNED,
-                       MaintenanceRequest.StatusChoices.IN_PROGRESS]
+            status__in=[MaintenanceTask.StatusChoices.PENDING, 
+                       MaintenanceTask.StatusChoices.ASSIGNED,
+                       MaintenanceTask.StatusChoices.IN_PROGRESS]
         ).order_by('-priority', 'created_at')
         
         return context

@@ -1,6 +1,6 @@
 # apps/rooms/admin.py
 from django.contrib import admin
-from .models import RoomType, Room, CleaningTask, MaintenanceRequest
+from .models import RoomType, Room, CleaningTask, MaintenanceTask
 
 
 @admin.register(RoomType)
@@ -61,8 +61,8 @@ class CleaningTaskAdmin(admin.ModelAdmin):
         ]
 
 
-@admin.register(MaintenanceRequest)
-class MaintenanceRequestAdmin(admin.ModelAdmin):
+@admin.register(MaintenanceTask)
+class MaintenanceTaskAdmin(admin.ModelAdmin):
     list_display = [
         'room', 
         'title', 

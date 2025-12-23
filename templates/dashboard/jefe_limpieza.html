@@ -1,0 +1,338 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Gestión de Limpieza - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">{{ greeting }}, {{ user.get_full_name }}</h1>
+                    <p class="text-muted mb-0">Gestión de Limpieza - {{ today|date:"d/m/Y" }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'cleaning:create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nueva Tarea
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs de Limpieza -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Tareas Pendientes</h6>
+                            <h2 class="mb-0">{{ pending_tasks }}</h2>
+                            <small class="text-muted">{{ unassigned_tasks }} sin asignar</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-spinner fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">En Progreso</h6>
+                            <h2 class="mb-0">{{ in_progress_tasks }}</h2>
+                            <small class="text-muted">Siendo limpiadas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Completadas Hoy</h6>
+                            <h2 class="mb-0">{{ completed_today }}</h2>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> Buen ritmo
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-info bg-opacity-10 rounded p-3 me-3">
+                            <i class="fas fa-users fa-2x text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Mi Equipo</h6>
+                            <h2 class="mb-0">{{ team_size }}</h2>
+                            <small class="text-muted">{{ team_present }} trabajando</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado de Habitaciones -->
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Estado de Habitaciones</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><i class="fas fa-circle text-danger me-2"></i>Sucias</span>
+                            <strong>{{ dirty_rooms }}</strong>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" style="width: {{ dirty_rooms|mul:10 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><i class="fas fa-circle text-primary me-2"></i>En limpieza</span>
+                            <strong>{{ cleaning_rooms }}</strong>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" style="width: {{ cleaning_rooms|mul:10 }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{% url 'rooms:room_list' %}" class="btn btn-sm btn-outline-primary w-100">
+                            Ver Estado Completo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productividad del Equipo -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Productividad del Equipo Hoy</h6>
+                    <span class="badge bg-success">Top 5</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Camarero/a</th>
+                                    <th class="text-center">Completadas</th>
+                                    <th style="width: 50%">Rendimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in team_productivity %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if stat.employee.avatar %}
+                                            <img src="{{ stat.employee.avatar.url }}" class="rounded-circle me-2" width="30" height="30">
+                                            {% else %}
+                                            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                                <span class="text-primary small fw-bold">{{ stat.employee.user.first_name|slice:":1" }}</span>
+                                            </div>
+                                            {% endif %}
+                                            <span>{{ stat.employee.user.get_full_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <strong>{{ stat.completed_today }}</strong>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success" 
+                                                 style="width: {{ stat.completed_today|mul:10 }}%">
+                                                {{ stat.completed_today }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-3">
+                                        No hay datos de productividad hoy
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tareas Sin Asignar y Permisos -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            {% if unassigned_tasks > 0 %}
+            <div class="card border-0 shadow-sm border-start border-warning border-4 mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-2">
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                Tareas Sin Asignar
+                            </h5>
+                            <p class="text-muted mb-0">
+                                Hay {{ unassigned_tasks }} tareas de limpieza sin asignar a ningún camarero
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{% url 'cleaning:list' %}?status=unassigned" class="btn btn-warning">
+                                <i class="fas fa-tasks me-2"></i>Asignar Tareas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if pending_team_leaves > 0 %}
+            <div class="card border-0 shadow-sm border-start border-info border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-2">
+                                <i class="fas fa-calendar-times text-info me-2"></i>
+                                Solicitudes de Permiso
+                            </h5>
+                            <p class="text-muted mb-0">
+                                {{ pending_team_leaves }} solicitudes de tu equipo pendientes de aprobación
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{% url 'leave:management' %}" class="btn btn-info">
+                                <i class="fas fa-check me-2"></i>Revisar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Accesos Rápidos -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">Accesos Rápidos</h6>
+                </div>
+                <div class="card-body p-2">
+                    <a href="{% url 'cleaning:list' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-list me-2 text-primary"></i>Todas las Tareas
+                    </a>
+                    <a href="{% url 'employees:my_team' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-users me-2 text-info"></i>Mi Equipo
+                    </a>
+                    <a href="{% url 'rooms:list' %}" class="btn btn-light w-100 text-start mb-2">
+                        <i class="fas fa-door-open me-2 text-success"></i>Estado Habitaciones
+                    </a>
+                    <a href="{% url 'leave:management' %}" class="btn btn-light w-100 text-start">
+                        <i class="fas fa-calendar-check me-2 text-warning"></i>Aprobar Permisos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Mi Equipo -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Mi Equipo de Limpieza</h6>
+                    <a href="{% url 'employees:my_team' %}" class="btn btn-sm btn-outline-primary">
+                        Ver Todos <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Empleado</th>
+                                    <th>Estado</th>
+                                    <th>Tareas Hoy</th>
+                                    <th>Disponible</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in team_productivity %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if member.employee.avatar %}
+                                            <img src="{{ member.employee.avatar.url }}" class="rounded-circle me-2" width="35" height="35">
+                                            {% else %}
+                                            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                <span class="text-primary fw-bold">{{ member.employee.user.first_name|slice:":1" }}</span>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="fw-semibold">{{ member.employee.user.get_full_name }}</div>
+                                                <small class="text-muted">{{ member.employee.employee_number }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if member.employee.is_checked_in %}
+                                        <span class="badge bg-success">Trabajando</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Ausente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ member.completed_today }}</strong> completadas
+                                    </td>
+                                    <td>
+                                        {% if member.employee.is_available %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                        {% else %}
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        No hay miembros en tu equipo
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

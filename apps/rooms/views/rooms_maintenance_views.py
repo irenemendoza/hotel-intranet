@@ -4,12 +4,12 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from apps.rooms.models import MaintenanceRequest
+from apps.rooms.models import MaintenanceTask
 from apps.rooms.forms import MaintenanceRequestForm, MaintenanceRequestUpdateForm
 
 
 class MaintenanceRequestListView(LoginRequiredMixin, ListView):
-    model = MaintenanceRequest
+    model = MaintenanceTask
     template_name = 'rooms/maintenance/RoomMaintenanceList.html'
     context_object_name = 'requests'
     paginate_by = 20
@@ -35,27 +35,27 @@ class MaintenanceRequestListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         
         # Estadísticas
-        all_requests = MaintenanceRequest.objects.all()
+        all_requests = MaintenanceTask.objects.all()
         context['stats'] = {
-            'pending': all_requests.filter(status=MaintenanceRequest.StatusChoices.PENDING).count(),
-            'in_progress': all_requests.filter(status=MaintenanceRequest.StatusChoices.IN_PROGRESS).count(),
-            'urgent': all_requests.filter(priority=MaintenanceRequest.PriorityChoices.URGENT).count(),
+            'pending': all_requests.filter(status=MaintenanceTask.StatusChoices.PENDING).count(),
+            'in_progress': all_requests.filter(status=MaintenanceTask.StatusChoices.IN_PROGRESS).count(),
+            'urgent': all_requests.filter(priority=MaintenanceTask.PriorityChoices.URGENT).count(),
         }
         
-        context['status_choices'] = MaintenanceRequest.StatusChoices.choices
-        context['priority_choices'] = MaintenanceRequest.PriorityChoices.choices
+        context['status_choices'] = MaintenanceTask.StatusChoices.choices
+        context['priority_choices'] = MaintenanceTask.PriorityChoices.choices
         
         return context
 
 
 class MaintenanceRequestDetailView(LoginRequiredMixin, DetailView):
-    model = MaintenanceRequest
+    model = MaintenanceTask
     template_name = 'rooms/maintenance/RoomMaintenanceDetail.html'
     context_object_name = 'request'
 
 
 class MaintenanceRequestCreateView(LoginRequiredMixin, CreateView):
-    model = MaintenanceRequest
+    model = MaintenanceTask
     form_class = MaintenanceRequestForm
     template_name = 'rooms/maintenance/RoomMaintenanceForm.html'
     success_url = reverse_lazy('maintenance:list')
@@ -86,7 +86,7 @@ class MaintenanceRequestCreateView(LoginRequiredMixin, CreateView):
 
 
 class MaintenanceRequestUpdateView(LoginRequiredMixin, UpdateView):
-    model = MaintenanceRequest
+    model = MaintenanceTask
     form_class = MaintenanceRequestUpdateForm
     template_name = 'rooms/maintenance/RoomMaintenanceForm.html'
     success_url = reverse_lazy('maintenance:list')
@@ -111,7 +111,7 @@ class MaintenanceRequestUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class MaintenanceRequestDeleteView(LoginRequiredMixin, DeleteView):
-    model = MaintenanceRequest
+    model = MaintenanceTask
     template_name = 'rooms/maintenance/RoomMaintenanceDelete.html'
     context_object_name = 'request'
     success_url = reverse_lazy('maintenance:list')
@@ -123,15 +123,15 @@ class MaintenanceRequestDeleteView(LoginRequiredMixin, DeleteView):
 
 class MyMaintenanceTasksView(LoginRequiredMixin, ListView):
     """Vista para que el personal de mantenimiento vea sus tareas asignadas"""
-    model = MaintenanceRequest
+    model = MaintenanceTask
     template_name = 'rooms/maintenance/MyMaintenanceTasks.html'
     context_object_name = 'requests'
     
     def get_queryset(self):
-        return MaintenanceRequest.objects.filter(
+        return MaintenanceTask.objects.filter(
             assigned_to=self.request.user,
             status__in=[
-                MaintenanceRequest.StatusChoices.ASSIGNED,
-                MaintenanceRequest.StatusChoices.IN_PROGRESS
+                MaintenanceTask.StatusChoices.ASSIGNED,
+                MaintenanceTask.StatusChoices.IN_PROGRESS
             ]
         ).select_related('room', 'reported_by').order_by('-priority', 'created_at')
