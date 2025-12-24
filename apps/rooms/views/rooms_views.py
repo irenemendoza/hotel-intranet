@@ -60,8 +60,8 @@ class RoomDashboardView(LoginRequiredMixin, TemplateView):
             status__in=[CleaningTask.StatusChoices.PENDING, CleaningTask.StatusChoices.IN_PROGRESS]
         ).select_related('room', 'assigned_to').order_by('priority')[:5]
         
-        context['pending_maintenance'] = MaintenanceRequest.objects.filter(
-            status__in=[MaintenanceRequest.StatusChoices.PENDING, MaintenanceRequest.StatusChoices.ASSIGNED]
+        context['pending_maintenance'] = MaintenanceTask.objects.filter(
+            status__in=[MaintenanceTask.StatusChoices.PENDING, MaintenanceTask.StatusChoices.ASSIGNED]
         ).select_related('room', 'reported_by').order_by('-priority', 'created_at')[:5]
         
         return context

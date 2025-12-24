@@ -118,32 +118,84 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         """Dashboard para Jefe de Recepción"""
         employee = self.request.user.employee
         team = employee.get_supervised_employees()
-        
+        today = timezone.now().date()
+    
+        # Estadísticas de habitaciones
+        total_rooms = Room.objects.filter(is_active=True).count()
+        occupied_rooms = Room.objects.filter(status='occupied', is_active=True).count()
+        clean_rooms = Room.objects.filter(status='clean', is_active=True).count()
+        dirty_rooms = Room.objects.filter(status='dirty', is_active=True).count()
+        maintenance_rooms = Room.objects.filter(status='maintenance', is_active=True).count()
+    
+        # Calcular tasa de ocupación
+        occupancy_rate = round((occupied_rooms / total_rooms * 100), 1) if total_rooms > 0 else 0
+    
+        # Mi equipo
+        team_total = team.count()
+        team_present = Attendance.objects.filter(
+            employee__in=team,
+            check_in__date=today,
+            check_out__isnull=True
+        ).count()
+    
+        # Miembros del equipo con estado de asistencia
+        team_members = []
+        for member in team.select_related('user')[:5]:
+            team_members.append(member)
+    
+        # Permisos del equipo
+        team_leaves = Leave.objects.filter(
+            employee__in=team
+        ).select_related('employee', 'employee__user').order_by('-created_at')[:5]
+    
+        # Cambios recientes en habitaciones (últimas 10)
+        recent_room_changes = Room.objects.filter(
+            is_active=True,
+            updated_at__gte=timezone.now() - timedelta(hours=24)
+        ).order_by('-updated_at')[:10]
+    
+        # Agregar color de estado para cada habitación
+        for room in recent_room_changes:
+            if room.status == 'clean':
+                room.status_color = 'success'
+            elif room.status == 'dirty':
+                room.status_color = 'warning'
+            elif room.status == 'maintenance':
+                room.status_color = 'danger'
+            else:
+                room.status_color = 'primary'
+    
         return {
+            # Estadísticas generales
+            'total_rooms': total_rooms,
+            'occupied_rooms': occupied_rooms,
+            'clean_rooms': clean_rooms,
+            'dirty_rooms': dirty_rooms,
+            'maintenance_rooms': maintenance_rooms,
+            'occupancy_rate': occupancy_rate,
+        
+            # Check-ins/outs (valores por defecto si no tienes modelo de reservas)
+            'pending_checkins': 0,  # Cambiar cuando tengas modelo de reservas
+            'completed_checkins': 0,
+            'pending_checkouts': 0,
+            'completed_checkouts': 0,
+            'upcoming_checkins': [],  # Lista vacía de momento
+        
             # Mi equipo
-            'team_size': team.count(),
-            'team_present': Attendance.objects.filter(
-                employee__in=team,
-                check_in__date=timezone.now().date(),
-                check_out__isnull=True
-            ).count(),
-            
-            # Habitaciones
-            'available_rooms': Room.objects.filter(status='available').count(),
-            'occupied_rooms': Room.objects.filter(status='occupied').count(),
-            'dirty_rooms': Room.objects.filter(status='dirty').count(),
-            'maintenance_rooms': Room.objects.filter(status='maintenance').count(),
-            
+            'team_total': team_total,
+            'team_present': team_present,
+            'team_members': team_members,
+        
             # Permisos del equipo
-            'pending_team_leaves': Leave.objects.filter(
-                employee__in=team,
-                status='pending'
-            ).count(),
-            
-            # Check-ins/outs del día (si tienes modelo de reservas)
-            # 'checkins_today': Reservation.objects.filter(check_in_date=today).count(),
-            # 'checkouts_today': Reservation.objects.filter(check_out_date=today).count(),
+            'team_leaves': team_leaves,
+        
+            # Habitaciones
+            'recent_room_changes': recent_room_changes,
+        
+            # Alertas (puedes personalizarlas)
+            'urgent_issues': self.get_reception_alerts(dirty_rooms, maintenance_rooms),
         }
+
     
     def get_recepcionista_context(self):
         """Dashboard para Recepcionista"""
@@ -405,6 +457,24 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 'icon': 'tools'
             })
         
+        return alerts
+    
+    def get_reception_alerts(self, dirty_rooms, maintenance_rooms):
+        """Genera alertas específicas para recepción"""
+        alerts = []
+    
+        if dirty_rooms > 5:
+            alerts.append({
+                'title': 'Habitaciones Sucias',
+                'description': f'Hay {dirty_rooms} habitaciones pendientes de limpieza'
+            })
+    
+        if maintenance_rooms > 2:
+            alerts.append({
+                'title': 'Habitaciones en Mantenimiento',
+                'description': f'{maintenance_rooms} habitaciones no disponibles por mantenimiento'
+            })
+    
         return alerts
     
     def get_cleaning_team_stats(self, team, today):

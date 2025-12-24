@@ -1,0 +1,399 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Dashboard Jefe de Recepción - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">{{ greeting }}, {{ user.get_full_name }}</h1>
+            <p class="text-muted">Gestión de Recepción - {{ today|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+
+    <!-- KPIs Principales -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-door-open fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Ocupación Hoy</h6>
+                            <h2 class="mb-0">{{ occupied_rooms }}/{{ total_rooms }}</h2>
+                            <small class="text-muted">
+                                {{ occupancy_rate }}% ocupación
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-box-arrow-in-right fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Check-ins Hoy</h6>
+                            <h2 class="mb-0">{{ pending_checkins }}</h2>
+                            <small class="text-muted">
+                                {{ completed_checkins }} completados
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-box-arrow-right fa-2x text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Check-outs Hoy</h6>
+                            <h2 class="mb-0">{{ pending_checkouts }}</h2>
+                            <small class="text-muted">
+                                {{ completed_checkouts }} completados
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-info bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-people fa-2x text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Equipo Recepción</h6>
+                            <h2 class="mb-0">{{ team_present }}/{{ team_total }}</h2>
+                            <small class="text-muted">
+                                Recepcionistas activos
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas y Acciones Prioritarias -->
+    {% if urgent_issues %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm border-start border-danger border-4">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                        Atención Requerida
+                    </h5>
+                    <div class="row">
+                        {% for issue in urgent_issues %}
+                        <div class="col-md-6 mb-2">
+                            <div class="alert alert-danger mb-0">
+                                <strong>{{ issue.title }}</strong>
+                                <p class="mb-0 small">{{ issue.description }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Estado de Habitaciones y Mi Equipo -->
+    <div class="row mb-4">
+        <!-- Estado de Habitaciones -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="bi bi-house-door me-2"></i>Estado de Habitaciones
+                    </h6>
+                    <a href="{% url 'rooms:dashboard' %}" class="btn btn-sm btn-outline-primary">
+                        Ver Todas <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-center">
+                            <div class="p-3 bg-success bg-opacity-10 rounded">
+                                <h3 class="text-success mb-0">{{ clean_rooms }}</h3>
+                                <small class="text-muted">Limpias</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="p-3 bg-primary bg-opacity-10 rounded">
+                                <h3 class="text-primary mb-0">{{ occupied_rooms }}</h3>
+                                <small class="text-muted">Ocupadas</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="p-3 bg-warning bg-opacity-10 rounded">
+                                <h3 class="text-warning mb-0">{{ dirty_rooms }}</h3>
+                                <small class="text-muted">Sucias</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="p-3 bg-danger bg-opacity-10 rounded">
+                                <h3 class="text-danger mb-0">{{ maintenance_rooms }}</h3>
+                                <small class="text-muted">Mantenimiento</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if recent_room_changes %}
+                    <hr>
+                    <h6 class="mb-3">Cambios Recientes</h6>
+                    <div class="list-group list-group-flush">
+                        {% for change in recent_room_changes|slice:":5" %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Habitación {{ change.room.room_number }}</strong>
+                                    <span class="ms-2 badge bg-{{ change.status_color }}">
+                                        {{ change.get_status_display }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">{{ change.updated_at|date:"H:i" }}</small>
+                                </div>
+                                <a href="{% url 'rooms:detail' change.room.pk %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Mi Equipo de Recepción -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="bi bi-people me-2"></i>Mi Equipo
+                    </h6>
+                    <a href="{% url 'employees:list' %}" class="btn btn-sm btn-outline-primary">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if team_members %}
+                    <div class="list-group list-group-flush">
+                        {% for member in team_members %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">
+                                    {% if member.avatar %}
+                                    <img src="{{ member.avatar.url }}" alt="{{ member.get_full_name }}" class="rounded-circle" width="40" height="40">
+                                    {% else %}
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        {{ member.user.first_name.0 }}{{ member.user.last_name.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong>{{ member.get_full_name }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {% if member.is_checked_in %}
+                                        <span class="text-success">
+                                            <i class="bi bi-circle-fill"></i> Presente
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">
+                                            <i class="bi bi-circle"></i> Ausente
+                                        </span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-people display-4"></i>
+                        <p class="mt-2">No hay recepcionistas asignados</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reservas y Permisos -->
+    <div class="row mb-4">
+        <!-- Próximos Check-ins/Check-outs -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>Check-ins de Hoy
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_checkins %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Habitación</th>
+                                    <th>Huésped</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for checkin in upcoming_checkins|slice:":5" %}
+                                <tr>
+                                    <td>{{ checkin.expected_time|time:"H:i" }}</td>
+                                    <td><strong>{{ checkin.room.room_number }}</strong></td>
+                                    <td>{{ checkin.guest_name }}</td>
+                                    <td>
+                                        {% if checkin.completed %}
+                                        <span class="badge bg-success">Completado</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-calendar-x display-4"></i>
+                        <p class="mt-2">No hay check-ins programados hoy</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Solicitudes de Permiso -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Permisos del Equipo
+                    </h6>
+                    <a href="{% url 'leave:management' %}" class="btn btn-sm btn-outline-primary">
+                        Gestionar
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if team_leaves %}
+                    <div class="list-group list-group-flush">
+                        {% for leave in team_leaves|slice:":5" %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ leave.employee.get_full_name }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar"></i> 
+                                        {{ leave.start_date|date:"d/m" }} - {{ leave.end_date|date:"d/m" }}
+                                    </small>
+                                </div>
+                                <div>
+                                    {% if leave.status == 'pending' %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                    {% elif leave.status == 'approved' %}
+                                    <span class="badge bg-success">Aprobado</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Rechazado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-check-circle display-4"></i>
+                        <p class="mt-2">No hay solicitudes pendientes</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accesos Rápidos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <a href="{% url 'rooms:dashboard' %}" class="btn btn-outline-primary quick-action-btn w-100">
+                                <i class="bi bi-door-open me-2"></i>
+                                <span>Ver Habitaciones</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'employees:list' %}" class="btn btn-outline-success quick-action-btn w-100">
+                                <i class="bi bi-people me-2"></i>
+                                <span>Mi Equipo</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'leave:management' %}" class="btn btn-outline-warning quick-action-btn w-100">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                <span>Aprobar Permisos</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'attendance:report' %}" class="btn btn-outline-info quick-action-btn w-100">
+                                <i class="bi bi-graph-up me-2"></i>
+                                <span>Reportes</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh cada 5 minutos
+setTimeout(function() {
+    location.reload();
+}, 300000);
+
+// Notificación de nuevos check-ins
+{% if pending_checkins > 0 %}
+console.log('Tienes {{ pending_checkins }} check-ins pendientes');
+{% endif %}
+</script>
+{% endblock %}
