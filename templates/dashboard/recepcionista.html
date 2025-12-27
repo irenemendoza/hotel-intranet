@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load math_filters %}
 
 {% block title %}Recepción - {{ block.super }}{% endblock %}
 
@@ -62,7 +63,7 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-percentage fa-3x text-primary mb-2"></i>
-                    <h2 class="mb-1">{{ occupied_rooms|mul:100|div:available_rooms|add:occupied_rooms|floatformat:0 }}%</h2>
+                    <h2 class="mb-1">{{ occupied_rooms|percentage:total_rooms }}%</h2>
                     <p class="text-muted mb-0">Ocupación</p>
                 </div>
             </div>
@@ -99,16 +100,16 @@
                                         <span class="badge bg-success">{{ room_type.available }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-primary">{{ room_type.total|add:room_type.available|mul:-1|add:room_type.total }}</span>
+                                        <span class="badge bg-primary">{{ room_type.total|add:room_type.available|percentage:total_rooms }}</span>
                                     </td>
                                     <td>
                                         <div class="progress" style="height: 20px;">
                                             <div class="progress-bar bg-success" 
-                                                 style="width: {{ room_type.available|mul:100|div:room_type.total }}%">
+                                                 style="width: {{ room_type.available|percentage:total_rooms }}%">
                                                 {{ room_type.available }}
                                             </div>
                                             <div class="progress-bar bg-primary" 
-                                                 style="width: {{ room_type.total|add:room_type.available|mul:-1|add:room_type.total|mul:100|div:room_type.total }}%">
+                                                 style="width: {{ room_type.total|add:room_type.available|percentage:total_rooms }}%">
                                             </div>
                                         </div>
                                     </td>

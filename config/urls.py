@@ -17,7 +17,7 @@ urlpatterns = [
     path('leave/', include(('apps.leave.urls', "leave"), namespace="leave")),
     path('cleaning/', include(('apps.rooms.urls.rooms_cleaning_urls', "cleaning"), namespace="cleaning")),
     path('maintenance/', include(('apps.rooms.urls.rooms_maintenance_urls', "maintenance"), namespace="maintenance")),
-    path('departments/', include(('apps.employees.urls.departments_urls', "department"), namespace="departments")),
+    path('departments/', include(('apps.employees.urls.departments_urls', "departments"), namespace="departments")),
 ]
 
 # Servir archivos media en desarrollo

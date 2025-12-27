@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load math_filters %}
 
 {% block title %}Gestión de Limpieza - {{ block.super }}{% endblock %}
 
@@ -109,7 +110,7 @@
                             <strong>{{ dirty_rooms }}</strong>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-danger" style="width: {{ dirty_rooms|mul:10 }}%"></div>
+                            <div class="progress-bar bg-danger" style="width: {{ dirty_rooms|percentage:total_rooms }}%"></div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -118,11 +119,11 @@
                             <strong>{{ cleaning_rooms }}</strong>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-primary" style="width: {{ cleaning_rooms|mul:10 }}%"></div>
+                            <div class="progress-bar bg-primary" style="width: {{ cleaning_rooms|percentage:total_rooms }}%"></div>
                         </div>
                     </div>
                     <div>
-                        <a href="{% url 'rooms:room_list' %}" class="btn btn-sm btn-outline-primary w-100">
+                        <a href="{% url 'rooms:list' %}" class="btn btn-sm btn-outline-primary w-100">
                             Ver Estado Completo
                         </a>
                     </div>
@@ -168,7 +169,7 @@
                                     <td>
                                         <div class="progress" style="height: 20px;">
                                             <div class="progress-bar bg-success" 
-                                                 style="width: {{ stat.completed_today|mul:10 }}%">
+                                                 style="width: {{ stat.completed_today|percentage:total_rooms }}%">
                                                 {{ stat.completed_today }}
                                             </div>
                                         </div>
@@ -249,7 +250,7 @@
                     <a href="{% url 'cleaning:list' %}" class="btn btn-light w-100 text-start mb-2">
                         <i class="fas fa-list me-2 text-primary"></i>Todas las Tareas
                     </a>
-                    <a href="{% url 'employees:my_team' %}" class="btn btn-light w-100 text-start mb-2">
+                    <a href="#" class="btn btn-light w-100 text-start mb-2">
                         <i class="fas fa-users me-2 text-info"></i>Mi Equipo
                     </a>
                     <a href="{% url 'rooms:list' %}" class="btn btn-light w-100 text-start mb-2">
@@ -269,7 +270,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">Mi Equipo de Limpieza</h6>
-                    <a href="{% url 'employees:my_team' %}" class="btn btn-sm btn-outline-primary">
+                    <a href="#" class="btn btn-sm btn-outline-primary">
                         Ver Todos <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>

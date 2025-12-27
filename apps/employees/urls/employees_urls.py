@@ -7,7 +7,7 @@ from apps.employees.views.employees_views import (
     EmployeeDeleteView
 )
 
-app_name = 'users'
+app_name = 'employees'
 
 urlpatterns = [
     path('', EmployeeListView.as_view(), name='list'),
