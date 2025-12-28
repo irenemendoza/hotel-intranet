@@ -174,9 +174,15 @@
                                     <br>
                                     <small class="text-muted">{{ change.updated_at|date:"H:i" }}</small>
                                 </div>
-                                <a href="{% url 'rooms:detail' change.room.pk %}" class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-eye"></i>
-                                </a>
+                                {% if change.room and change.room.pk %}
+                                    <a href="{% url 'rooms:detail' change.room.pk %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i>
+                                        Ver habitación
+                                    </a>
+                                {% else %}
+                                <span class="text-muted">Sin habitación</span>
+                                {% endif %}
+
                             </div>
                         </div>
                         {% endfor %}

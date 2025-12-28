@@ -52,7 +52,7 @@
                             </a>
                         </li>
                         
-                        {% if user.profile.department.code == 'LIM' %}
+                        {% if user.employee.department.code == 'LIM' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'cleaning:list' %}">
                                 <i class="bi bi-droplet"></i> Limpieza
@@ -60,7 +60,7 @@
                         </li>
                         {% endif %}
                         
-                        {% if user.profile.department.code == 'MAN' %}
+                        {% if user.employee.department.code == 'MAN' %}
                         <li class="nav-item">
                             <a class="nav-link" href="#">
                                 <i class="bi bi-tools"></i> Mantenimiento
@@ -75,9 +75,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
-                                {% if user.profile.department %}
-                                    <span class="badge" style="background-color: {{ user.profile.department.color }};">
-                                        {{ user.profile.department.code }}
+                                {% if user.employee.department %}
+                                    <span class="badge" style="background-color: {{ user.employee.department.color }};">
+                                        {{ user.employee.department.code }}
                                     </span>
                                 {% endif %}
                             </a>

@@ -93,9 +93,8 @@ class EmployeeForm(forms.ModelForm):
         ]
         widgets = {
             'department': forms.Select(attrs={'class': 'form-control'}),
-            'role': forms.TextInput(attrs={
+            'role': forms.Select(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: Recepcionista, Camarera de pisos...'
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
