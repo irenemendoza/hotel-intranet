@@ -1,14 +1,19 @@
-from django.shortcuts import redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
-from django.urls import reverse_lazy
+
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
+from django.db import models
 from django.db.models import Q, Count
-from django.utils import timezone
 from django.http import JsonResponse
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 
-from apps.rooms.models import Room, RoomType
+from apps.employees.models import Employee
 
+from apps.rooms.models import Room, RoomType, Reservation
 from apps.rooms.forms import RoomForm, RoomTypeForm
 from apps.rooms.models import CleaningTask, MaintenanceTask
 
@@ -263,4 +268,7 @@ class RoomDeleteView(LoginRequiredMixin, DeleteView):
         room = self.get_object()
         messages.success(request, f'Habitación {room.number} eliminada exitosamente.')
         return super().delete(request, *args, **kwargs)
+
+
+
 

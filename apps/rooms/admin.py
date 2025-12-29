@@ -1,6 +1,6 @@
 # apps/rooms/admin.py
 from django.contrib import admin
-from .models import RoomType, Room, CleaningTask, MaintenanceTask
+from .models import RoomType, Room, CleaningTask, MaintenanceTask, Reservation
 
 
 @admin.register(RoomType)
@@ -37,6 +37,44 @@ class RoomAdmin(admin.ModelAdmin):
         'created_at', 
         'updated_at'
         ]
+
+@admin.register(Reservation)
+class ReservationAdmin(admin.ModelAdmin):
+    search_fields = (
+        'reservation_number',
+        'guest_first_name',
+        'guest_last_name',
+        'guest_email',
+        'guest_phone',
+        'guest_dni',
+    )
+
+    readonly_fields = (
+        'reservation_number',
+        'total_amount',
+        'pending_amount_display',
+        'created_at',
+        'updated_at',
+    )
+
+    date_hierarchy = 'check_in_date'
+
+    list_display = (
+        'reservation_number',
+        'guest_full_name',
+        'room',
+        'check_in_date',
+        'check_out_date',
+        'payment_status',
+        'total_amount',
+    )
+
+    list_filter = (
+        'status',
+        'payment_status',
+        'check_in_date',
+        'check_out_date',
+    )
 
 
 @admin.register(CleaningTask)
