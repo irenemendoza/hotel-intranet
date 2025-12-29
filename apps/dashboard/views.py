@@ -119,91 +119,49 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         employee = self.request.user.employee
         team = employee.get_supervised_employees()
         today = timezone.now().date()
-    
-        # Estadísticas de habitaciones
-        total_rooms = Room.objects.filter(is_active=True).count()
-        occupied_rooms = Room.objects.filter(status='occupied', is_active=True).count()
-        clean_rooms = Room.objects.filter(status='clean', is_active=True).count()
-        dirty_rooms = Room.objects.filter(status='dirty', is_active=True).count()
-        maintenance_rooms = Room.objects.filter(status='maintenance', is_active=True).count()
-    
-        # Calcular tasa de ocupación
-        occupancy_rate = round((occupied_rooms / total_rooms * 100), 1) if total_rooms > 0 else 0
-    
-        # Mi equipo
-        team_total = team.count()
-        team_present = Attendance.objects.filter(
-            employee__in=team,
-            check_in__date=today,
-            check_out__isnull=True
-        ).count()
-    
-        # Miembros del equipo con estado de asistencia
-        team_members = []
-        for member in team.select_related('user')[:5]:
-            team_members.append(member)
-    
-        # Permisos del equipo
-        team_leaves = Leave.objects.filter(
-            employee__in=team
-        ).select_related('employee', 'employee__user').order_by('-created_at')[:5]
-    
-        # Cambios recientes en habitaciones (últimas 10)
-        recent_room_changes = Room.objects.filter(
-            is_active=True,
-            updated_at__gte=timezone.now() - timedelta(hours=24)
-        ).order_by('-updated_at')[:10]
-    
-        # Agregar color de estado para cada habitación
-        for room in recent_room_changes:
-            if room.status == 'clean':
-                room.status_color = 'success'
-            elif room.status == 'dirty':
-                room.status_color = 'warning'
-            elif room.status == 'maintenance':
-                room.status_color = 'danger'
-            else:
-                room.status_color = 'primary'
-    
+
         return {
-            # Estadísticas generales
-            'total_rooms': total_rooms,
-            'occupied_rooms': occupied_rooms,
-            'clean_rooms': clean_rooms,
-            'dirty_rooms': dirty_rooms,
-            'maintenance_rooms': maintenance_rooms,
-            'occupancy_rate': occupancy_rate,
-        
-            # Check-ins/outs (valores por defecto si no tienes modelo de reservas)
-            'pending_checkins': 0,  # Cambiar cuando tengas modelo de reservas
+            # Mi equipo
+            'team_size': team.count(),
+            'team_present': Attendance.objects.filter(
+                employee__in=team,
+                check_in__date=today,
+                check_out__isnull=True
+            ).count(),
+            # Habitaciones
+            'team_members': team.select_related('user', 'department'),
+            'available_rooms': Room.objects.filter(status='available').count(),
+            'occupied_rooms': Room.objects.filter(status='occupied').count(),
+            'cleaning_rooms': Room.objects.filter(status='cleaning').count(),
+            'maintenance_rooms': Room.objects.filter(status='maintenance', is_active=True).count(),
+            # Calcular tasa de ocupación
+            'occupancy_rate': self._calculate_occupancy_rate(),
+            # Permisos del equipo
+            'pending_team_leaves': Leave.objects.filter(
+                employee__in=team,
+                status='pending'
+            ).count(),
+            'team_leaves': Leave.objects.filter(
+                employee__in=team
+            ).select_related('employee', 'employee__user').order_by('-created_at')[:10],
+            # Check-ins/outs del día
+            'pending_checkins': 0,  # Cambiar cuando tenga modelo de reservas
             'completed_checkins': 0,
             'pending_checkouts': 0,
             'completed_checkouts': 0,
-            'upcoming_checkins': [],  # Lista vacía de momento
-        
-            # Mi equipo
-            'team_total': team_total,
-            'team_present': team_present,
-            'team_members': team_members,
-        
-            # Permisos del equipo
-            'team_leaves': team_leaves,
-        
-            # Habitaciones
-            'recent_room_changes': recent_room_changes,
-        
-            # Alertas (puedes personalizarlas)
-            'urgent_issues': self.get_reception_alerts(dirty_rooms, maintenance_rooms),
+            'upcoming_checkins': [],
+            # Cambios recientes en habitaciones
+            'recent_room_changes': Room.objects.select_related(
+            'room_type').order_by('-updated_at')[:10],
+            # Alertas urgentes
+            'urgent_issues': [], 
         }
-
+       
     
     def get_recepcionista_context(self):
         """Dashboard para Recepcionista"""
         return {
             # Habitaciones
-            'available_rooms': Room.objects.filter(status='available').count(),
-            'occupied_rooms': Room.objects.filter(status='occupied').count(),
-            'cleaning_rooms': Room.objects.filter(status='cleaning').count(),
             
             # Mis datos
             'my_attendance_today': Attendance.objects.filter(
