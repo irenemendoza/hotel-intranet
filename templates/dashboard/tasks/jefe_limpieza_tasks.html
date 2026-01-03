@@ -1,0 +1,171 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de Tareas - Limpieza{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-list-check"></i> Gestión de Tareas de Limpieza</h2>
+            <p class="text-muted">{{ employee.get_full_name }} - {{ today|date:"d/m/Y" }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'cleaning:create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nueva Tarea
+            </a>
+        </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h6 class="text-muted">Sin Asignar</h6>
+                    <h2 class="text-danger">{{ unassigned_tasks|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="text-muted">Pendientes</h6>
+                    <h2 class="text-warning">{{ pending_tasks|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h6 class="text-muted">En Progreso</h6>
+                    <h2 class="text-info">{{ in_progress_tasks|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="text-muted">Permisos Pendientes</h6>
+                    <h2 class="text-warning">{{ team_leaves|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tareas sin asignar (urgente) -->
+    {% if unassigned_tasks %}
+    <div class="card mb-4 border-danger">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Tareas Sin Asignar</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Habitación</th>
+                            <th>Tipo</th>
+                            <th>Prioridad</th>
+                            <th>Creada</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in unassigned_tasks %}
+                        <tr>
+                            <td><strong>{{ task.room.number }}</strong></td>
+                            <td>{{ task.get_cleaning_type_display }}</td>
+                            <td>
+                                {% if task.priority <= 2 %}
+                                    <span class="badge bg-danger">Alta</span>
+                                {% else %}
+                                    <span class="badge bg-info">Normal</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ task.created_at|date:"d/m H:i" }}</td>
+                            <td>
+                                <a href="{% url 'cleaning:update' task.pk %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-person-plus"></i> Asignar
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tareas pendientes y en progreso -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">Pendientes</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_tasks %}
+                        <div class="list-group">
+                            {% for task in pending_tasks|slice:":10" %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6>Hab. {{ task.room.number }}</h6>
+                                        <small>
+                                            {% if task.assigned_to %}
+                                                {{ task.assigned_to.get_full_name }}
+                                            {% else %}
+                                                Sin asignar
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'cleaning:detail' task.pk %}" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay tareas pendientes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">En Progreso</h5>
+                </div>
+                <div class="card-body">
+                    {% if in_progress_tasks %}
+                        <div class="list-group">
+                            {% for task in in_progress_tasks %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6>Hab. {{ task.room.number }}</h6>
+                                        <small>{{ task.assigned_to.get_full_name }}</small>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'cleaning:detail' task.pk %}" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay tareas en progreso</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

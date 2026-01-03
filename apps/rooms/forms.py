@@ -89,7 +89,9 @@ class CleaningTaskForm(forms.ModelForm):
                 'class': 'form-control'
             }),
             'assigned_to': forms.Select(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'required': False,
+                'empty_label': "Sin asignar",
             }),
             'cleaning_type': forms.Select(attrs={
                 'class': 'form-control'
@@ -118,9 +120,11 @@ class CleaningTaskForm(forms.ModelForm):
                 department=limpieza_dept,
                 is_available=True
             ).select_related('user')
-            self.fields['assigned_to'].queryset = User.objects.filter(
-                id__in=cleaning_staff.values_list('user_id', flat=True)
-            )
+            
+            # Asignación directa del queryset de Employee
+            self.fields['assigned_to'].queryset = cleaning_staff   
+
+            # Personalización de cómo se muestra para cada empleado
             self.fields['assigned_to'].label_from_instance = lambda obj: obj.get_full_name() or obj.username
         except Department.DoesNotExist:
             pass

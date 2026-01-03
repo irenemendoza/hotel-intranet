@@ -149,7 +149,7 @@
                                     </td>
                                     <td>
                                         {% if task.assigned_to %}
-                                            <i class="bi bi-person"></i> {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                                            <i class="bi bi-person"></i> {{ task.assigned_to.get_full_name }}
                                         {% else %}
                                             <span class="text-muted">
                                                 <i class="bi bi-person-x"></i> Sin asignar

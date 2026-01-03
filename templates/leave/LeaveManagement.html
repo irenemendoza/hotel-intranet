@@ -183,11 +183,11 @@
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <a href="{% url 'leave:detail' leave.pk %}" class="btn btn-outline-primary" title="Ver detalles">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="bi bi-eye"></i>
                                     </a>
                                     {% if leave.status == 'pending' and perms.users.can_approve_leave %}
                                     <a href="{% url 'leave:approval' leave.pk %}" class="btn btn-outline-success" title="Aprobar/Rechazar">
-                                        <i class="fas fa-check"></i>
+                                        <i class="bi bi-check-circle-fill"></i>
                                     </a>
                                     {% endif %}
                                 </div>

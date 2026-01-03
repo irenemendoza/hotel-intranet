@@ -1,0 +1,243 @@
+
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de Tareas - RRHH{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="bi bi-people"></i> Gestión de Recursos Humanos</h2>
+            <p class="text-muted">{{ employee.get_full_name }} - {{ today|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="text-muted">Permisos Pendientes</h6>
+                    <h2 class="text-warning">{{ pending_leaves|length }}</h2>
+                    <a href="{% url 'leave:management' %}" class="btn btn-sm btn-warning mt-2">
+                        <i class="bi bi-calendar-check"></i> Revisar
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h6 class="text-muted">Ausentes Hoy</h6>
+                    <h2 class="text-info">{{ absent_today|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h6 class="text-muted">Llegadas Tarde Hoy</h6>
+                    <h2 class="text-danger">{{ late_today|length }}</h2>
+                    <a href="{% url 'attendance:dashboard' %}" class="btn btn-sm btn-danger mt-2">
+                        <i class="bi bi-clock-history"></i> Ver
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6 class="text-muted">Permisos del Mes</h6>
+                    <h2 class="text-success">{{ leaves_this_month|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solicitudes de permiso pendientes -->
+<div class="card mb-4">
+    <div class="card-header bg-warning text-white">
+        <h5 class="mb-0"><i class="bi bi-calendar-x"></i> Solicitudes de Permiso Pendientes</h5>
+    </div>
+    <div class="card-body">
+        {% if pending_leaves %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Departamento</th>
+                            <th>Tipo</th>
+                            <th>Fechas</th>
+                            <th>Días</th>
+                            <th>Solicitado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in pending_leaves %}
+                        <tr>
+                            <td>
+                                <strong>{{ leave.employee.get_full_name }}</strong><br>
+                                <small class="text-muted">{{ leave.employee.employee_number }}</small>
+                            </td>
+                            <td>
+                                <span class="badge" style="background-color: {{ leave.employee.department.color }};">
+                                    {{ leave.employee.department.name }}
+                                </span>
+                            </td>
+                            <td><span class="badge bg-secondary">{{ leave.get_leave_type_display }}</span></td>
+                            <td>
+                                {{ leave.start_date|date:"d/m/Y" }}<br>
+                                {{ leave.end_date|date:"d/m/Y" }}
+                            </td>
+                            <td><strong>{{ leave.duration_days }}</strong> día{{ leave.duration_days|pluralize }}</td>
+                            <td>{{ leave.created_at|date:"d/m/Y" }}</td>
+                            <td>
+                                <a href="{% url 'leave:approval' leave.pk %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-check-circle"></i> Revisar
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-center text-muted py-3">No hay solicitudes de permiso pendientes</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <!-- Empleados ausentes hoy -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-person-x"></i> Empleados Ausentes Hoy</h5>
+            </div>
+            <div class="card-body">
+                {% if absent_today %}
+                    <div class="list-group">
+                        {% for employee in absent_today %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ employee.get_full_name }}</strong><br>
+                                    <small class="text-muted">
+                                        {{ employee.department.name }} - {{ employee.get_role_display }}
+                                    </small>
+                                </div>
+                                <a href="{% url 'employees:detail' employee.pk %}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-person"></i> Ver Perfil
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted">Todos los empleados presentes</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Llegadas tarde hoy -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Llegadas Tarde Hoy</h5>
+            </div>
+            <div class="card-body">
+                {% if late_today %}
+                    <div class="list-group">
+                        {% for attendance in late_today %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ attendance.employee.get_full_name }}</strong><br>
+                                    <small class="text-muted">
+                                        Llegada: {{ attendance.check_in|date:"H:i" }}
+                                    </small>
+                                </div>
+                                <a href="{% url 'employees:detail' attendance.employee.pk %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-person"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted">No hay llegadas tarde hoy</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Permisos del mes -->
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Permisos Aprobados Este Mes</h5>
+    </div>
+    <div class="card-body">
+        {% if leaves_this_month %}
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Tipo</th>
+                            <th>Fechas</th>
+                            <th>Días</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in leaves_this_month %}
+                        <tr>
+                            <td>{{ leave.employee.get_full_name }}</td>
+                            <td><span class="badge bg-secondary">{{ leave.get_leave_type_display }}</span></td>
+                            <td>{{ leave.start_date|date:"d/m" }} - {{ leave.end_date|date:"d/m" }}</td>
+                            <td>{{ leave.duration_days }}</td>
+                            <td><span class="badge bg-success">Aprobado</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-center text-muted">No hay permisos aprobados este mes</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Accesos rápidos -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h5>Accesos Rápidos</h5>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'employees:list' %}" class="btn btn-outline-primary w-100 mb-2">
+            <i class="bi bi-people"></i> Ver Todos los Empleados
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline-info w-100 mb-2">
+            <i class="bi bi-clock"></i> Dashboard de Asistencia
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'leave:management' %}" class="btn btn-outline-warning w-100 mb-2">
+            <i class="bi bi-calendar-check"></i> Gestión de Permisos
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'departments:list' %}" class="btn btn-outline-success w-100 mb-2">
+            <i class="bi bi-building"></i> Departamentos
+        </a>
+    </div>
+</div>
+
+
+{% endblock %}

@@ -8,7 +8,7 @@
     <div class="row">
         <div class="col-12">
             <div class="mb-4">
-                <a href="{% url 'leave:leave_list' %}" class="text-decoration-none text-muted">
+                <a href="{% url 'leave:list' %}" class="text-decoration-none text-muted">
                     <i class="fas fa-arrow-left me-2"></i>Volver a solicitudes
                 </a>
             </div>
@@ -175,7 +175,7 @@
 
                     {% if leave.status == 'pending' %}
                     <div class="d-grid gap-2">
-                        <a href="{% url 'leave:create' %}" class="btn btn-primary">
+                        <a href="{% url 'leave:update' leave.pk %}" class="btn btn-primary">
                             <i class="fas fa-edit me-2"></i>Editar Solicitud
                         </a>
                         <button type="button" class="btn btn-outline-danger" onclick="cancelLeave()">

@@ -49,7 +49,9 @@ class Reservation(models.Model):
     class StatusChoices(models.TextChoices):
         PENDING = 'pending', 'Pendiente'
         CONFIRMED = 'confirmed', 'Confirmada'
+        PENDING_CHECKIN = 'pending_checkin', 'Checkin pendiente'
         CHECKED_IN = 'checked_in', 'En estancia'
+        PENDING_CHECKOUT = 'pending_checkout', 'Checkout pendiente'
         CHECKED_OUT = 'checked_out', 'Finalizada'
         CANCELLED = 'cancelled', 'Cancelada'
         NO_SHOW = 'no_show', 'No se presentó'
@@ -632,6 +634,10 @@ class CleaningTask(models.Model):
         'Última actualización', 
         auto_now=True
         )
+    completed_at = models.DateTimeField(
+        'Limpieza terminada', 
+        auto_now=True
+        )
     
     
     def __str__(self):
@@ -714,11 +720,6 @@ class MaintenanceTask(models.Model):
     )
     assigned_at = models.DateTimeField(
         'Fecha de asignación', 
-        null=True, 
-        blank=True
-    )
-    started_at = models.DateTimeField(
-        'Fecha de inicio', 
         null=True, 
         blank=True
     )

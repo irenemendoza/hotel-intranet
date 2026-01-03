@@ -193,3 +193,54 @@ class EmployeeDeleteView(LoginRequiredMixin, DeleteView):
         return result
 
 
+class MyTeamView(LoginRequiredMixin, ListView):
+    """Vista para que jefes vean solo su equipo"""
+    model = Employee
+    template_name = 'employees/MyTeam.html'
+    context_object_name = 'team_members'
+    paginate_by = 20
+    
+    def dispatch(self, request, *args, **kwargs):
+        # Solo supervisores pueden acceder
+        if not hasattr(request.user, 'employee') or not request.user.employee.is_supervisor():
+            messages.error(request, 'No tienes permiso para acceder a esta página.')
+            return redirect('dashboard:home')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        """Obtiene solo los empleados supervisados"""
+        employee = self.request.user.employee
+        team = employee.get_supervised_employees()
+        
+        # Aplicar filtros opcionales
+        search = self.request.GET.get('search')
+        available = self.request.GET.get('available')
+        
+        if search:
+            team = team.filter(
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(employee_number__icontains=search)
+            )
+        
+        if available:
+            team = team.filter(is_available=True)
+        
+        return team.select_related('user', 'department').order_by('user__first_name')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        today = timezone.now().date()
+        team = self.get_queryset()
+        
+        context['team_total'] = team.count()
+        context['team_present'] = Attendance.objects.filter(
+            employee__in=team,
+            check_in__date=today,
+            check_out__isnull=True
+        ).count()
+        context['team_available'] = team.filter(is_available=True).count()
+        
+        return context
+    

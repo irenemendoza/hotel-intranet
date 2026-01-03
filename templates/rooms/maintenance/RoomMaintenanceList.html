@@ -162,7 +162,7 @@
                                     <td>{{ request.reported_by.get_full_name|default:request.reported_by.username }}</td>
                                     <td>
                                         {% if request.assigned_to %}
-                                            {{ request.assigned_to.get_full_name|default:request.assigned_to.username }}
+                                            {{ request.assigned_to.get_full_name }}
                                         {% else %}
                                             <span class="text-muted">Sin asignar</span>
                                         {% endif %}

@@ -100,18 +100,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Hora programada (si existe en el form) -->
-                    {% if form.scheduled_time %}
-                    <div class="mb-3">
-                        <label for="{{ form.scheduled_time.id_for_label }}" class="form-label">
-                            <i class="bi bi-clock"></i> Hora Programada
-                        </label>
-                        {{ form.scheduled_time }}
-                        {% if form.scheduled_time.errors %}
-                        <div class="text-danger small">{{ form.scheduled_time.errors }}</div>
-                        {% endif %}
-                    </div>
-                    {% endif %}
 
                     <!-- Notas -->
                     <div class="mb-3">

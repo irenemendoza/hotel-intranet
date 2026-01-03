@@ -17,26 +17,16 @@ class RoomTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = [
-        'number', 
-        'floor', 
-        'room_type', 
-        'status', 
-        'occupancy', 
-        'last_cleaned'
-        ]
-    list_filter = [
-        'floor', 
-        'room_type', 
-        'status', 
-        'occupancy', 
-        'is_active'
-        ]
-    search_fields = ['number']
-    readonly_fields = [
-        'created_at', 
-        'updated_at'
-        ]
+    list_display = (
+        'number',
+        'room_type',
+        'status',
+    )
+
+    list_filter = (
+        'room_type',
+        'status',
+    )
 
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
