@@ -240,6 +240,8 @@ class Employee(models.Model):
         
         return total_hours
 
+
+
 @receiver(post_save, sender=User)
 def create_employee_profile(sender, instance, created, **kwargs):
     """Crea un Employee cuando se crea un User"""

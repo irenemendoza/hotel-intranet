@@ -4,6 +4,7 @@
 {% block title %}Dashboard Jefe de Recepción - {{ block.super }}{% endblock %}
 
 {% block content %}
+
 <div class="container-fluid px-4">
     <!-- Header -->
     <div class="row mb-4">
@@ -26,7 +27,7 @@
                             <h6 class="text-muted mb-1">Ocupación Hoy</h6>
                             <h2 class="mb-0">{{ occupied_rooms }}/{{ total_rooms }}</h2>
                             <small class="text-muted">
-                                {{ occupancy_rate }}% ocupación
+                                {{ occupancy_rate }} ocupación
                             </small>
                         </div>
                     </div>
@@ -81,7 +82,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-1">Equipo Recepción</h6>
-                            <h2 class="mb-0">{{ team_present }}/{{ team_total }}</h2>
+                            <h2 class="mb-0">{{ team_present }}/{{ team_members }}</h2>
                             <small class="text-muted">
                                 Recepcionistas activos
                             </small>
@@ -92,7 +93,7 @@
         </div>
     </div>
 
-    <!-- Alertas y Acciones Prioritarias -->
+    <!-- Alertas y Acciones Prioritarias A COMPLETARRRRRRRRR-->
     {% if urgent_issues %}
     <div class="row mb-4">
         <div class="col-12">
@@ -117,7 +118,7 @@
         </div>
     </div>
     {% endif %}
-
+team
     <!-- Estado de Habitaciones y Mi Equipo -->
     <div class="row mb-4">
         <!-- Estado de Habitaciones -->
@@ -167,15 +168,15 @@
                         <div class="list-group-item px-0">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <strong>Habitación {{ change.room.room_number }}</strong>
-                                    <span class="ms-2 badge bg-{{ change.status_color }}">
+                                    <strong>Habitación {{ change.number }}</strong>
+                                    <span class="ms-2 badge bg-{{ change.get_status_display_color }}">
                                         {{ change.get_status_display }}
                                     </span>
                                     <br>
                                     <small class="text-muted">{{ change.updated_at|date:"H:i" }}</small>
                                 </div>
-                                {% if change.room and change.room.pk %}
-                                    <a href="{% url 'rooms:detail' change.room.pk %}" class="btn btn-sm btn-outline-secondary">
+                                {% if change and change.pk %}
+                                    <a href="{% url 'rooms:detail' change.pk %}" class="btn btn-sm btn-outline-secondary">
                                         <i class="bi bi-eye"></i>
                                         Ver habitación
                                     </a>
@@ -199,7 +200,7 @@
                     <h6 class="mb-0">
                         <i class="bi bi-people me-2"></i>Mi Equipo
                     </h6>
-                    <a href="{% url 'employees:list' %}" class="btn btn-sm btn-outline-primary">
+                    <a href="{% url 'employees:myteam' %}" class="btn btn-sm btn-outline-primary">
                         Ver Todos
                     </a>
                 </div>
@@ -365,7 +366,7 @@
                             </a>
                         </div>
                         <div class="col-md-3">
-                            <a href="{% url 'employees:list' %}" class="btn btn-outline-success quick-action-btn w-100">
+                            <a href="{% url 'employees:myteam' %}" class="btn btn-outline-success quick-action-btn w-100">
                                 <i class="bi bi-people me-2"></i>
                                 <span>Mi Equipo</span>
                             </a>
@@ -387,7 +388,10 @@
             </div>
         </div>
     </div>
-</div>
+</div> 
+
+
+
 {% endblock %}
 
 {% block extra_js %}
@@ -402,4 +406,7 @@ setTimeout(function() {
 console.log('Tienes {{ pending_checkins }} check-ins pendientes');
 {% endif %}
 </script>
+
+
+
 {% endblock %}

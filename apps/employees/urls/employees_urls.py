@@ -4,7 +4,8 @@ from apps.employees.views.employees_views import (
     EmployeeDetailView,
     EmployeeCreateView,
     EmployeeUpdateView,
-    EmployeeDeleteView
+    EmployeeDeleteView,
+    MyTeamView,
 )
 
 app_name = 'employees'
@@ -15,4 +16,5 @@ urlpatterns = [
     path('<int:pk>/', EmployeeDetailView.as_view(), name='detail'),
     path('<int:pk>/editar/', EmployeeUpdateView.as_view(), name='update'),
     path('<int:pk>/eliminar/', EmployeeDeleteView.as_view(), name='delete'),
+    path('miequipo/', MyTeamView.as_view(), name='myteam'),
 ]

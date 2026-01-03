@@ -10,7 +10,6 @@ urlpatterns = [
     path('', include(('apps.dashboard.urls', "dashboard"), namespace="dashboard")),
 
     path('auth/', include(('apps.auth.auth_urls', 'auth'), namespace='auth')),
-    path('accounts/', include('django.contrib.auth.urls')),
     path('employees/', include(('apps.employees.urls', "employees"), namespace="employees")),
     path('attendance/', include(('apps.attendance.urls', "attendance"), namespace="attendance")),
     path('rooms/', include(('apps.rooms.urls', "rooms"), namespace="rooms")),

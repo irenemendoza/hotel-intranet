@@ -10,7 +10,7 @@ from datetime import timedelta
 from apps.employees.models import Employee, Department
 from apps.attendance.models import Attendance
 from apps.leave.models import Leave
-from apps.rooms.models import Room, CleaningTask, MaintenanceTask
+from apps.rooms.models import Room, Reservation, CleaningTask, MaintenanceTask
 
 
 
@@ -35,7 +35,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'rrhh': 'dashboard/rrhh.html',
         }
         
-        return [template_map.get(role, 'dashboard/home.html')]
+        template = template_map.get(role, 'dashboard/home.html')
+
+        print(f"DEBUG: Usuario: {self.request.user.username}")
+        print(f"DEBUG: Rol: {role}")
+        print(f"DEBUG: Template a usar: {template}")
+
+        return [template]
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -74,6 +80,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             return "Buenas tardes"
         else:
             return "Buenas noches"
+    
+    def _calculate_occupancy_rate(self):
+        """Calcula el porcentaje de ocupación"""
+        from apps.rooms.models import Room
+        
+        total = Room.objects.filter(is_active=True).count()
+        occupied = Room.objects.filter(status='occupied').count()
+        
+        if total > 0:
+            return round((occupied / total) * 100, 1)
+        return 0
     
     # ==================== CONTEXTOS POR ROL ====================
     
@@ -132,7 +149,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'team_members': team.select_related('user', 'department'),
             'available_rooms': Room.objects.filter(status='available').count(),
             'occupied_rooms': Room.objects.filter(status='occupied').count(),
-            'cleaning_rooms': Room.objects.filter(status='cleaning').count(),
+            'clean_rooms': Room.objects.filter(status='clean').count(),
+            'dirty_rooms': Room.objects.filter(status='dirty').count(),
+            'total_rooms': Room.objects.filter(is_active=True).count(),
             'maintenance_rooms': Room.objects.filter(status='maintenance', is_active=True).count(),
             # Calcular tasa de ocupación
             'occupancy_rate': self._calculate_occupancy_rate(),
@@ -145,10 +164,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 employee__in=team
             ).select_related('employee', 'employee__user').order_by('-created_at')[:10],
             # Check-ins/outs del día
-            'pending_checkins': 0,  # Cambiar cuando tenga modelo de reservas
-            'completed_checkins': 0,
-            'pending_checkouts': 0,
-            'completed_checkouts': 0,
+            'pending_checkins': Reservation.objects.filter(status='pending_checkin'),  
+            'completed_checkins': Reservation.objects.filter(status='checked_in'),
+            'pending_checkouts': Reservation.objects.filter(status='pending_checkedout'),
+            'completed_checkouts': Reservation.objects.filter(status='checked_out'),
             'upcoming_checkins': [],
             # Cambios recientes en habitaciones
             'recent_room_changes': Room.objects.select_related(

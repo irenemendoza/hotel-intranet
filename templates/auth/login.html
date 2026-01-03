@@ -48,7 +48,7 @@
                     {% endif %}
                 {% endif %}
 
-                <form method="post" action="{% url 'login' %}" id="loginForm">
+                <form method="post" action="{% url 'auth:login' %}" id="loginForm">
                     {% csrf_token %}
 
                     <div class="mb-3">

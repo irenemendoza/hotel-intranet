@@ -49,7 +49,9 @@ class Reservation(models.Model):
     class StatusChoices(models.TextChoices):
         PENDING = 'pending', 'Pendiente'
         CONFIRMED = 'confirmed', 'Confirmada'
+        PENDING_CHECKIN = 'pending_checkin', 'Checkin pendiente'
         CHECKED_IN = 'checked_in', 'En estancia'
+        PENDING_CHECKOUT = 'pending_checkout', 'Checkout pendiente'
         CHECKED_OUT = 'checked_out', 'Finalizada'
         CANCELLED = 'cancelled', 'Cancelada'
         NO_SHOW = 'no_show', 'No se presentó'
