@@ -19,96 +19,12 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'dashboard:home' %}">
-                <img src="{% static 'images/logo-hotel-octavio.png' %}"
-         alt="Hotel Intranet"
-         height="46"
-         class="d-inline-block align-text-top">
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard:home' %}">
-                                <i class="bi bi-house-door"></i> Inicio
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'rooms:dashboard' %}">
-                                <i class="bi bi-door-open"></i> Habitaciones
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-list-check"></i> Tareas
-                            </a>
-                        </li>
-                        
-                        {% if user.employee.department.code == 'LIM' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'cleaning:list' %}">
-                                <i class="bi bi-droplet"></i> Limpieza
-                            </a>
-                        </li>
-                        {% endif %}
-                        
-                        {% if user.employee.department.code == 'MAN' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-tools"></i> Mantenimiento
-                            </a>
-                        </li>
-                        {% endif %}
-                    {% endif %}
-                </ul>
-                
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
-                                {% if user.employee.department %}
-                                    <span class="badge" style="background-color: {{ user.employee.department.color }};">
-                                        {{ user.employee.department.code }}
-                                    </span>
-                                {% endif %}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Mi Perfil</a></li>
-                                {% if user.is_staff %}
-                                <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear"></i> Admin</a></li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="post" action="{% url 'auth:logout' %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'auth:login' %}">
-                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <!-- Incluir Navbar -->
+    {% include '_includes/navbar.html' %}
 
+    <!-- Incluir Widget de Fichaje Rápido -->
+    {% include '_includes/fichaje_rapido.html' %}
+    
     <!-- Messages -->
     {% if messages %}
         <div class="container mt-3">

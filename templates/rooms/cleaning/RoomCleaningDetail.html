@@ -134,19 +134,8 @@
             </div>
             <div class="card-body">
                 <div class="row g-2">
+                    
                     {% if task.status == 'pending' %}
-                    <div class="col-md-6">
-                        <form method="post" action="{% url 'cleaning:update' task.pk %}" class="d-inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="status" value="in_progress">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-play-circle"></i> Iniciar Limpieza
-                            </button>
-                        </form>
-                    </div>
-                    {% endif %}
-
-                    {% if task.status == 'in_progress' %}
                     <div class="col-md-6">
                         <form method="post" action="{% url 'cleaning:update' task.pk %}" class="d-inline">
                             {% csrf_token %}
@@ -210,15 +199,6 @@
                     {% endif %}
                 </div>
 
-                {% if task.scheduled_time %}
-                <div class="mb-3">
-                    <small class="text-muted d-block">Programada para</small>
-                    <strong>
-                        <i class="bi bi-clock"></i> 
-                        {{ task.scheduled_time|date:"d/m/Y H:i" }}
-                    </strong>
-                </div>
-                {% endif %}
 
                 <div class="mb-3">
                     <small class="text-muted d-block">Creada el</small>

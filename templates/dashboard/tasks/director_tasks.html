@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block title %}Panel de Tareas - Dirección{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="bi bi-briefcase"></i> Panel de Gestión - Dirección</h2>
+            <p class="text-muted">{{ employee.get_full_name }} - {{ today|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Resumen ejecutivo -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="text-muted">Permisos Pendientes</h6>
+                    <h2 class="text-warning">{{ pending_leaves|length }}</h2>
+                    <a href="{% url 'leave:management' %}" class="btn btn-sm btn-warning mt-2">
+                        <i class="bi bi-calendar-check"></i> Revisar
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h6 class="text-muted">Mantenimiento Urgente</h6>
+                    <h2 class="text-danger">{{ urgent_maintenance|length }}</h2>
+                    <a href="{% url 'maintenance:list' %}" class="btn btn-sm btn-danger mt-2">
+                        <i class="bi bi-tools"></i> Ver
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h6 class="text-muted">Check-ins Hoy</h6>
+                    <h2 class="text-info">{{ today_arrivals|length }}</h2>

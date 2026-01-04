@@ -1,0 +1,223 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gestión de Tareas - Recepción{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2><i class="bi bi-reception-4"></i> Gestión de Tareas - Recepción</h2>
+            <p class="text-muted">{{ employee.get_full_name }} - {{ today|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h6 class="text-muted">Check-ins Pendientes</h6>
+                    <h2 class="text-primary">{{ pending_checkins|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6 class="text-muted">Check-outs Pendientes</h6>
+                    <h2 class="text-success">{{ pending_checkouts|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="text-muted">Habitaciones Sucias</h6>
+                    <h2 class="text-warning">{{ dirty_rooms|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h6 class="text-muted">En Mantenimiento</h6>
+                    <h2 class="text-danger">{{ maintenance_rooms|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-ins pendientes -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-door-open"></i> Check-ins Pendientes para Hoy</h5>
+        </div>
+        <div class="card-body">
+            {% if pending_checkins %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Huésped</th>
+                                <th>Habitación</th>
+                                <th>Hora Entrada</th>
+                                <th>Adultos/Niños</th>
+                                <th>Noches</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reservation in pending_checkins %}
+                            <tr>
+                                <td>
+                                    <strong>{{ reservation.guest_full_name }}</strong><br>
+                                    <small class="text-muted">{{ reservation.guest_email }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ reservation.room.number }}</strong><br>
+                                    <small>{{ reservation.room.room_type.name }}</small>
+                                </td>
+                                <td>{{ reservation.check_in_date|date:"H:i" }}</td>
+                                <td>{{ reservation.adults }} / {{ reservation.children }}</td>
+                                <td>{{ reservation.nights }}</td>
+                                <td>
+                                    <span class="badge bg-warning">{{ reservation.get_status_display }}</span>
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-check-circle"></i> Check-in
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center text-muted py-3">No hay check-ins pendientes para hoy</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Check-outs pendientes -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-box-arrow-right"></i> Check-outs para Hoy</h5>
+        </div>
+        <div class="card-body">
+            {% if pending_checkouts %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Huésped</th>
+                                <th>Habitación</th>
+                                <th>Hora Salida</th>
+                                <th>Noches Alojado</th>
+                                <th>Estado Pago</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reservation in pending_checkouts %}
+                            <tr>
+                                <td>
+                                    <strong>{{ reservation.guest_full_name }}</strong><br>
+                                    <small class="text-muted">{{ reservation.guest_email }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ reservation.room.number }}</strong><br>
+                                    <small>{{ reservation.room.room_type.name }}</small>
+                                </td>
+                                <td>{{ reservation.check_out_date|date:"H:i" }}</td>
+                                <td>{{ reservation.nights_stayed }}</td>
+                                <td>
+                                    {% if reservation.is_paid %}
+                                        <span class="badge bg-success">Pagado</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-success">
+                                        <i class="bi bi-box-arrow-right"></i> Check-out
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center text-muted py-3">No hay check-outs para hoy</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Habitaciones sucias -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="bi bi-droplet"></i> Habitaciones Sucias</h5>
+                </div>
+                <div class="card-body">
+                    {% if dirty_rooms %}
+                        <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+                            {% for room in dirty_rooms %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Habitación {{ room.number }}</strong><br>
+                                        <small class="text-muted">{{ room.room_type.name }} - Piso {{ room.floor }}</small>
+                                    </div>
+                                    <a href="{% url 'cleaning:create' %}?room={{ room.id }}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-plus"></i> Asignar Limpieza
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">Todas las habitaciones están limpias</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Permisos del equipo -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Permisos del Equipo</h5>
+                </div>
+                <div class="card-body">
+                    {% if team_leaves %}
+                        <div class="list-group">
+                            {% for leave in team_leaves %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ leave.employee.get_full_name }}</strong><br>
+                                        <small class="text-muted">
+                                            {{ leave.get_leave_type_display }} - 
+                                            {{ leave.start_date|date:"d/m" }} al {{ leave.end_date|date:"d/m" }}
+                                        </small>
+                                    </div>
+                                    <a href="{% url 'leave:approval' leave.pk %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-check-circle"></i> Revisar
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No hay permisos pendientes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
