@@ -44,10 +44,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-1">Check-ins Hoy</h6>
-                            <h2 class="mb-0">{{ pending_checkins }}</h2>
-                            <small class="text-muted">
-                                {{ completed_checkins }} completados
-                            </small>
+                            <h2 class="mb-0">{{ pending_checkins }} / {{ total_checkins }} </h2>
                         </div>
                     </div>
                 </div>
@@ -63,10 +60,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-1">Check-outs Hoy</h6>
-                            <h2 class="mb-0">{{ pending_checkouts }}</h2>
-                            <small class="text-muted">
-                                {{ completed_checkouts }} completados
-                            </small>
+                            <h2 class="mb-0">{{ pending_checkouts }} / {{ total_checkouts }}</h2>
                         </div>
                     </div>
                 </div>
@@ -82,7 +76,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-1">Equipo Recepción</h6>
-                            <h2 class="mb-0">{{ team_present }}/{{ team_members }}</h2>
+                            <h2 class="mb-0">{{ team_present }}/{{ team_total }}</h2>
                             <small class="text-muted">
                                 Recepcionistas activos
                             </small>

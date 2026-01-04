@@ -10,7 +10,7 @@ urlpatterns = [
     path('', include(('apps.dashboard.urls', "dashboard"), namespace="dashboard")),
 
     path('auth/', include(('apps.auth.auth_urls', 'auth'), namespace='auth')),
-    path('employees/', include(('apps.employees.urls', "employees"), namespace="employees")),
+    path('employees/', include(('apps.employees.urls.employees_urls', "employees"), namespace="employees")),
     path('attendance/', include(('apps.attendance.urls', "attendance"), namespace="attendance")),
     path('rooms/', include(('apps.rooms.urls', "rooms"), namespace="rooms")),
     path('leave/', include(('apps.leave.urls', "leave"), namespace="leave")),

@@ -195,7 +195,7 @@
                     {% if task.assigned_to %}
                         <strong>
                             <i class="bi bi-person"></i> 
-                            {{ task.assigned_to.get_full_name|default:task.assigned_to.username }}
+                            {{ task.assigned_to.get_full_name }}
                         </strong>
                         {% if task.assigned_to.profile.department %}
                         <br>

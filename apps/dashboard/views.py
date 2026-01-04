@@ -137,6 +137,32 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         team = employee.get_supervised_employees()
         today = timezone.now().date()
 
+        # Filtrar checkins del día de hoy
+
+        pending_checkins = Reservation.objects.filter(
+                check_in_date=today,
+                status='pending_checkin'
+        )  
+        
+        completed_checkins = Reservation.objects.filter(
+                check_in_date=today,
+                status='checked_in'
+                )
+        
+        total_chekins_count = pending_checkins.count() + completed_checkins.count()
+
+        pending_checkouts = Reservation.objects.filter(
+                check_out_date=today,
+                status='pending_checkedout'
+                )
+        
+        completed_checkouts = Reservation.objects.filter(
+                check_in_date=today,
+                status='checked_out'
+                )
+        
+        total_checkouts_count = pending_checkouts.count() + completed_checkouts.count()
+
         return {
             # Mi equipo
             'team_size': team.count(),
@@ -145,8 +171,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 check_in__date=today,
                 check_out__isnull=True
             ).count(),
-            # Habitaciones
             'team_members': team.select_related('user', 'department'),
+            'team_total': team.select_related('user', 'department').count(),
+            # Habitaciones
             'available_rooms': Room.objects.filter(status='available').count(),
             'occupied_rooms': Room.objects.filter(status='occupied').count(),
             'clean_rooms': Room.objects.filter(status='clean').count(),
@@ -164,10 +191,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 employee__in=team
             ).select_related('employee', 'employee__user').order_by('-created_at')[:10],
             # Check-ins/outs del día
-            'pending_checkins': Reservation.objects.filter(status='pending_checkin'),  
-            'completed_checkins': Reservation.objects.filter(status='checked_in'),
-            'pending_checkouts': Reservation.objects.filter(status='pending_checkedout'),
-            'completed_checkouts': Reservation.objects.filter(status='checked_out'),
+            'pending_checkins': pending_checkins.count(),  
+            'completed_checkins': completed_checkins.count(),
+            'total_checkins': total_chekins_count,
+            'pending_checkouts': pending_checkouts.count(),
+            'completed_checkouts': completed_checkouts.count(),
+            'total_checkouts': total_checkouts_count,
             'upcoming_checkins': [],
             # Cambios recientes en habitaciones
             'recent_room_changes': Room.objects.select_related(
