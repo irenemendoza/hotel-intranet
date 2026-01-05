@@ -4,7 +4,8 @@ from .views import (
     LeaveCreateView,
     LeaveDetailView,
     LeaveManagementView,
-    LeaveApprovalView
+    LeaveApprovalView,
+    LeaveUpdateView
 )
 
 app_name = 'leave'
@@ -19,5 +20,6 @@ urlpatterns = [
     # Leave dinámicas
     
     path('<int:pk>/', LeaveDetailView.as_view(), name='detail'),
+    path('<int:pk>/update/', LeaveUpdateView.as_view(), name='update'),
     path('<int:pk>/approval/', LeaveApprovalView.as_view(), name='approval'),
 ]

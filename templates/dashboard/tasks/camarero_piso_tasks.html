@@ -98,9 +98,6 @@
                             <div class="col-md-3">
                                 <span class="badge bg-secondary">{{ task.get_cleaning_type_display }}</span>
                             </div>
-                            <div class="col-md-4">
-                                <small>Iniciada: {{ task.updated_at|date:"H:i" }}</small>
-                            </div>
                             <div class="col-md-2 text-end">
                                 <a href="{% url 'cleaning:update' task.pk %}" class="btn btn-success btn-sm">
                                     <i class="bi bi-check-circle"></i> Completar

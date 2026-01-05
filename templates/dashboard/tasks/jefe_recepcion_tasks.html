@@ -78,7 +78,7 @@
                                     <strong>{{ reservation.room.number }}</strong><br>
                                     <small>{{ reservation.room.room_type.name }}</small>
                                 </td>
-                                <td>{{ reservation.check_in_date|date:"H:i" }}</td>
+                                <td>{{ reservation.check_in_date|date:"Y:m:d" }}</td>
                                 <td>{{ reservation.adults }} / {{ reservation.children }}</td>
                                 <td>{{ reservation.nights }}</td>
                                 <td>
@@ -130,7 +130,7 @@
                                     <strong>{{ reservation.room.number }}</strong><br>
                                     <small>{{ reservation.room.room_type.name }}</small>
                                 </td>
-                                <td>{{ reservation.check_out_date|date:"H:i" }}</td>
+                                <td>{{ reservation.check_out_date|date:"Y-m-d" }}</td>
                                 <td>{{ reservation.nights_stayed }}</td>
                                 <td>
                                     {% if reservation.is_paid %}

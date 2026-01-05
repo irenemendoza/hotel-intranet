@@ -52,6 +52,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['employee'] = employee
         context['today'] = today
         context['greeting'] = self.get_greeting()
+        context['total_rooms'] = Room.objects.filter(status='active').count(),
         
         # Datos específicos por rol
         role_context_methods = {

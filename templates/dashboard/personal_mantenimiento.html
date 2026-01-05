@@ -9,6 +9,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-2">{{ greeting }}, {{ user.first_name }}</h1>
+            <!-- Incluir Widget de Fichaje Rápido -->
+            {% include '_includes/fichaje_rapido.html' %}
+
             <p class="text-muted">Mis Tareas de Mantenimiento - {{ today|date:"d/m/Y" }}</p>
         </div>
     </div>

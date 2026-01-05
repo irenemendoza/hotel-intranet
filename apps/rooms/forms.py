@@ -89,7 +89,9 @@ class CleaningTaskForm(forms.ModelForm):
                 'class': 'form-control'
             }),
             'assigned_to': forms.Select(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'required': False,
+                'empty_label': "Sin asignar",
             }),
             'cleaning_type': forms.Select(attrs={
                 'class': 'form-control'

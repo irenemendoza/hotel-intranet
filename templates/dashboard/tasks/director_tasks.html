@@ -40,3 +40,206 @@
                 <div class="card-body">
                     <h6 class="text-muted">Check-ins Hoy</h6>
                     <h2 class="text-info">{{ today_arrivals|length }}</h2>
+                    <a href="{% url 'rooms:dashboard' %}" class="btn btn-sm btn-info mt-2">
+                        <i class="bi bi-door-open"></i> Ver
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6 class="text-muted">Check-outs Hoy</h6>
+                    <h2 class="text-success">{{ today_departures|length }}</h2>
+                    <a href="{% url 'rooms:dashboard' %}" class="btn btn-sm btn-success mt-2">
+                        <i class="bi bi-box-arrow-right"></i> Ver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    <div class="row">
+          <!-- Check-ins y Check-outs -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-door-open"></i> Llegadas de Hoy</h5>
+                </div>
+                <div class="card-body">
+                    {% if today_arrivals %}
+                        <div class="list-group">
+                            {% for reservation in today_arrivals %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>{{ reservation.guest_full_name }}</strong><br>
+                                        <small>Hab. {{ reservation.room.number }} - {{ reservation.check_in_date|date:"H:i" }}</small>
+                                    </div>
+                                    {% if reservation.status == 'confirmed' or reservation.status == 'primary' or reservation.status == 'success' %}
+                                        <span class="badge">
+                                        {{ reservation.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                    
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No hay llegadas programadas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-box-arrow-right"></i> Salidas de Hoy</h5>
+                </div>
+                <div class="card-body">
+                    {% if today_departures %}
+                        <div class="list-group">
+                            {% for reservation in today_departures %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>{{ reservation.guest_full_name }}</strong><br>
+                                        <small>Hab. {{ reservation.room.number }} - {{ reservation.check_out_date|date:"Y:m:d" }}</small>
+                                    </div>
+                                    <span class="badge bg-success">Check-out</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No hay salidas programadas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+        <!-- Mantenimiento urgente -->
+        <div class="col-md-6">
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Mantenimiento Urgente</h5>
+                </div>
+                <div class="card-body">
+                    {% if urgent_maintenance %}
+                        <div class="list-group">
+                            {% for task in urgent_maintenance %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Habitación {{ task.room.number }} - {{ task.title }}</h6>
+                                        <small class="text-muted">
+                                            Reportado por {{ task.reported_by.get_full_name }} - 
+                                            {{ task.created_at|date:"d/m/Y H:i" }}
+                                        </small>
+                                    </div>
+                                    <a href="{% url 'maintenance:detail' task.pk %}" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No hay tareas urgentes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Limpieza pendiente -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-droplet"></i> Limpieza Pendiente</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_cleaning %}
+                        <div class="list-group">
+                            {% for task in pending_cleaning %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">Habitación {{ task.room.number }}</h6>
+                                        <small class="text-muted">
+                                            {{ task.get_cleaning_type_display }} - 
+                                            {% if task.assigned_to %}
+                                                {{ task.assigned_to.get_full_name }}
+                                            {% else %}
+                                                Sin asignar
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    {% if task.status == 'pending' or task.status == 'warning' or task.status == 'info' %}
+                                        <span class="badge bg">
+                                            {{ task.get_status_display }}
+                                        </span>
+                                    {% endif %}                            
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No hay tareas de limpieza pendientes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permisos pendientes -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0"><i class="bi bi-calendar-x"></i> Solicitudes de Permiso Pendientes</h5>
+        </div>
+        <div class="card-body">
+            {% if pending_leaves %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Tipo</th>
+                                <th>Fechas</th>
+                                <th>Días</th>
+                                <th>Solicitado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in pending_leaves %}
+                            <tr>
+                                <td>
+                                    <strong>{{ leave.employee.get_full_name }}</strong><br>
+                                    <small class="text-muted">{{ leave.employee.department.name }}</small>
+                                </td>
+                                <td><span class="badge bg-secondary">{{ leave.get_leave_type_display }}</span></td>
+                                <td>{{ leave.start_date|date:"d/m/Y" }} - {{ leave.end_date|date:"d/m/Y" }}</td>
+                                <td>{{ leave.duration_days }} día{{ leave.duration_days|pluralize }}</td>
+                                <td>{{ leave.created_at|date:"d/m/Y" }}</td>
+                                <td>
+                                    <a href="{% url 'leave:approval' leave.pk %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-check-circle"></i> Revisar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center text-muted py-3">No hay solicitudes de permiso pendientes</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

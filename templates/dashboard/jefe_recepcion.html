@@ -5,6 +5,7 @@
 
 {% block content %}
 
+
 <div class="container-fluid px-4">
     <!-- Header -->
     <div class="row mb-4">
@@ -13,6 +14,10 @@
             <p class="text-muted">Gestión de Recepción - {{ today|date:"d/m/Y" }}</p>
         </div>
     </div>
+
+    <!-- Incluir Widget de Fichaje Rápido -->
+    {% include '_includes/fichaje_rapido.html' %}
+
 
     <!-- KPIs Principales -->
     <div class="row mb-4">
@@ -87,6 +92,7 @@
         </div>
     </div>
 
+ 
     <!-- Alertas y Acciones Prioritarias A COMPLETARRRRRRRRR-->
     {% if urgent_issues %}
     <div class="row mb-4">

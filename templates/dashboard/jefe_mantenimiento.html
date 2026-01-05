@@ -10,6 +10,8 @@
             <h2>{{ greeting }}, {{ employee.get_full_name }}</h2>
             <p class="text-muted">Jefe de Mantenimiento - {{ today|date:"l, d \d\e F \d\e Y" }}</p>
         </div>
+
+
         <div class="col-md-4 text-end">
             <a href="{% url 'maintenance:create' %}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Nueva Solicitud
