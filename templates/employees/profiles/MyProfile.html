@@ -1,0 +1,374 @@
+<!-- templates/employees/profile/MyProfile.html -->
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}Mi Perfil - {{ employee.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
+            <li class="breadcrumb-item active">Mi Perfil</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Columna Principal -->
+        <div class="col-lg-8">
+            <!-- Información Personal -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-badge"></i> Información Personal
+                    </h5>
+                    <a href="{% url 'employees:profile-update' %}" class="btn btn-light btn-sm">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Avatar -->
+                        <div class="col-md-3 text-center mb-3">
+                            {% if employee.avatar %}
+                                <img src="{{ employee.avatar.url }}" alt="Avatar" class="img-fluid rounded-circle" style="max-width: 150px;">
+                            {% else %}
+                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; font-size: 3rem; margin: 0 auto;">
+                                    {{ employee.user.first_name.0 }}{{ employee.user.last_name.0 }}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Estado de fichaje -->
+                            <div class="mt-3">
+                                {% if is_checked_in %}
+                                    <span class="badge bg-success p-2">
+                                        <i class="bi bi-clock"></i> Fichado
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary p-2">
+                                        <i class="bi bi-clock"></i> No fichado
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Datos -->
+                        <div class="col-md-9">
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-bold">Nombre completo:</div>
+                                <div class="col-sm-8">{{ employee.get_full_name }}</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-bold">Email:</div>
+                                <div class="col-sm-8">{{ employee.user.email }}</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-bold">Teléfono:</div>
+                                <div class="col-sm-8">{{ employee.phone|default:"No especificado" }}</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-bold">Departamento:</div>
+                                <div class="col-sm-8">
+                                    {% if employee.department %}
+                                        <span class="badge" style="background-color: {{ employee.department.color }};">
+                                            {{ employee.department.name }}
+                                        </span>
+                                    {% else %}
+                                        No asignado
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-bold">Rol:</div>
+                                <div class="col-sm-8">{{ employee.get_role_display }}</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-bold">Número de empleado:</div>
+                                <div class="col-sm-8">{{ employee.employee_number|default:"No asignado" }}</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-bold">Fecha de contratación:</div>
+                                <div class="col-sm-8">
+                                    {% if employee.hire_date %}
+                                        {{ employee.hire_date|date:"d/m/Y" }}
+                                        <small class="text-muted">({{ employee.hire_date|timesince }} en la empresa)</small>
+                                    {% else %}
+                                        No especificada
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if employee.bio %}
+                            <div class="row mb-3">
+                                <div class="col-sm-4 fw-bold">Biografía:</div>
+                                <div class="col-sm-8">{{ employee.bio }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas del Mes -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart"></i> Estadísticas del Mes
+                    </h5>
+                    <a href="{% url 'employees:profile-stats' %}" class="btn btn-light btn-sm">
+                        <i class="bi bi-graph-up"></i> Ver Detalle
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <div class="stat-card">
+                                <h3 class="text-primary">{{ monthly_stats.days_worked }}</h3>
+                                <p class="text-muted mb-0">Días trabajados</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stat-card">
+                                <h3 class="text-success">{{ monthly_stats.total_hours.hours }}h {{ monthly_stats.total_hours.minutes }}m</h3>
+                                <p class="text-muted mb-0">Horas totales</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stat-card">
+                                <h3 class="text-info">{{ monthly_stats.average_hours.hours }}h {{ monthly_stats.average_hours.minutes }}m</h3>
+                                <p class="text-muted mb-0">Promedio diario</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stat-card">
+                                <h3 class="text-warning">{{ monthly_stats.late_arrivals }}</h3>
+                                <p class="text-muted mb-0">Llegadas tarde</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas específicas por rol -->
+                    {% if role_stats.cleaning %}
+                    <hr>
+                    <h6 class="mb-3"><i class="bi bi-droplet"></i> Tareas de Limpieza</h6>
+                    <div class="row text-center">
+                        <div class="col-3">
+                            <strong>{{ role_stats.cleaning.completed_month }}</strong>
+                            <small class="d-block text-muted">Completadas</small>
+                        </div>
+                        <div class="col-3">
+                            <strong>{{ role_stats.cleaning.pending }}</strong>
+                            <small class="d-block text-muted">Pendientes</small>
+                        </div>
+                        <div class="col-3">
+                            <strong>{{ role_stats.cleaning.in_progress }}</strong>
+                            <small class="d-block text-muted">En progreso</small>
+                        </div>
+                        <div class="col-3">
+                            <strong>{{ role_stats.cleaning.total_month }}</strong>
+                            <small class="d-block text-muted">Total mes</small>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if role_stats.maintenance %}
+                    <hr>
+                    <h6 class="mb-3"><i class="bi bi-tools"></i> Tareas de Mantenimiento</h6>
+                    <div class="row text-center">
+                        <div class="col-3">
+                            <strong>{{ role_stats.maintenance.completed_month }}</strong>
+                            <small class="d-block text-muted">Completadas</small>
+                        </div>
+                        <div class="col-3">
+                            <strong>{{ role_stats.maintenance.pending }}</strong>
+                            <small class="d-block text-muted">Pendientes</small>
+                        </div>
+                        <div class="col-3">
+                            <strong class="text-danger">{{ role_stats.maintenance.urgent }}</strong>
+                            <small class="d-block text-muted">Urgentes</small>
+                        </div>
+                        <div class="col-3">
+                            <strong>{{ role_stats.maintenance.total_month }}</strong>
+                            <small class="d-block text-muted">Total mes</small>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if role_stats.team %}
+                    <hr>
+                    <h6 class="mb-3"><i class="bi bi-people"></i> Mi Equipo</h6>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <strong>{{ role_stats.team.size }}</strong>
+                            <small class="d-block text-muted">Miembros</small>
+                        </div>
+                        <div class="col-4">
+                            <strong class="text-success">{{ role_stats.team.present_today }}</strong>
+                            <small class="d-block text-muted">Presentes hoy</small>
+                        </div>
+                        <div class="col-4">
+                            <strong class="text-warning">{{ role_stats.team.pending_leaves }}</strong>
+                            <small class="d-block text-muted">Permisos pendientes</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Asistencias Recientes -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Asistencias Recientes
+                    </h5>
+                    <a href="{% url 'attendance:history' %}" class="btn btn-light btn-sm">
+                        <i class="bi bi-list"></i> Ver Todo
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_attendances %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Entrada</th>
+                                        <th>Salida</th>
+                                        <th>Duración</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for attendance in recent_attendances %}
+                                    <tr>
+                                        <td>{{ attendance.check_in|date:"d/m/Y" }}</td>
+                                        <td>{{ attendance.check_in|date:"H:i" }}</td>
+                                        <td>
+                                            {% if attendance.check_out %}
+                                                {{ attendance.check_out|date:"H:i" }}
+                                            {% else %}
+                                                <span class="badge bg-info">En progreso</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ attendance.duration_formatted }}</td>
+                                        <td>
+                                            {% if attendance.status == 'present' %}
+                                                <span class="badge bg-success">A tiempo</span>
+                                            {% elif attendance.status == 'late' %}
+                                                <span class="badge bg-warning">Tarde</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center mb-0">No hay registros de asistencia aún.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Lateral -->
+        <div class="col-lg-4">
+            <!-- Acciones Rápidas -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning"></i> Acciones Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'attendance:my-attendance' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-clock"></i> Fichar Entrada/Salida
+                        </a>
+                        <a href="{% url 'leave:create' %}" class="btn btn-outline-success">
+                            <i class="bi bi-calendar-plus"></i> Solicitar Permiso
+                        </a>
+                        <a href="{% url 'leave:list' %}" class="btn btn-outline-info">
+                            <i class="bi bi-calendar-check"></i> Mis Permisos
+                        </a>
+                        <a href="{% url 'employees:profile-stats' %}" class="btn btn-outline-warning">
+                            <i class="bi bi-graph-up"></i> Estadísticas Detalladas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permisos Próximos -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event"></i> Permisos Próximos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if approved_leaves %}
+                        {% for leave in approved_leaves %}
+                        <div class="alert alert-success mb-2">
+                            <strong>{{ leave.get_leave_type_display }}</strong>
+                            <br>
+                            <small>
+                                <i class="bi bi-calendar"></i> 
+                                {{ leave.start_date|date:"d/m" }} - {{ leave.end_date|date:"d/m" }}
+                                ({{ leave.duration_days }} días)
+                            </small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mb-0">
+                            No tienes permisos aprobados próximamente.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Permisos Pendientes -->
+            {% if pending_leaves > 0 %}
+            <div class="card mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        <i class="bi bi-hourglass-split"></i> Permisos Pendientes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-0">
+                        Tienes <strong>{{ pending_leaves }}</strong> solicitud(es) de permiso pendiente(s) de aprobación.
+                        <br>
+                        <a href="{% url 'leave:list' %}" class="btn btn-sm btn-warning mt-2">
+                            Ver Solicitudes
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    padding: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.stat-card h3 {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.alert {
+    border-radius: 8px;
+}
+</style>
+{% endblock %}

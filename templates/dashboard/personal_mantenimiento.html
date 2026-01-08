@@ -117,8 +117,8 @@
                                             <i class="fas fa-check"></i> Completar
                                         </a>
                                         {% else %}
-                                        <a href="{% url 'maintenance:detail' task.pk %}" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-eye"></i>
+                                        <a href="{% url 'maintenance:detail' task.pk %}" class="btn btn-warning">
+                                            <fas fa-edit me-2></i> Editar
                                         </a>
                                         {% endif %}
                                     </td>

@@ -1,0 +1,137 @@
+<!-- templates/employees/profile/ProfileUpdate.html -->
+{% extends "layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Actualizar Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'employees:my-profile' %}">Mi Perfil</a></li>
+            <li class="breadcrumb-item active">Actualizar</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> {{ title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Información Personal -->
+                        <h5 class="mb-3"><i class="bi bi-person"></i> Información Personal</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.last_name|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.email|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.phone|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Información Laboral (Solo lectura para el usuario) -->
+                        <h5 class="mb-3"><i class="bi bi-briefcase"></i> Información Laboral</h5>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            La información laboral solo puede ser modificada por RRHH o Administradores.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Departamento</label>
+                                    <input type="text" class="form-control" value="{{ form.instance.department }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Rol</label>
+                                    <input type="text" class="form-control" value="{{ form.instance.get_role_display }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Número de Empleado</label>
+                                    <input type="text" class="form-control" value="{{ form.instance.employee_number|default:'No asignado' }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Fecha de Contratación</label>
+                                    <input type="text" class="form-control" value="{{ form.instance.hire_date|date:'d/m/Y'|default:'No especificada' }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Avatar y Bio -->
+                        <h5 class="mb-3"><i class="bi bi-image"></i> Personalización</h5>
+                        
+                        {% if form.instance.avatar %}
+                        <div class="mb-3 text-center">
+                            <label class="form-label fw-bold">Avatar Actual</label>
+                            <br>
+                            <img src="{{ form.instance.avatar.url }}" alt="Avatar actual" class="img-thumbnail" style="max-width: 200px;">
+                        </div>
+                        {% endif %}
+                        
+                        {{ form.avatar|as_crispy_field }}
+                        {{ form.bio|as_crispy_field }}
+
+                        <hr>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'employees:my-profile' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> {{ button_text }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cambiar Contraseña -->
+            <div class="card mt-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-lock"></i> Seguridad
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>¿Necesitas cambiar tu contraseña?</p>
+                    <a href="{% url 'password_change' %}" class="btn btn-warning">
+                        <i class="bi bi-key"></i> Cambiar Contraseña
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
