@@ -6,6 +6,7 @@ from apps.employees.views.employees_views import (
     EmployeeUpdateView,
     EmployeeDeleteView,
     MyTeamView,
+ 
 )
 
 app_name = 'employees'

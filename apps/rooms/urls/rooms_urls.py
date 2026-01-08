@@ -16,6 +16,7 @@ from apps.rooms.views.rooms_views import (
 app_name = "rooms"
 
 urlpatterns = [
+    
     path('', RoomDashboardView.as_view(), name="dashboard"),
     path('typelist/', RoomTypeListView.as_view(), name="typelist"),
     path('typecreate/', RoomTypeCreateView.as_view(), name="typecreate"),

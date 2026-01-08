@@ -11,6 +11,7 @@ from apps.rooms.views.rooms_cleaning_views import (
 app_name = "cleaning"
 
 urlpatterns = [
+    # Acceso para CAMAREROS y SUPERVISORES
     path('list/', CleaningTaskListView.as_view(), name="list"),
     path('create/', CleaningTaskCreateView.as_view(), name="create"),
     path('mycleaningtasks/',MyCleaningTasksView.as_view(), name="tasks"),
