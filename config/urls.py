@@ -17,6 +17,7 @@ urlpatterns = [
     path('cleaning/', include(('apps.rooms.urls.rooms_cleaning_urls', "cleaning"), namespace="cleaning")),
     path('maintenance/', include(('apps.rooms.urls.rooms_maintenance_urls', "maintenance"), namespace="maintenance")),
     path('departments/', include(('apps.employees.urls.departments_urls', "departments"), namespace="departments")),
+    path('profiles/', include(('apps.employees.urls.profiles_urls', "profiles"), namespace="profiles")),
 ]
 
 # Servir archivos media en desarrollo

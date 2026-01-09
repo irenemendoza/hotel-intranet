@@ -10,7 +10,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'employees:my-profile' %}">Mi Perfil</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'profiles:my-profile' %}">Mi Perfil</a></li>
             <li class="breadcrumb-item active">Actualizar</li>
         </ol>
     </nav>
@@ -106,7 +106,7 @@
 
                         <!-- Botones -->
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'employees:my-profile' %}" class="btn btn-secondary">
+                            <a href="{% url 'profiles:my-profile' %}" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left"></i> Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary">
