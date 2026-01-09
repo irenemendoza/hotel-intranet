@@ -23,7 +23,7 @@
                     <h5 class="mb-0">
                         <i class="bi bi-person-badge"></i> Información Personal
                     </h5>
-                    <a href="{% url 'employees:profile-update' %}" class="btn btn-light btn-sm">
+                    <a href="{% url 'profiles:update' %}" class="btn btn-light btn-sm">
                         <i class="bi bi-pencil"></i> Editar
                     </a>
                 </div>
@@ -122,7 +122,7 @@
                     <h5 class="mb-0">
                         <i class="bi bi-bar-chart"></i> Estadísticas del Mes
                     </h5>
-                    <a href="{% url 'employees:profile-stats' %}" class="btn btn-light btn-sm">
+                    <a href="{% url 'profiles:stats' %}" class="btn btn-light btn-sm">
                         <i class="bi bi-graph-up"></i> Ver Detalle
                     </a>
                 </div>
@@ -297,7 +297,7 @@
                         <a href="{% url 'leave:list' %}" class="btn btn-outline-info">
                             <i class="bi bi-calendar-check"></i> Mis Permisos
                         </a>
-                        <a href="{% url 'employees:profile-stats' %}" class="btn btn-outline-warning">
+                        <a href="{% url 'profiles:stats' %}" class="btn btn-outline-warning">
                             <i class="bi bi-graph-up"></i> Estadísticas Detalladas
                         </a>
                     </div>
