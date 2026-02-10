@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 120" width="450" height="120">
+  <defs>
+    <!-- Gradiente principal del proyecto -->
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Gradiente para las olas -->
+    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d6efd;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a58ca;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Gradiente para acento -->
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0dcaf0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d6efd;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Icono de olas estilizadas -->
+  <g transform="translate(15, 25)">
+    <!-- Ola principal (grande) -->
+    <path d="M 10 35 Q 20 25, 30 35 T 50 35 Q 60 25, 70 35 T 90 35"
+          fill="none"
+          stroke="url(#waveGradient)"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- Ola media -->
+    <path d="M 15 47 Q 25 37, 35 47 T 55 47 Q 65 37, 75 47 T 95 47"
+          fill="none"
+          stroke="url(#primaryGradient)"
+          stroke-width="4.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.85"/>
+
+    <!-- Ola pequeña (inferior) -->
+    <path d="M 20 58 Q 30 48, 40 58 T 60 58 Q 70 48, 80 58"
+          fill="none"
+          stroke="url(#accentGradient)"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.7"/>
+
+    <!-- Detalles decorativos - gotas/espuma -->
+    <circle cx="25" cy="28" r="2.5" fill="#667eea" opacity="0.6"/>
+    <circle cx="45" cy="26" r="2" fill="#764ba2" opacity="0.5"/>
+    <circle cx="65" cy="28" r="2.5" fill="#0d6efd" opacity="0.6"/>
+  </g>
+
+  <!-- Texto del hotel -->
+  <g transform="translate(115, 0)">
+    <!-- Nombre principal "LEVANTE WAVES" -->
+    <text x="0" y="45"
+          font-family="'Helvetica Neue', 'Arial', sans-serif"
+          font-size="32"
+          font-weight="300"
+          letter-spacing="3"
+          fill="#1E293B">
+      LEVANTE WAVES
+    </text>
+
+    <!-- Subtítulo "HOTEL" -->
+    <text x="2" y="68"
+          font-family="'Helvetica Neue', 'Arial', sans-serif"
+          font-size="14"
+          font-weight="500"
+          letter-spacing="7"
+          fill="#667eea">
+      HOTEL
+    </text>
+
+    <!-- Línea decorativa -->
+    <line x1="0" y1="75" x2="130" y2="75"
+          stroke="url(#primaryGradient)"
+          stroke-width="2"
+          opacity="0.4"/>
+
+    <!-- Tagline -->
+    <text x="2" y="92"
+          font-family="'Helvetica Neue', 'Arial', sans-serif"
+          font-size="10"
+          font-weight="300"
+          font-style="italic"
+          letter-spacing="1.5"
+          fill="#6c757d">
+      Tarifa · Strait of Gibraltar
+    </text>
+  </g>
+</svg>

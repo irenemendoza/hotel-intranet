@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 60" width="320" height="60">
+  <defs>
+    <!-- Gradientes en blanco para navbar -->
+    <linearGradient id="waveWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0F2FE;stop-opacity:0.95" />
+    </linearGradient>
+
+    <linearGradient id="accentWhite" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E0F2FE;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Icono de olas compacto -->
+  <g transform="translate(8, 12)">
+    <!-- Ola principal -->
+    <path d="M 5 18 Q 12 13, 18 18 T 30 18 Q 36 13, 42 18"
+          fill="none"
+          stroke="url(#waveWhite)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- Ola media -->
+    <path d="M 8 25 Q 15 20, 21 25 T 33 25 Q 39 20, 45 25"
+          fill="none"
+          stroke="url(#accentWhite)"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.85"/>
+
+    <!-- Ola inferior -->
+    <path d="M 11 31 Q 18 26, 24 31 T 36 31 Q 42 26, 48 31"
+          fill="none"
+          stroke="url(#waveWhite)"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.7"/>
+
+    <!-- Detalles -->
+    <circle cx="14" cy="15" r="1.5" fill="#FFFFFF" opacity="0.7"/>
+    <circle cx="26" cy="14" r="1.2" fill="#E0F2FE" opacity="0.6"/>
+    <circle cx="38" cy="15" r="1.5" fill="#FFFFFF" opacity="0.7"/>
+  </g>
+
+  <!-- Texto -->
+  <g transform="translate(65, 0)">
+    <!-- Nombre principal -->
+    <text x="0" y="28"
+          font-family="'Helvetica Neue', 'Arial', sans-serif"
+          font-size="22"
+          font-weight="300"
+          letter-spacing="2"
+          fill="#FFFFFF">
+      LEVANTE WAVES
+    </text>
+
+    <!-- Subtítulo -->
+    <text x="0" y="43"
+          font-family="'Helvetica Neue', 'Arial', sans-serif"
+          font-size="9"
+          font-weight="500"
+          letter-spacing="5"
+          fill="rgba(255,255,255,0.85)">
+      HOTEL
+    </text>
+  </g>
+</svg>

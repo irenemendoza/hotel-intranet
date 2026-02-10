@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <!-- Gradiente de fondo del proyecto -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Gradiente para olas -->
+    <linearGradient id="waveIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0F2FE;stop-opacity:0.95" />
+    </linearGradient>
+
+    <linearGradient id="accentIcon" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0dcaf0;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0.95" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo con gradiente del proyecto -->
+  <rect width="100" height="100" rx="20" fill="url(#bgGrad)"/>
+
+  <!-- Olas centradas -->
+  <g transform="translate(50, 55)">
+    <!-- Ola principal -->
+    <path d="M -40 0 Q -25 -8, -15 0 T 5 0 Q 15 -8, 25 0 T 45 0"
+          fill="none"
+          stroke="url(#waveIcon)"
+          stroke-width="4.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+
+    <!-- Ola media -->
+    <path d="M -35 11 Q -20 3, -10 11 T 10 11 Q 20 3, 30 11 T 50 11"
+          fill="none"
+          stroke="url(#accentIcon)"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.9"/>
+
+    <!-- Ola inferior -->
+    <path d="M -30 21 Q -15 13, -5 21 T 15 21 Q 25 13, 35 21"
+          fill="none"
+          stroke="url(#waveIcon)"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.75"/>
+
+    <!-- Detalles decorativos -->
+    <circle cx="-22" cy="-5" r="2" fill="#FFFFFF" opacity="0.8"/>
+    <circle cx="0" cy="-7" r="1.5" fill="#E0F2FE" opacity="0.7"/>
+    <circle cx="22" cy="-5" r="2" fill="#FFFFFF" opacity="0.8"/>
+  </g>
+
+  <!-- Iniciales "LWH" -->
+  <text x="50" y="32"
+        text-anchor="middle"
+        font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="20"
+        font-weight="600"
+        letter-spacing="1"
+        fill="#FFFFFF"
+        opacity="0.98">
+    LWH
+  </text>
+</svg>

@@ -1,77 +1,80 @@
-from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.contrib.auth.models import User
-from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db import models
+from django.db.models import F, Q
+from django.utils.translation import gettext_lazy as _
+
 from apps.employees.models import Employee
 
+
 class Leave(models.Model):
-    """Gestión de permisos y vacaciones"""
-    
+    # Leave and vacation management
+
     class LeaveTypeChoices(models.TextChoices):
-        VACATION = 'vacation', 'Vacaciones'
-        SICK = 'sick', 'Baja médica'
-        PERSONAL = 'personal', 'Asunto personal'
-        UNPAID = 'unpaid', 'Sin sueldo'
-        OTHER = 'other', 'Otro'
-    
+        VACATION = "vacation", _("Vacation")
+        SICK = "sick", _("Sick")
+        PERSONAL = "personal", _("Personal")
+        UNPAID = "unpaid", _("Unpaid")
+        OTHER = "other", _("Other")
+
     class StatusChoices(models.TextChoices):
-        PENDING = 'pending', 'Pendiente'
-        APPROVED = 'approved', 'Aprobado'
-        REJECTED = 'rejected', 'Rechazado'
-        CANCELLED = 'cancelled', 'Cancelado'
-    
+        PENDING = "pending", _("Pending")
+        APPROVED = "approved", _("Approved")
+        REJECTED = "rejected", _("Rejected")
+        CANCELLED = "cancelled", _("Cancelled")
+
     employee = models.ForeignKey(
         Employee,
         on_delete=models.CASCADE,
-        related_name='leaves',
-        verbose_name='Empleado'
+        related_name="leaves",
+        verbose_name=_("Employee"),
     )
     leave_type = models.CharField(
-        'Tipo de permiso',
-        max_length=20,
-        choices=LeaveTypeChoices.choices
+        _("Leave_type"), max_length=20, choices=LeaveTypeChoices.choices
     )
-    start_date = models.DateField('Fecha de inicio')
-    end_date = models.DateField('Fecha de fin')
-    reason = models.TextField('Motivo')
+    start_date = models.DateField(_("Start date"))
+    end_date = models.DateField(_("End date"))
+    reason = models.TextField(_("Reason"))
     status = models.CharField(
-        'Estado',
+        _("Status"),
         max_length=20,
         choices=StatusChoices.choices,
-        default=StatusChoices.PENDING
+        default=StatusChoices.PENDING,
     )
     approved_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='approved_leaves',
-        verbose_name='Aprobado por'
+        related_name="approved_leaves",
+        verbose_name=_("Approved by"),
     )
-    approved_at = models.DateTimeField('Fecha de aprobación', null=True, blank=True)
-    rejection_reason = models.TextField('Motivo de rechazo', blank=True)
+    approved_at = models.DateTimeField(_("Approval date"), null=True, blank=True)
+    rejection_reason = models.TextField(_("Rejection reason"), blank=True)
     attachment = models.FileField(
-        'Documento adjunto',
-        upload_to='leaves/',
+        _("Attachment"),
+        upload_to="leaves/",
         blank=True,
         null=True,
-        help_text='Justificante médico u otro documento'
+        help_text=_("Supporting document"),
     )
-    created_at = models.DateTimeField('Fecha de solicitud', auto_now_add=True)
-    updated_at = models.DateTimeField('Última actualización', auto_now=True)
-    
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Last updated"), auto_now=True)
+
     class Meta:
-        verbose_name = 'Permiso'
-        verbose_name_plural = 'Permisos'
-        ordering = ['-created_at']
-    
+        verbose_name = _("Leave")
+        verbose_name_plural = _("Leaves")
+        ordering = ["-created_at"]
+
+        constraint = [
+            models.CheckConstraint(
+                condition=Q(end_date__gte=F("start_date")),
+                name="valid_leave_date_range",
+            )
+        ]
+
     def __str__(self):
         return f"{self.employee.get_full_name()} - {self.get_leave_type_display()} ({self.start_date} - {self.end_date})"
-    
-    def duration_days(self):
-        """Calcula la duración en días"""
-        return (self.end_date - self.start_date).days + 1
 
+    def duration_days(self):
+        # Calculates duration in days
+        return (self.end_date - self.start_date).days + 1

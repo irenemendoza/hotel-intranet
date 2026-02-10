@@ -1,308 +1,292 @@
-# apps/rooms/models.py
+from decimal import Decimal
+
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, EmailValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator, MinValueValidator
 from django.db import models
+from django.db.models import F, Q
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from apps.employees.models import Employee
 
-from decimal import Decimal
-  
+
 class RoomType(models.Model):
-    """Tipos de habitación (Individual, Doble, Suite, etc.)"""
-    name = models.CharField(
-        'Nombre', 
-        max_length=50
-        )
-    code = models.CharField(
-        'Código', 
-        max_length=10, 
-        unique=True
-        )
+    # Room type (Single, Double, Suite...)
+    name = models.CharField(_("Name"), max_length=50)
+    code = models.CharField(_("Code"), max_length=10, unique=True)
     capacity = models.PositiveIntegerField(
-        'Capacidad', 
-        help_text='Número máximo de huéspedes'
-        )
-    description = models.TextField(
-        'Descripción', 
-        blank=True
-        )
+        _("Capacity"), help_text="Maximum capacity number"
+    )
+    description = models.TextField(_("Description"), blank=True)
     amenities = models.TextField(
-        'Comodidades', 
-        blank=True, 
-        help_text='Lista de amenidades incluidas'
-        )
-    is_active = models.BooleanField(
-        'Activo', 
-        default=True
-        )
-   
-    
+        _("Amenities"), blank=True, help_text="Amenities included"
+    )
+    is_active = models.BooleanField(_("Active"), default=True)
+
+    class Meta:
+        verbose_name = _("Room Type")
+        verbose_name_plural = _("Room Types")
+
     def __str__(self):
         return f"{self.name} ({self.code})"
 
 
 class Reservation(models.Model):
-    """Reservas de habitaciones"""
-    
+    # Room reservation
+
     class StatusChoices(models.TextChoices):
-        PENDING = 'pending', 'Pendiente'
-        CONFIRMED = 'confirmed', 'Confirmada'
-        PENDING_CHECKIN = 'pending_checkin', 'Checkin pendiente'
-        CHECKED_IN = 'checked_in', 'En estancia'
-        PENDING_CHECKOUT = 'pending_checkout', 'Checkout pendiente'
-        CHECKED_OUT = 'checked_out', 'Finalizada'
-        CANCELLED = 'cancelled', 'Cancelada'
-        NO_SHOW = 'no_show', 'No se presentó'
-    
+        PENDING = "pending", _("Pending")
+        CONFIRMED = "confirmed", _("Confirmed")
+        PENDING_CHECKIN = "pending_checkin", _("Pending check-in")
+        CHECKED_IN = "checked_in", _("Checked in")
+        PENDING_CHECKOUT = "pending_checkout", _("Pending check-out")
+        CHECKED_OUT = "checked_out", _("Checked out")
+        CANCELLED = "cancelled", _("Canceled")
+        NO_SHOW = "no_show", _("No show")
+
     class PaymentStatusChoices(models.TextChoices):
-        UNPAID = 'unpaid', 'Sin pagar'
-        PARTIAL = 'partial', 'Pago parcial'
-        PAID = 'paid', 'Pagado'
-        REFUNDED = 'refunded', 'Reembolsado'
-    
-    # Información de la reserva
+        UNPAID = "unpaid", _("Unpaid")
+        PARTIAL = "partial", _("Partial payment")
+        PAID = "paid", _("Paid")
+        REFUNDED = "refunded", _("Refunded")
+
+    # Reservation information
     reservation_number = models.CharField(
-        'Número de reserva',
+        _("Reservation number"),
         max_length=20,
         unique=True,
         editable=False,
-        help_text='Se genera automáticamente'
+        help_text=_("Auto-generated"),
     )
     room = models.ForeignKey(
-        'Room',
+        "Room",
         on_delete=models.PROTECT,
-        related_name='reservations',
-        verbose_name='Habitación'
+        related_name="reservations",
+        verbose_name=_("Room"),
     )
-    
-    # Fechas
-    check_in_date = models.DateField('Fecha de entrada')
-    check_out_date = models.DateField('Fecha de salida')
+
+    # Dates
+    check_in_date = models.DateField(_("Check-in date"))
+    check_out_date = models.DateField(_("Check-out date"))
     actual_check_in = models.DateTimeField(
-        'Check-in real',
+        _("Actual check-in"),
         null=True,
         blank=True,
-        help_text='Fecha y hora real de entrada'
+        help_text=_("Actual check-in date and time"),
     )
     actual_check_out = models.DateTimeField(
-        'Check-out real',
+        _("Actual check-out"),
         null=True,
         blank=True,
-        help_text='Fecha y hora real de salida'
+        help_text=_("Actual check-out date and time"),
     )
-    
-    # Información del huésped
-    guest_first_name = models.CharField('Nombre', max_length=100)
-    guest_last_name = models.CharField('Apellidos', max_length=100)
-    guest_email = models.EmailField(
-        'Email',
-        validators=[EmailValidator()],
-        help_text='Email del huésped'
-    )
-    guest_phone = models.CharField('Teléfono', max_length=20)
+
+    # Guest information
+    guest_first_name = models.CharField(_("First name"), max_length=100)
+    guest_last_name = models.CharField(_("Last name"), max_length=100)
+    guest_email = models.EmailField(_("Email"), help_text=_("Guest's email"))
+    guest_phone = models.CharField(_("Phone"), max_length=20)
     guest_dni = models.CharField(
-        'DNI/Pasaporte',
-        max_length=20,
-        blank=True,
-        help_text='Documento de identidad'
+        _("ID/Passport"), max_length=20, blank=True, help_text=_("Identity document")
     )
-    guest_nationality = models.CharField(
-        'Nacionalidad',
-        max_length=50,
-        blank=True
-    )
-    guest_address = models.TextField(
-        'Dirección',
-        blank=True
-    )
-    
-    # Detalles de la reserva
+    guest_nationality = models.CharField(_("Nationality"), max_length=50, blank=True)
+    guest_address = models.TextField(_("Address"), blank=True)
+
+    # Reservation details
     adults = models.PositiveIntegerField(
-        'Adultos',
-        default=1,
-        validators=[MinValueValidator(1)]
+        _("Adults"), default=1, validators=[MinValueValidator(1)]
     )
     children = models.PositiveIntegerField(
-        'Niños',
-        default=0,
-        validators=[MinValueValidator(0)]
+        _("Children"), default=0, validators=[MinValueValidator(0)]
     )
     special_requests = models.TextField(
-        'Solicitudes especiales',
-        blank=True,
-        help_text='Peticiones del huésped'
+        _("Special requests"), blank=True, help_text=_("Guest's requests")
     )
-    
-    # Estado y gestión
+
+    # Status and management
     status = models.CharField(
-        'Estado',
+        _("Status"),
         max_length=20,
         choices=StatusChoices.choices,
-        default=StatusChoices.PENDING
+        default=StatusChoices.PENDING,
     )
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='created_reservations',
-        verbose_name='Creado por'
+        related_name="created_reservations",
+        verbose_name=_("Created by"),
     )
     checked_in_by = models.ForeignKey(
         Employee,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='checkins_processed',
-        verbose_name='Check-in realizado por'
+        related_name="checkins_processed",
+        verbose_name=_("Checked in by"),
     )
     checked_out_by = models.ForeignKey(
         Employee,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='checkouts_processed',
-        verbose_name='Check-out realizado por'
+        related_name="checkouts_processed",
+        verbose_name=_("Checked out by"),
     )
-    
-    # Información financiera
+
+    # Financial information
     room_rate = models.DecimalField(
-        'Tarifa por noche',
+        _("Room rate per night"),
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01'))]
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     total_amount = models.DecimalField(
-        'Importe total',
+        _("Total amount"),
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.00'))]
+        validators=[MinValueValidator(Decimal("0.00"))],
+        blank=True,
+        default=Decimal("0.00"),
     )
     paid_amount = models.DecimalField(
-        'Importe pagado',
+        _("Paid amount"),
         max_digits=10,
         decimal_places=2,
-        default=Decimal('0.00'),
-        validators=[MinValueValidator(Decimal('0.00'))]
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
     )
     payment_status = models.CharField(
-        'Estado del pago',
+        _("Payment status"),
         max_length=20,
         choices=PaymentStatusChoices.choices,
-        default=PaymentStatusChoices.UNPAID
+        default=PaymentStatusChoices.UNPAID,
     )
-    
-    # Notas internas
+
+    # Internal notes
     internal_notes = models.TextField(
-        'Notas internas',
+        _("Internal notes"),
         blank=True,
-        help_text='Notas del personal (no visibles para el huésped)'
+        help_text=_("Staff notes (not visible to guest)"),
     )
-    cancellation_reason = models.TextField(
-        'Motivo de cancelación',
-        blank=True
-    )
-    
-    # Metadatos
-    created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
-    updated_at = models.DateTimeField('Última actualización', auto_now=True)
-    
+    cancellation_reason = models.TextField(_("Cancellation reason"), blank=True)
+
+    # Metadata
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Last updated"), auto_now=True)
+
     class Meta:
-        verbose_name = 'Reserva'
-        verbose_name_plural = 'Reservas'
-        ordering = ['-check_in_date', '-created_at']
+        verbose_name = _("Reservation")
+        verbose_name_plural = _("Reservations")
+        ordering = ["-check_in_date", "-created_at"]
         indexes = [
-            models.Index(fields=['check_in_date', 'check_out_date']),
-            models.Index(fields=['room', 'status']),
-            models.Index(fields=['guest_email']),
-            models.Index(fields=['reservation_number']),
+            models.Index(fields=["check_in_date", "check_out_date"]),
+            models.Index(fields=["room", "status"]),
+            models.Index(fields=["guest_email"]),
+            models.Index(fields=["reservation_number"]),
         ]
-    
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(check_out_date__gt=F("check_in_date")),
+                name="valid_reservation_date_range",
+            )
+        ]
+
     def __str__(self):
-        return f"{self.reservation_number} - {self.guest_full_name} - Hab. {self.room.number}"
-    
+        return (
+            f"{self.reservation_number} - {self.guest_full_name} - {self.room.number}"
+        )
+
     def save(self, *args, **kwargs):
-        # Generar número de reserva si no existe
+        # Generate reservation number if it doesn't exist
         if not self.reservation_number:
             self.reservation_number = self.generate_reservation_number()
-        
-        # Calcular importe total automáticamente
+
+        # Calculate total amount automatically
         if not self.total_amount or self.total_amount == 0:
             self.total_amount = self.calculate_total()
-        
-        # Actualizar estado de pago
+
+        # Update payment status
         self.update_payment_status()
-        
+
+        # Verify validations
+        self.full_clean()
+
         super().save(*args, **kwargs)
-    
+
     def clean(self):
-        """Validaciones del modelo"""
+        # Model validations
         super().clean()
-        
-        # Validar fechas
+
+        # Validate dates
         if self.check_in_date and self.check_out_date:
             if self.check_out_date <= self.check_in_date:
-                raise ValidationError({
-                    'check_out_date': 'La fecha de salida debe ser posterior a la fecha de entrada'
-                })
-        
-        # Validar capacidad de la habitación
+                raise ValidationError(
+                    {"check_out_date": _("Check-out date must be after check-in date")}
+                )
+
+        # Validate room capacity
         if self.room:
             total_guests = self.adults + self.children
             if total_guests > self.room.room_type.capacity:
-                raise ValidationError({
-                    'adults': f'Esta habitación tiene capacidad máxima de {self.room.room_type.capacity} personas'
-                })
-        
-        # Validar disponibilidad de la habitación
+                raise ValidationError(
+                    {
+                        "adults": _(
+                            "This room has a maximum capacity of %(capacity)s guests"
+                        )
+                        % {"capacity": self.room.room_type.capacity}
+                    }
+                )
+
+        # Validate room availability
         if self.room and self.check_in_date and self.check_out_date:
             if not self.is_room_available():
-                raise ValidationError({
-                    'room': 'Esta habitación no está disponible para las fechas seleccionadas'
-                })
-    
-    # Propiedades calculadas
+                raise ValidationError(
+                    {"room": _("This room is not available for the selected dates")}
+                )
+
+    # Calculated properties
     @property
     def guest_full_name(self):
-        """Nombre completo del huésped"""
+        # Guest's full name
         return f"{self.guest_first_name} {self.guest_last_name}"
-    
+
     @property
     def nights(self):
-        """Número de noches de la reserva"""
+        # Number of nights
         if self.check_in_date and self.check_out_date:
             return (self.check_out_date - self.check_in_date).days
         return 0
-    
+
     @property
     def is_active(self):
-        """Verifica si la reserva está activa (en estancia)"""
+        # Checks if reservation is active (guest in-house)
         return self.status == self.StatusChoices.CHECKED_IN
-    
+
     @property
     def is_confirmed(self):
-        """Verifica si la reserva está confirmada"""
+        # Checks if reservation is confirmed
         return self.status == self.StatusChoices.CONFIRMED
-    
+
     @property
     def is_completed(self):
-        """Verifica si la reserva está completada"""
+        # Checks if reservation is completed
         return self.status == self.StatusChoices.CHECKED_OUT
-    
+
     @property
     def pending_amount(self):
-        """Importe pendiente de pago"""
+        # Pending payment amount
         return self.total_amount - self.paid_amount
-    
+
     @property
     def is_paid(self):
-        """Verifica si está totalmente pagado"""
+        # Checks if fully paid
         return self.paid_amount >= self.total_amount
-    
+
     def nights_stayed(self):
-        """Calcula cuántas noches lleva el huésped"""
+        # Calculates how many nights the guest has stayed
         if self.actual_check_in:
             if self.actual_check_out:
                 delta = self.actual_check_out - self.actual_check_in
@@ -310,439 +294,375 @@ class Reservation(models.Model):
                 delta = timezone.now() - self.actual_check_in
             return delta.days
         return 0
-    
+
     def needs_linen_change(self):
-        """Determina si necesita cambio de sábanas (cada 3 días)"""
+        # Determines if linen change is needed (every 3 days)
         return self.nights_stayed() >= 3
-    
+
     def get_cleaning_type_needed(self):
-        """Determina qué tipo de limpieza necesita"""
+        # Determines what type of cleaning is needed
         if not self.is_active:
             return None
-        
+
         today = timezone.now().date()
-        
-        # Departure (salida)
+
+        # Departure
         if self.check_out_date == today:
-            return 'checkout'
-        # Stay over con cambio de sábanas
+            return "checkout"
+        # Stay over with linen change
         elif self.needs_linen_change():
-            return 'deep_cleaning'
-        # Stay over normal
+            return "deep_cleaning"
+        # Normal stay over
         else:
-            return 'stay_over'
-    
-    # Métodos de negocio
+            return "stay_over"
+
+    # Business methods
     def calculate_total(self):
-        """Calcula el importe total de la reserva"""
         return self.room_rate * self.nights
-    
+
     def update_payment_status(self):
-        """Actualiza el estado del pago según el importe pagado"""
+        # Updates payment status based on paid amount
         if self.paid_amount >= self.total_amount:
             self.payment_status = self.PaymentStatusChoices.PAID
         elif self.paid_amount > 0:
             self.payment_status = self.PaymentStatusChoices.PARTIAL
         else:
             self.payment_status = self.PaymentStatusChoices.UNPAID
-    
+
     def generate_reservation_number(self):
-        """Genera un número único de reserva"""
-        from django.utils.crypto import get_random_string
+        # Generates unique reservation number
         from datetime import datetime
-        
-        # Formato: RES-YYYYMMDD-XXXX
-        date_str = datetime.now().strftime('%Y%m%d')
-        random_str = get_random_string(length=4, allowed_chars='0123456789')
-        
+
+        from django.utils.crypto import get_random_string
+
+        # Format: RES-YYYYMMDD-XXXX
+        date_str = datetime.now().strftime("%Y%m%d")
+        random_str = get_random_string(length=4, allowed_chars="0123456789")
+
         reservation_number = f"RES-{date_str}-{random_str}"
-        
-        # Verificar que no exista
-        while Reservation.objects.filter(reservation_number=reservation_number).exists():
-            random_str = get_random_string(length=4, allowed_chars='0123456789')
+
+        # Verify it doesn't exist
+        while Reservation.objects.filter(
+            reservation_number=reservation_number
+        ).exists():
+            random_str = get_random_string(length=4, allowed_chars="0123456789")
             reservation_number = f"RES-{date_str}-{random_str}"
-        
+
         return reservation_number
-    
+
     def is_room_available(self):
-        """Verifica si la habitación está disponible para las fechas seleccionadas"""
-        # Excluir esta misma reserva si estamos editando
+        # Checks if room is available for selected dates
+        # Exclude this reservation if editing
         queryset = Reservation.objects.filter(room=self.room)
         if self.pk:
             queryset = queryset.exclude(pk=self.pk)
-        
-        # Buscar reservas que se solapen
+
+        # Look for overlapping reservations
         overlapping = queryset.filter(
             check_in_date__lt=self.check_out_date,
             check_out_date__gt=self.check_in_date,
-            status__in=[
-                self.StatusChoices.CONFIRMED,
-                self.StatusChoices.CHECKED_IN
-            ]
+            status__in=[self.StatusChoices.CONFIRMED, self.StatusChoices.CHECKED_IN],
         )
-        
         return not overlapping.exists()
-    
+
     def check_in(self, employee):
-        """Procesa el check-in"""
+        # Processes check-in
         if self.status != self.StatusChoices.CONFIRMED:
-            raise ValidationError('Solo se puede hacer check-in de reservas confirmadas')
-        
+            raise ValidationError(_("Only confirmed reservation can be checked in"))
+
         self.status = self.StatusChoices.CHECKED_IN
         self.actual_check_in = timezone.now()
         self.checked_in_by = employee
-        
-        # Actualizar estado de la habitación
+
+        # Update room status
         self.room.status = Room.StatusChoices.OCCUPIED
         self.room.occupancy = Room.OccupancyChoices.OCCUPIED
         self.room.save()
-        
+
         self.save()
-    
+
     def check_out(self, employee):
-        """Procesa el check-out"""
+        # Processes check-out
         if self.status != self.StatusChoices.CHECKED_IN:
-            raise ValidationError('Solo se puede hacer check-out de reservas con check-in realizado')
-        
+            raise ValidationError(_("Only checked-in reservations can be checked out"))
+
         self.status = self.StatusChoices.CHECKED_OUT
         self.actual_check_out = timezone.now()
         self.checked_out_by = employee
-        
-        # Actualizar estado de la habitación
+
+        # Update room status
         self.room.status = Room.StatusChoices.DIRTY
         self.room.occupancy = Room.OccupancyChoices.VACANT
         self.room.save()
-        
-        # Crear tarea de limpieza automáticamente
+
+        # Create cleaning task automatically
         from apps.rooms.models import CleaningTask
+
         CleaningTask.objects.create(
             room=self.room,
             cleaning_type=CleaningTask.TypeChoices.CHECKOUT,
             priority=1,
-            notes=f'Limpieza después de check-out - Reserva {self.reservation_number}'
+            notes=__("Cleaning after checkout -Reservation %(number)s")
+            % {"number": self.reservation_number},
         )
-        
         self.save()
-    
-    def cancel(self, reason=''):
-        """Cancela la reserva"""
+
+    def cancel(self, reason=""):
+        # Cancels reservation
         if self.status == self.StatusChoices.CHECKED_IN:
-            raise ValidationError('No se puede cancelar una reserva con check-in realizado')
-        
+            raise ValidationError(_("Cannot cancel a checked-in reservation"))
+
         self.status = self.StatusChoices.CANCELLED
         self.cancellation_reason = reason
-        
-        # Liberar la habitación
+
+        # Release the room
         if self.room.occupancy == Room.OccupancyChoices.RESERVED:
             self.room.occupancy = Room.OccupancyChoices.VACANT
             self.room.save()
-        
+
         self.save()
-    
+
     @property
     def pending_amount_display(self):
         return self.total_amount - self.amount_paid
-    
-    def get_status_color(self):
-        """Retorna el color bootstrap según el estado"""
-        colors = {
-            self.StatusChoices.PENDING: 'secondary',
-            self.StatusChoices.CONFIRMED: 'primary',
-            self.StatusChoices.CHECKED_IN: 'success',
-            self.StatusChoices.CHECKED_OUT: 'info',
-            self.StatusChoices.CANCELLED: 'danger',
-            self.StatusChoices.NO_SHOW: 'warning',
-        }
-        return colors.get(self.status, 'secondary')
-    
-class Room(models.Model):
 
+    def get_status_color(self):
+        # Returns bootstrap color based on status
+        colors = {
+            self.StatusChoices.PENDING: "secondary",
+            self.StatusChoices.CONFIRMED: "primary",
+            self.StatusChoices.CHECKED_IN: "success",
+            self.StatusChoices.CHECKED_OUT: "info",
+            self.StatusChoices.CANCELLED: "danger",
+            self.StatusChoices.NO_SHOW: "warning",
+        }
+        return colors.get(self.status, "secondary")
+
+
+class Room(models.Model):
     class StatusChoices(models.TextChoices):
-        CLEAN = 'clean', 'Limpia'
-        DIRTY = 'dirty', 'Sucia'
-        INSPECTED = 'inspected', 'Inspeccionada'
-        MAINTENANCE = 'maintenance', 'En mantenimiento'
-        OUT_OF_ORDER = 'out_of_order', 'Fuera de servicio'
-    
+        CLEAN = "clean", _("Clean")
+        DIRTY = "dirty", _("Dirty")
+        INSPECTED = "inspected", _("Inspected")
+        MAINTENANCE = "maintenance", _("Under maintenance")
+        OUT_OF_ORDER = "out_of_order", _("Out of order")
 
     class OccupancyChoices(models.TextChoices):
-        VACANT = 'vacant', 'Vacante'
-        OCCUPIED = 'occupied', 'Ocupada'
-        RESERVED = 'reserved', 'Reservada'
-    
-    
-    number = models.CharField(
-        'Número', 
-        max_length=10, 
-        unique=True
-        )
-    floor = models.PositiveIntegerField(
-        'Piso'
-        )
-    room_type = models.ForeignKey(
-        RoomType, 
-        on_delete=models.PROTECT,
-        verbose_name='Tipo de habitación'
-        )
-    status = models.CharField(
-        'Estado de limpieza', 
-        max_length=20, 
-        choices=StatusChoices.choices, 
-        default=StatusChoices.DIRTY
-        )
-    occupancy = models.CharField(
-        'Estado de ocupación', 
-        max_length=20, 
-        choices=OccupancyChoices.choices, 
-        default=OccupancyChoices.VACANT
-        )
-    last_cleaned = models.DateTimeField(
-        'Última limpieza', 
-        null=True, 
-        blank=True
-        )
-    last_inspected = models.DateTimeField(
-        'Última inspección', 
-        null=True, 
-        blank=True
-        )
-    notes = models.TextField(
-        'Notas', 
-        blank=True
-        )
-    is_active = models.BooleanField(
-        'Activa', 
-        default=True
-        )
-    created_at = models.DateTimeField(
-        'Fecha de creación', 
-        auto_now_add=True
-        )
-    updated_at = models.DateTimeField(
-        'Última actualización', 
-        auto_now=True
-        )
+        VACANT = "vacant", _("Vacant")
+        OCCUPIED = "occupied", _("Occupied")
+        RESERVED = "reserved", _("Reserved")
 
-    
+    number = models.CharField(_("Number"), max_length=10, unique=True)
+    floor = models.PositiveIntegerField(_("Floor"))
+    room_type = models.ForeignKey(
+        RoomType, on_delete=models.PROTECT, verbose_name=_("Room type")
+    )
+    status = models.CharField(
+        _("Cleaning status"),
+        max_length=20,
+        choices=StatusChoices.choices,
+        default=StatusChoices.DIRTY,
+    )
+    occupancy = models.CharField(
+        _("Occupancy status"),
+        max_length=20,
+        choices=OccupancyChoices.choices,
+        default=OccupancyChoices.VACANT,
+    )
+    last_cleaned = models.DateTimeField(_("Last cleaned"), null=True, blank=True)
+    last_inspected = models.DateTimeField(_("Last inspected"), null=True, blank=True)
+    notes = models.TextField(_("Notes"), blank=True)
+    is_active = models.BooleanField(_("Active"), default=True)
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Last updated"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("Room")
+        verbose_name_plural = _("Rooms")
+        ordering = ["floor, number"]
+
     def __str__(self):
-        return f"Habitación {self.number} - Piso {self.floor}"
-    
-    def get_status_display_color(self):
-        """Retorna un color según el estado"""
-        colors = {
-            self.StatusChoices.CLEAN: 'success',
-            self.StatusChoices.DIRTY: 'warning',
-            self.StatusChoices.INSPECTED: 'info',
-            self.StatusChoices.MAINTENANCE: 'danger',
-            self.StatusChoices.OUT_OF_ORDER: 'dark',
+        return _("Room %(number)s - Floor %(floor)s") % {
+            "number": self.number,
+            "floor": self.floor,
         }
-        return colors.get(self.status, 'secondary')
-    
+
+    def get_status_display_color(self):
+        # Returns color based on status
+        colors = {
+            self.StatusChoices.CLEAN: "success",
+            self.StatusChoices.DIRTY: "warning",
+            self.StatusChoices.INSPECTED: "info",
+            self.StatusChoices.MAINTENANCE: "danger",
+            self.StatusChoices.OUT_OF_ORDER: "dark",
+        }
+        return colors.get(self.status, "secondary")
+
     def get_current_reservation(self):
-        """Obtiene la reserva activa actual"""
+        # Gets current active reservation
         return self.reservations.filter(
             status=Reservation.StatusChoices.CHECKED_IN,
             actual_check_in__isnull=False,
-            actual_check_out__isnull=True
+            actual_check_out__isnull=True,
         ).first()
-    
+
     def is_occupied(self):
-        """Verifica si la habitación está ocupada"""
+        # Checks if room is occupied
         return self.get_current_reservation() is not None
-    
+
     def get_next_reservation(self):
-        """Obtiene la próxima reserva confirmada"""
+        # Gets next confirmed reservation
         today = timezone.now().date()
-        return self.reservations.filter(
-            status=Reservation.StatusChoices.CONFIRMED,
-            check_in_date__gte=today
-        ).order_by('check_in_date').first()
+        return (
+            self.reservations.filter(
+                status=Reservation.StatusChoices.CONFIRMED, check_in_date__gte=today
+            )
+            .order_by("check_in_date")
+            .first()
+        )
+
 
 class CleaningTask(models.Model):
-    """Tareas de limpieza asignadas a habitaciones"""
+    # Cleaning tasks assigned to rooms
     class StatusChoices(models.TextChoices):
-        PENDING = 'pending', 'Pendiente'
-        IN_PROGRESS = 'in_progress', 'En progreso'
-        COMPLETED = 'completed', 'Completada'
-        VERIFIED = 'verified', 'Verificada'
-    
-      
-    # Tipos de limpieza
+        PENDING = "pending", _("Pending")
+        IN_PROGRESS = "in_progress", _("In progress")
+        COMPLETED = "completed", _("Completed")
+        VERIFIED = "verified", _("Verified")
+
+    # Cleaning types
     class TypeChoices(models.TextChoices):
-        CHECKOUT = 'checkout', 'Salida'
-        STAY_OVER = 'stay_over', 'Cliente'
-        DEEP_CLEANING = 'deep_cleaning', 'Limpieza profunda'
-    
-    
+        CHECKOUT = "checkout", _("Checkout")
+        STAY_OVER = "stay_over", _("Stay over")
+        DEEP_CLEANING = "deep_cleaning", _("Deep cleaning")
+
     room = models.ForeignKey(
-        Room, 
-        on_delete=models.CASCADE, 
-        related_name='cleaning_tasks', 
-        verbose_name='Habitación'
-        )
+        Room,
+        on_delete=models.CASCADE,
+        related_name="cleaning_tasks",
+        verbose_name=_("Room"),
+    )
     assigned_to = models.ForeignKey(
-        Employee, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        related_name='cleaning_tasks',
-        verbose_name='Asignado a'
-        )
+        Employee,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="cleaning_tasks",
+        verbose_name=_("Assigned to"),
+    )
     cleaning_type = models.CharField(
-        'Tipo de limpieza', 
-        max_length=20, 
-        choices=TypeChoices.choices, 
-        default=TypeChoices.CHECKOUT
-        )
+        _("Cleaning type"),
+        max_length=20,
+        choices=TypeChoices.choices,
+        default=TypeChoices.CHECKOUT,
+    )
     status = models.CharField(
-        'Estado', 
-        max_length=20, 
-        choices=StatusChoices.choices, 
-        default=StatusChoices.PENDING
-        )
+        _("Status"),
+        max_length=20,
+        choices=StatusChoices.choices,
+        default=StatusChoices.PENDING,
+    )
     priority = models.PositiveIntegerField(
-        'Prioridad', 
-        default=1, 
-        help_text='1 = Alta, 5 = Baja'
-        )
+        _("Priority"), default=1, help_text="1 = Alta, 5 = Baja"
+    )
     verified_by = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, blank=True, 
-        related_name='verified_cleanings',
-        verbose_name='Verificado por',
-        )
-    verified_at = models.DateTimeField(
-        'Fecha de verificación', 
-        null=True, 
-        blank=True
-        )
-    notes = models.TextField(
-        'Notas', 
-        blank=True
-        )
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="verified_cleanings",
+        verbose_name=_("Verified by"),
+    )
+    verified_at = models.DateTimeField(_("Verification date"), null=True, blank=True)
+    notes = models.TextField(_("Notes"), blank=True)
     photos = models.ImageField(
-        'Fotos', 
-        upload_to='cleaning_tasks/', 
-        blank=True, 
-        null=True
-        )
-    created_at = models.DateTimeField(
-        'Fecha de creación', 
-        auto_now_add=True
-        )
-    updated_at = models.DateTimeField(
-        'Última actualización', 
-        auto_now=True
-        )
-    completed_at = models.DateTimeField(
-        'Limpieza terminada', 
-        auto_now=True
-        )
-    
-    
+        _("Photos"), upload_to="cleaning_tasks/", blank=True, null=True
+    )
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Last updated"), auto_now=True)
+    completed_at = models.DateTimeField(_("Completed at"), auto_now=True)
+
+    class Meta:
+        verbose_name = (_("Cleaning Task"),)
+        verbose_name_plural = (_("Cleaning Tasks"),)
+        ordering = ["-created_at"]
+
     def __str__(self):
         return f"{self.room} - {self.get_status_display()}"
-    
-   
+
 
 class MaintenanceTask(models.Model):
-    """Solicitudes de mantenimiento para habitaciones"""
+    # Maintenance requests for rooms
     class PriorityChoices(models.TextChoices):
-        LOW = 'low', 'Baja'
-        MEDIUM = 'medium', 'Media'
-        HIGH = 'high', 'Alta'
-        URGENT = 'urgent', 'Urgente'
-    
+        LOW = "low", _("Low")
+        MEDIUM = "medium", _("Medium")
+        HIGH = "high", _("High")
+        URGENT = "urgent", _("Urgent")
+
     class StatusChoices(models.TextChoices):
-        PENDING = 'pending', 'Pendiente'
-        ASSIGNED = 'assigned', 'Asignada'
-        IN_PROGRESS = 'in_progress', 'En progreso'
-        COMPLETED = 'completed', 'Completada'
-        CANCELLED = 'cancelled', 'Cancelada'
-    
+        PENDING = "pending", _("Pending")
+        ASSIGNED = "assigned", _("Assigned")
+        IN_PROGRESS = "in_progress", _("In progress")
+        COMPLETED = "completed", _("Completed")
+        CANCELLED = "cancelled", _("Cancelled")
+
     room = models.ForeignKey(
-        Room, 
-        on_delete=models.CASCADE, 
-        related_name='maintenance_requests',
-        verbose_name='Habitación'
+        Room,
+        on_delete=models.CASCADE,
+        related_name="maintenance_requests",
+        verbose_name=_("Room"),
     )
     reported_by = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        related_name='reported_maintenance',
-        verbose_name='Reportado por'
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="reported_maintenance",
+        verbose_name=_("Reported by"),
     )
     assigned_to = models.ForeignKey(
-        Employee, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='assigned_maintenance',
-        verbose_name='Asignado a'
+        Employee,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_maintenance",
+        verbose_name=_("Assigned to"),
     )
-    title = models.CharField(
-        'Título', 
-        max_length=200
-    )
-    description = models.TextField(
-        'Descripción'
-    )
+    title = models.CharField(_("Title"), max_length=200)
+    description = models.TextField(_("Description"))
     priority = models.CharField(
-        'Prioridad', 
-        max_length=10, 
-        choices=PriorityChoices.choices, 
-        default=PriorityChoices.MEDIUM
+        _("Priority"),
+        max_length=10,
+        choices=PriorityChoices.choices,
+        default=PriorityChoices.MEDIUM,
     )
     status = models.CharField(
-        'Estado', 
-        max_length=20, 
+        _("Status"),
+        max_length=20,
         choices=StatusChoices.choices,
-        default=StatusChoices.PENDING
+        default=StatusChoices.PENDING,
     )
-    resolution = models.TextField(
-        'Resolución', 
-        blank=True
-    )
+    resolution = models.TextField(_("Resolution"), blank=True)
     photos = models.ImageField(
-        'Fotos', 
-        upload_to='maintenance/', 
-        blank=True, 
-        null=True
+        _("Photos"), upload_to="maintenance/", blank=True, null=True
     )
-    created_at = models.DateTimeField(
-        'Fecha de creación', 
-        auto_now_add=True
-    )
-    updated_at = models.DateTimeField(
-        'Última actualización', 
-        auto_now=True
-    )
-    assigned_at = models.DateTimeField(
-        'Fecha de asignación', 
-        null=True, 
-        blank=True
-    )
-    resolved_at = models.DateTimeField(
-        'Fecha de resolución', 
-        null=True, 
-        blank=True
-    )
-    
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Last updated"), auto_now=True)
+    assigned_at = models.DateTimeField(_("Assigned to"), null=True, blank=True)
+    resolved_at = models.DateTimeField(_("Resolution date"), null=True, blank=True)
+
     class Meta:
-        ordering = ['-created_at']
-        verbose_name = 'Solicitud de Mantenimiento'
-        verbose_name_plural = 'Solicitudes de Mantenimiento'
-    
+        ordering = ["-created_at"]
+        verbose_name = _("Maintenance Request")
+        verbose_name_plural = _("Maintenance Requests")
+
     def __str__(self):
         return f"{self.room} - {self.title} [{self.get_priority_display()}]"
-    
+
     def get_priority_color(self):
-        """Retorna un color según la prioridad"""
+        # Returns color based on priority
         colors = {
-            self.PriorityChoices.LOW: 'info',
-            self.PriorityChoices.MEDIUM: 'warning',
-            self.PriorityChoices.HIGH: 'danger',
-            self.PriorityChoices.URGENT: 'dark',
+            self.PriorityChoices.LOW: "info",
+            self.PriorityChoices.MEDIUM: "warning",
+            self.PriorityChoices.HIGH: "danger",
+            self.PriorityChoices.URGENT: "dark",
         }
-        return colors.get(self.priority, 'secondary')
+        return colors.get(self.priority, "secondary")

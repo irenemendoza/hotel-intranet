@@ -139,12 +139,13 @@ main {
 .login-header {
     background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
     color: white;
-    padding: 40px 30px;
+    padding: 40px 0;
     text-align: center;
 }
 
 .login-logo {
-    max-width: 200px;
+    max-width: 80%;
+    width: 100%;
     height: auto;
     margin-bottom: 20px;
     background: white;
@@ -228,8 +229,9 @@ main {
     border: none;
 }
 
-/* Footer de la página de login */
-.footer-text {
+/* Footer */
+footer {
+    background-color: none;
     color: white;
     text-align: center;
     margin-top: 20px;
@@ -242,15 +244,15 @@ main {
     .login-container {
         padding: 10px;
     }
-    
+
     .login-header {
         padding: 30px 20px;
     }
-    
+
     .login-body {
         padding: 30px 25px;
     }
-    
+
     .login-logo {
         max-width: 160px;
     }
@@ -343,7 +345,7 @@ main {
     .status-absent { background-color: #dc3545; }
     .status-late { background-color: #ffc107; }
     .status-on-leave { background-color: #6c757d; }
-    
+
     .time-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;

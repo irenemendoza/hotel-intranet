@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Hotel Intranet</title>
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
@@ -19,10 +19,10 @@
     <div class="login-container">
         <div class="card login-card shadow-lg">
             <div class="login-header">
-                <img src="{% static 'images/logo-hotel-octavio.png' %}" alt="Hotel Octavio" class="img-fluid login-logo">
+                <img src="{% static 'images/levante_waves_logo.svg' %}" alt="Levante_waves_hotel_logo" class="img-fluid login-logo">
                 <h2>Sistema de Gestión Interna</h2>
             </div>
-            
+
             <div class="login-body">
                 {% if form.errors %}
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -55,11 +55,11 @@
                         <label for="id_username" class="form-label">
                             <i class="bi bi-person-fill me-1"></i>Usuario
                         </label>
-                        <input 
-                            type="text" 
-                            class="form-control" 
-                            id="id_username" 
-                            name="username" 
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="id_username"
+                            name="username"
                             placeholder="Ingresa tu usuario"
                             required
                             autofocus
@@ -71,11 +71,11 @@
                         <label for="id_password" class="form-label">
                             <i class="bi bi-lock-fill me-1"></i>Contraseña
                         </label>
-                        <input 
-                            type="password" 
-                            class="form-control password-input" 
-                            id="id_password" 
-                            name="password" 
+                        <input
+                            type="password"
+                            class="form-control password-input"
+                            id="id_password"
+                            name="password"
                             placeholder="Ingresa tu contraseña"
                             required
                             autocomplete="current-password"
@@ -86,9 +86,9 @@
                     </div>
 
                     <div class="form-check mb-3">
-                        <input 
-                            class="form-check-input" 
-                            type="checkbox" 
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
                             id="rememberMe"
                             name="remember_me"
                         >
@@ -118,21 +118,26 @@
             </div>
         </div>
 
-        <p class="footer-text">
-            Hotel Intranet © 2025 | Desarrollado por tu equipo
-        </p>
+        <footer class="text-center py-3 mt-5">
+            <div class="container">
+                <p class="mb-0 fw-bold"> Levante Waves Hotel</p>
+                <p class="mb-3">Where the Wind Meets the Waves</p>
+                <p class="mb-0">Tarifa · Strait of Gibraltar · Spain</p>
+                <p class="small mb-0 fw-bold">Sistema de Gestión Hotelera - Proyecto Portfolio 2025</p>
+            </div>
+        </footer>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script src="{% static 'js/main.js' %}"></script>
-    
+
     <script>
         function togglePassword() {
             const passwordInput = document.getElementById('id_password');
             const toggleIcon = document.getElementById('toggleIcon');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 toggleIcon.classList.remove('bi-eye');
@@ -148,7 +153,7 @@
             const btn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             const btnSpinner = document.getElementById('btnSpinner');
-            
+
             btn.disabled = true;
             btnText.classList.add('d-none');
             btnSpinner.classList.remove('d-none');

@@ -1,65 +1,54 @@
-from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.contrib.auth.models import User
-from django.core.validators import RegexValidator
-from django.utils import timezone
 from datetime import timedelta
 
+from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
-   
 
 class Department(models.Model):
-
     class ColorChoices(models.TextChoices):
-        AZUL = '#3B82F6', 'Azul'
-        VERDE = '#10B981', 'Verde'
-        AMARILLO = '#F59E0B', 'Amarillo'
-        ROJO = '#EF4444', 'Rojo'
-        PURPURA = '#8B5CF6', 'Púrpura'
-        ROSA = '#EC4899', 'Rosa'
-        NARANJA = '#F97316', 'Naranja'
-        CYAN = '#06B6D4', 'Cyan'
-        INDIGO = '#6366F1', 'Índigo'
-        LIMA = '#84CC16', 'Lima'
-        ESMERALDA = '#059669', 'Esmeralda'
-        GRIS = '#6B7280', 'Gris'
+        BLUE = "#3B82F6", _("Blue")
+        GREEN = "#10B981", _("Green")
+        YELLOW = "#F59E0B", _("Yellow")
+        RED = "#EF4444", _("Red")
+        PURPLE = "#8B5CF6", _("Purple")
+        PINK = "#EC4899", _("Pink")
+        ORANGE = "#F97316", _("Orange")
+        CYAN = "#06B6D4", _("Cyan")
+        INDIGO = "#6366F1", _("Indigo")
+        LIME = "#84CC16", _("Lima")
+        EMERALD = "#059669", _("Emerald")
+        GREY = "#6B7280", _("Grey")
 
-    # Departamentos del hotel:
+    # Hotel departments
     name = models.CharField(
-    'Nombre', 
-    max_length=50,
+        _("Name"),
+        max_length=50,
     )
     color = models.CharField(
-    'Color', 
-    max_length=7,
-    choices=ColorChoices.choices, 
-    default=ColorChoices.AZUL)
+        _("Color"),
+        max_length=7,
+        choices=ColorChoices.choices,
+        default=ColorChoices.BLUE,
+    )
     code = models.CharField(
-    'Código', 
-    max_length=3, 
-    unique=True,
-    validators=[
+        _("Code"),
+        max_length=3,
+        unique=True,
+        validators=[
             RegexValidator(
-                regex='^[A-Z]{3}$',
-                message='El código debe tener exactamente 3 letras mayúsculas',
-                code='invalid_code'
+                regex="^[A-Z]{3}$",
+                message="Code must be exactly 3 uppercase letters",
+                code="invalid_code",
             )
         ],
-        help_text='Código de 3 letras mayúsculas (ej: DIR, REC, LIM)'
+        help_text="3 uppercase letters code (e.g. : DIR, REC, LIM)",
     )
-    description = models.TextField(
-        'Descripción',
-        blank=True
-    )
-    is_active = models.BooleanField(
-        'Activo',
-        default=True
-        )
-    created_at = models.DateTimeField(
-        'Fecha de creación',
-        auto_now_add=True
-    )
+    description = models.TextField(_("Description"), blank=True)
+    is_active = models.BooleanField(_("Active"), default=True)
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -67,196 +56,146 @@ class Department(models.Model):
     def save(self, *args, **kwargs):
         if self.code:
             self.code = self.code.upper()
+        self.full_clean()
         super().save(*args, **kwargs)
 
+
 class Employee(models.Model):
-        
     class RoleChoices(models.TextChoices):
-        # Dirección
-        DIRECTOR = 'director', 'Director/a'
-        
-        # Recepción
-        JEFE_RECEPCION = 'jefe_recepcion', 'Jefe/a de Recepción'
-        RECEPCIONISTA = 'recepcionista', 'Recepcionista'
-        
-        # Limpieza
-        JEFE_LIMPIEZA = 'jefe_limpieza', 'Jefe/a de Limpieza'
-        CAMARERO_PISO = 'camarero_piso', 'Camarero/a de Piso'
-        
-        # Mantenimiento
-        JEFE_MANTENIMIENTO = 'jefe_mantenimiento', 'Jefe/a de Mantenimiento'
-        MANTENIMIENTO = 'mantenimiento', 'Personal de Mantenimiento'
-        
+        # Direction
+        DIRECTOR = "director", _("Director")
+
+        # Reception
+        RECEPTION_MANAGER = "reception_manager", _("Reception Manager")
+        RECEPTIONIST = "receptionist", _("Recepcionist")
+
+        # Housekeeping
+        HOUSEKEEPING_MANAGER = "housekeeping_manager", _("Housekeeping Manager")
+        HOUSEKEEPER = "housekeeper", _("Housekeeper")
+
+        # Maitenance
+        MAITENANCE_MANALGER = "maitenance_manager", _("Maitenance Manager")
+        MAITENANCE = "maitenance_staff", _("Maitenance Staff")
+
         # RRHH
-        RRHH = 'rrhh', 'Recursos Humanos'
-    
-    # ... campos existentes ...
-    
-    # Perfil del usuario con información del hotel
+        RRHH = "rrhh", _("Human Resources")
+
+    # User profile with hotel information
     user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='employee'
+        User, verbose_name=_("User"), on_delete=models.CASCADE, related_name="employee"
     )
     department = models.ForeignKey(
         Department,
-        on_delete=models.SET_NULL,
-        null=True,
-        verbose_name='Departamento'
+        verbose_name=_("Departament"),
+        on_delete=models.PROTECT,
     )
     role = models.CharField(
-        'Rol',
+        _("Role"),
         max_length=30,
         choices=RoleChoices.choices,
-        help_text='Rol del empleado en el hotel'
+        help_text="Employee role in the hotel",
     )
-    phone = models.CharField(
-        'Teléfono',
-        max_length=20,
-        blank=True
-    )
-        
-    avatar = models.ImageField(
-        'Avatar', 
-        upload_to='avatars/', 
-        blank=True, 
-        null=True
-        )
+    phone = models.CharField(_("Phone"), max_length=20, blank=True)
+
+    avatar = models.ImageField(_("Avatar"), upload_to="avatars/", blank=True, null=True)
     employee_number = models.CharField(
-        'Número de empleado', 
-        max_length=20, 
-        unique=True, 
-        blank=True, 
-        null=True
-        )
-    hire_date = models.DateField(
-        'Fecha de contratación', 
-        null=True, 
-        blank=True)
+        _("Employee number"), max_length=20, unique=True, blank=True, null=True
+    )
+    hire_date = models.DateField(_("Hire date"), null=True, blank=True)
     is_available = models.BooleanField(
-        'Disponible', 
-        default=True, 
-        help_text='Indica si el empleado está disponible para asignaciones'
-        )
+        _("Available"),
+        default=True,
+        help_text=_("Indicates if the employee is available for assignments"),
+    )
     bio = models.TextField(
-        'Biografía', 
-        blank=True, 
-        help_text='Información adicional del empleado'
-        )
-    created_at = models.DateTimeField(
-        'Fecha de creación', 
-        auto_now_add=True
-        )
-    updated_at = models.DateTimeField(
-        'Última actualización', 
-        auto_now=True
-        )
-    
-    
+        _("Biography"), blank=True, help_text=_("Additional employee information")
+    )
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Last updated"), auto_now=True)
+
     class Meta:
-        verbose_name = 'Perfil de Usuario'
-        verbose_name_plural = 'Perfiles de Usuarios'
-    
+        verbose_name = _("Employee Profile")
+        verbose_name_plural = _("Employee Profiles")
+
     def __str__(self):
-        return f"{self.user.get_full_name()} - {self.get_role_display()}"
-    
+        return f"{self.get_full_name()} - {self.get_role_display()}"
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.assign_to_group()
-    
+
     def assign_to_group(self):
-        """Asigna el usuario al grupo correspondiente según su rol"""
+        # Assigns the user to the corresponding group based on their role
         from django.contrib.auth.models import Group
-        
-        # Mapeo de roles a grupos
+
+        # Role to group mapping
         role_group_map = {
-            'director': ['Dirección', 'Supervisores'],
-            'jefe_recepcion': ['Recepción', 'Supervisores'],
-            'recepcionista': ['Recepción'],
-            'jefe_limpieza': ['Limpieza', 'Supervisores'],
-            'camarero_piso': ['Limpieza'],
-            'jefe_mantenimiento': ['Mantenimiento', 'Supervisores'],
-            'mantenimiento': ['Mantenimiento'],
-            'rrhh': ['RRHH', 'Supervisores'],
+            "director": ["Management", "Supervisors"],
+            "reception_manager": ["Reception", "Supervisors"],
+            "recepcionist": ["Reception"],
+            "housekeeping_manager": ["Housekeeping", "Supervisors"],
+            "housekeeper": ["Housekeeping"],
+            "maitenance_manager": ["Maitenance", "Supervisors"],
+            "mantenance": ["Maitenance"],
+            "rrhh": ["RRHH", "Supervisors"],
         }
-        
+
         groups = role_group_map.get(self.role, [])
         self.user.groups.clear()
-        
+
         for group_name in groups:
             group, created = Group.objects.get_or_create(name=group_name)
             self.user.groups.add(group)
-    
+
     def is_supervisor(self):
-        """Verifica si el usuario es un supervisor/jefe"""
+        # Checks if the user is a supervisor/manager
         return self.role in [
-            'director', 'jefe_recepcion', 'jefe_limpieza', 
-            'jefe_mantenimiento', 'rrhh'
+            "director",
+            "reception_manager",
+            "housekeeping_manager",
+            "maintenance_manager",
+            "rrhh",
         ]
-    
+
     def can_manage_team(self):
-        """Verifica si puede gestionar su equipo"""
+        # Checks if they can manage their team
         return self.is_supervisor()
-    
+
     def get_supervised_employees(self):
-        """Obtiene los empleados bajo su supervisión"""
+        # Gets the employees under their supervision
         if not self.can_manage_team():
             return Employee.objects.none()
-        
-        # Mapeo de jefes a sus subordinados
+
+        # Mapping of managers to their subordinates
         supervision_map = {
-            'director': Employee.objects.all(),  # Ve todos
-            'jefe_recepcion': Employee.objects.filter(role='recepcionista'),
-            'jefe_limpieza': Employee.objects.filter(role='camarero_piso'),
-            'jefe_mantenimiento': Employee.objects.filter(role='mantenimiento'),
-            'rrhh': Employee.objects.all(),  # RRHH ve todos
+            "director": Employee.objects.all(),  # Sees everyone
+            "reception_manager": Employee.objects.filter(role="recepcionist"),
+            "housekeeper_manager": Employee.objects.filter(role="housekeeper"),
+            "maintenance_manager": Employee.objects.filter(role="maintenance_staff"),
+            "rrhh": Employee.objects.all(),  # Sees everyone
         }
-        
+
         return supervision_map.get(self.role, Employee.objects.none())
-    
-    def __str__(self):
-        return f"{self.user.get_full_name()} - {self.department}"
-    
+
     def get_full_name(self):
         return self.user.get_full_name() or self.user.username
 
     def get_current_attendance(self):
-        """Obtiene el fichaje activo actual (sin check_out)"""
+        # Gets the current active attendance (without check_out)
         return self.attendances.filter(check_out__isnull=True).first()
-    
+
     def is_checked_in(self):
-        """Verifica si el empleado está fichado actualmente"""
+        # Gets if the employee is currently clocked in
         return self.get_current_attendance() is not None
-    
+
     def get_today_work_hours(self):
-        """Calcula las horas trabajadas hoy"""
+        # Calculates hours worked today
         today = timezone.now().date()
         attendances = self.attendances.filter(check_in__date=today)
-        
+
         total_hours = timedelta()
         for attendance in attendances:
             if attendance.check_out:
                 total_hours += attendance.duration()
-        
+
         return total_hours
-
-
-
-@receiver(post_save, sender=User)
-def create_employee_profile(sender, instance, created, **kwargs):
-    """Crea un Employee cuando se crea un User"""
-    if created:
-        # Solo crear si no existe
-        if not hasattr(instance, 'employee'):
-            Employee.objects.create(
-                user=instance,
-                # No asignar rol automáticamente, 
-                # debe hacerse manualmente
-            )
-
-@receiver(post_save, sender=User)
-def save_employee_profile(sender, instance, **kwargs):
-    """Guarda el Employee cuando se guarda el User"""
-    if hasattr(instance, 'employee'):
-        instance.employee.save()
-

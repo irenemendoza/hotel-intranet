@@ -162,7 +162,7 @@ class Command(BaseCommand):
                 "employee_number": "EMP002",
             },
             {
-                "username": "ana.recepcion",
+                "username": "recepcion1",
                 "password": "demo123",
                 "first_name": "Ana",
                 "last_name": "Martínez",
@@ -173,7 +173,7 @@ class Command(BaseCommand):
                 "employee_number": "EMP003",
             },
             {
-                "username": "pedro.recepcion",
+                "username": "recepcion2",
                 "password": "demo123",
                 "first_name": "Pedro",
                 "last_name": "López",
@@ -196,7 +196,7 @@ class Command(BaseCommand):
                 "employee_number": "EMP005",
             },
             {
-                "username": "carmen.limpieza",
+                "username": "limpieza1",
                 "password": "demo123",
                 "first_name": "Carmen",
                 "last_name": "Ruiz",
@@ -207,7 +207,7 @@ class Command(BaseCommand):
                 "employee_number": "EMP006",
             },
             {
-                "username": "isabel.limpieza",
+                "username": "limpieza2",
                 "password": "demo123",
                 "first_name": "Isabel",
                 "last_name": "Sánchez",
@@ -218,7 +218,7 @@ class Command(BaseCommand):
                 "employee_number": "EMP007",
             },
             {
-                "username": "rosa.limpieza",
+                "username": "limpieza3",
                 "password": "demo123",
                 "first_name": "Rosa",
                 "last_name": "Moreno",
@@ -241,7 +241,7 @@ class Command(BaseCommand):
                 "employee_number": "EMP009",
             },
             {
-                "username": "juan.mantenimiento",
+                "username": "mantenimiento1",
                 "password": "demo123",
                 "first_name": "Juan",
                 "last_name": "Díaz",
@@ -252,7 +252,7 @@ class Command(BaseCommand):
                 "employee_number": "EMP010",
             },
             {
-                "username": "antonio.mantenimiento",
+                "username": "mantenimiento2",
                 "password": "demo123",
                 "first_name": "Antonio",
                 "last_name": "Jiménez",
