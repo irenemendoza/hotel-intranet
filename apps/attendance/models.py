@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
 from django.utils import timezone
@@ -5,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Attendance(models.Model):
-    # Employee clock-in and clock-out records
+    """Employee clock-in and clock-out records"""
 
     class StatusChoices(models.TextChoices):
         PRESENT = "present", _("Present")
@@ -27,10 +28,7 @@ class Attendance(models.Model):
         choices=StatusChoices.choices,
         default=StatusChoices.PRESENT,
     )
-    notes = models.TextField(
-        _("Notes"), blank=True, help_text="Observations about the attendance record"
-    )
-    created_at = models.DateTimeField(_("Created_at"), auto_now_add=True)
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
 
     class Meta:
         verbose_name = _("Attendance")
@@ -58,22 +56,48 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.employee.get_full_name()} - {self.check_in.strftime('%d/%m/%Y %H:%M')}"
 
+    @property
     def duration(self):
-        # Calculates shift duration
+        """Calculates shift duration"""
         if self.check_out:
             return self.check_out - self.check_in
         return timezone.now() - self.check_in
 
+    @property
     def duration_formatted(self):
-        # Returns duration in readable format
-        duration = self.duration()
+        """Returns duration in readable format"""
+        duration = self.duration
         hours = int(duration.total_seconds() // 3600)
         minutes = int((duration.total_seconds() % 3600) // 60)
         return f"{hours}h {minutes}m"
 
     def is_overtime(self, standard_hours=8):
-        # Check if there are overtime hours (more than 8 hours)
+        """_('Check if there are overtime hours (more than 8 hours)')"""
         if self.check_out:
             hours = self.duration().total_seconds() / 3600
             return hours > standard_hours
         return False
+
+    @classmethod
+    def create_check_in(cls, employee):
+        """Creates check-in attendance"""
+        # Verify there isn't any attendance already open
+        open_attendance = cls.objects.filter(
+            employee=employee, check_out__isnull=True
+        ).first()
+
+        if open_attendance:
+            raise ValidationError(_("Employee already has an open attendance"))
+
+        return cls.objects.create(
+            employee=employee,
+            check_in=timezone.now(),
+        )
+
+    def process_check_out(self):
+        """Processes check-out"""
+        if self.check_out:
+            raise ValidationError(_("Attendance already checked out"))
+
+        self.check_out = timezone.now()
+        self.save()
