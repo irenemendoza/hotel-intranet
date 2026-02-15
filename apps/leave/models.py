@@ -7,7 +7,7 @@ from apps.employees.models import Employee
 
 
 class Leave(models.Model):
-    # Leave and vacation management
+    """Leave and vacation management"""
 
     class LeaveTypeChoices(models.TextChoices):
         VACATION = "vacation", _("Vacation")
@@ -65,7 +65,7 @@ class Leave(models.Model):
         verbose_name_plural = _("Leaves")
         ordering = ["-created_at"]
 
-        constraint = [
+        constraints = [
             models.CheckConstraint(
                 condition=Q(end_date__gte=F("start_date")),
                 name="valid_leave_date_range",
@@ -76,5 +76,5 @@ class Leave(models.Model):
         return f"{self.employee.get_full_name()} - {self.get_leave_type_display()} ({self.start_date} - {self.end_date})"
 
     def duration_days(self):
-        # Calculates duration in days
+        """Calculates duration in days"""
         return (self.end_date - self.start_date).days + 1

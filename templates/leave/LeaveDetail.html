@@ -173,7 +173,7 @@
                         {% endif %}
                     </div>
 
-                    {% if leave.status == 'pending' %}
+                    {% if leave.status == 'pending' and leave.employee == user.employee %}
                     <div class="d-grid gap-2">
                         <a href="{% url 'leave:update' leave.pk %}" class="btn btn-primary">
                             <i class="fas fa-edit me-2"></i>Editar Solicitud

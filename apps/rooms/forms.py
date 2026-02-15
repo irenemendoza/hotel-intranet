@@ -1,165 +1,174 @@
 from django import forms
-from django.utils import timezone
-from apps.rooms.models import Room, RoomType, CleaningTask, MaintenanceTask
-from apps.employees.models import Employee
 from django.contrib.auth.models import User
+from django.utils import timezone
+
+from apps.employees.models import Employee
+from apps.rooms.models import CleaningTask, MaintenanceTask, Room, RoomType
+
 
 class RoomTypeForm(forms.ModelForm):
     class Meta:
         model = RoomType
-        fields = ['name', 'code', 'capacity', 'description', 'amenities', 'is_active']
+        fields = ["name", "code", "capacity", "description", "amenities", "is_active"]
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: Suite Deluxe'
-            }),
-            'code': forms.TextInput(attrs={
-                'class': 'form-control',
-                'style': 'text-transform: uppercase;',
-                'maxlength': '10',
-                'placeholder': 'Ej: SUI-DLX'
-            }),
-            'capacity': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '1',
-                'max': '10'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Descripción del tipo de habitación...'
-            }),
-            'amenities': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Lista de comodidades: WiFi, TV, Minibar, etc.'
-            }),
-            'is_active': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            })
+            "name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Ej: Suite Deluxe"}
+            ),
+            "code": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "style": "text-transform: uppercase;",
+                    "maxlength": "10",
+                    "placeholder": "Ej: SUI-DLX",
+                }
+            ),
+            "capacity": forms.NumberInput(
+                attrs={"class": "form-control", "min": "1", "max": "10"}
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Descripción del tipo de habitación...",
+                }
+            ),
+            "amenities": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Lista de comodidades: WiFi, TV, Minibar, etc.",
+                }
+            ),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
-    
+
     def clean_code(self):
-        code = self.cleaned_data.get('code', '').upper()
-        if not code:
-            raise forms.ValidationError('El código es requerido')
+        code = self.cleaned_data.get("code", "").upper()
+
+        if not all(c.isalnum() or c == "-" for c in code):
+            raise forms.ValidationError(
+                "El código solo puede contener letras, números y guiones"
+            )
+
         return code
 
 
 class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = ['number', 'floor', 'room_type', 'status', 'occupancy', 'notes', 'is_active']
+        fields = [
+            "number",
+            "floor",
+            "room_type",
+            "status",
+            "occupancy",
+            "notes",
+            "is_active",
+        ]
         widgets = {
-            'number': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: 101, 201, 301A'
-            }),
-            'floor': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0',
-                'max': '50'
-            }),
-            'room_type': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'status': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'occupancy': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'notes': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Notas adicionales sobre la habitación...'
-            }),
-            'is_active': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            })
+            "number": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Ej: 101, 201, 301A"}
+            ),
+            "floor": forms.NumberInput(
+                attrs={"class": "form-control", "min": "0", "max": "50"}
+            ),
+            "room_type": forms.Select(attrs={"class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-control"}),
+            "occupancy": forms.Select(attrs={"class": "form-control"}),
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Notas adicionales sobre la habitación...",
+                }
+            ),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
 
 class CleaningTaskForm(forms.ModelForm):
     class Meta:
         model = CleaningTask
-        fields = ['room', 'assigned_to', 'cleaning_type', 'priority', 'notes']
+        fields = ["room", "assigned_to", "cleaning_type", "priority", "notes"]
         widgets = {
-            'room': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'assigned_to': forms.Select(attrs={
-                'class': 'form-control',
-                'required': False,
-                'empty_label': "Sin asignar",
-            }),
-            'cleaning_type': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'priority': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '1',
-                'max': '5'
-            }),
-            'notes': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Instrucciones especiales...'
-            })
+            "room": forms.Select(attrs={"class": "form-control"}),
+            "assigned_to": forms.Select(
+                attrs={
+                    "class": "form-control",
+                    "required": False,
+                    "empty_label": "Sin asignar",
+                }
+            ),
+            "cleaning_type": forms.Select(attrs={"class": "form-control"}),
+            "priority": forms.NumberInput(
+                attrs={"class": "form-control", "min": "1", "max": "5"}
+            ),
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Instrucciones especiales...",
+                }
+            ),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['assigned_to'].required = False
+        self.fields["assigned_to"].required = False
         # Filtrar solo usuarios del departamento de limpieza
         from apps.employees.models import Department
+
         try:
-            limpieza_dept = Department.objects.get(code='LIM')
+            limpieza_dept = Department.objects.get(code="LIM")
             cleaning_staff = Employee.objects.filter(
-                department=limpieza_dept,
-                is_available=True
-            ).select_related('user')
-            
+                department=limpieza_dept, is_available=True
+            ).select_related("user")
+
             # Asignación directa del queryset de Employee
-            self.fields['assigned_to'].queryset = cleaning_staff   
+            self.fields["assigned_to"].queryset = cleaning_staff
 
             # Personalización de cómo se muestra para cada empleado
-            self.fields['assigned_to'].label_from_instance = lambda obj: obj.get_full_name() or obj.username
+            self.fields["assigned_to"].label_from_instance = (
+                lambda obj: obj.get_full_name() or obj.username
+            )
         except Department.DoesNotExist:
             pass
-        
+
         # Filtrar solo habitaciones sucias o que necesiten limpieza
-        self.fields['room'].queryset = Room.objects.filter(
-            is_active=True
-        ).exclude(status=Room.StatusChoices.CLEAN)
+        self.fields["room"].queryset = Room.objects.filter(is_active=True).exclude(
+            status=Room.StatusChoices.CLEAN
+        )
 
 
 class CleaningTaskUpdateForm(forms.ModelForm):
     """Formulario para que el personal de limpieza actualice el estado"""
+
     class Meta:
         model = CleaningTask
-        fields = ['status', 'notes', 'photos']
+        fields = ["status", "notes", "photos"]
         widgets = {
-            'status': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'notes': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Notas sobre la limpieza realizada...'
-            }),
-            'photos': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': 'image/*'
-            })
+            "status": forms.Select(attrs={"class": "form-control"}),
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Notas sobre la limpieza realizada...",
+                }
+            ),
+            "photos": forms.FileInput(
+                attrs={"class": "form-control", "accept": "image/*"}
+            ),
         }
-    
+
     def save(self, commit=True):
         instance = super().save(commit=False)
-        
+
         # Si se marca como completada, registrar la hora
-        if instance.status == CleaningTask.StatusChoices.COMPLETED and not instance.completed_at:
+        if (
+            instance.status == CleaningTask.StatusChoices.COMPLETED
+            and not instance.completed_at
+        ):
             instance.completed_at = timezone.now()
             if not instance.started_at:
                 instance.started_at = timezone.now()
@@ -167,11 +176,14 @@ class CleaningTaskUpdateForm(forms.ModelForm):
             instance.room.status = Room.StatusChoices.CLEAN
             instance.room.last_cleaned = timezone.now()
             instance.room.save()
-        
+
         # Si se marca como en progreso, registrar hora de inicio
-        elif instance.status == CleaningTask.StatusChoices.IN_PROGRESS and not instance.started_at:
+        elif (
+            instance.status == CleaningTask.StatusChoices.IN_PROGRESS
+            and not instance.started_at
+        ):
             instance.started_at = timezone.now()
-        
+
         if commit:
             instance.save()
         return instance
@@ -180,30 +192,29 @@ class CleaningTaskUpdateForm(forms.ModelForm):
 class MaintenanceRequestForm(forms.ModelForm):
     class Meta:
         model = MaintenanceTask
-        fields = ['room', 'title', 'description', 'priority', 'photos']
+        fields = ["room", "title", "description", "priority", "photos"]
         widgets = {
-            'room': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: Aire acondicionado no funciona'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Describe el problema en detalle...'
-            }),
-            'priority': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'photos': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': 'image/*'
-            })
+            "room": forms.Select(attrs={"class": "form-control"}),
+            "title": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Ej: Aire acondicionado no funciona",
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Describe el problema en detalle...",
+                }
+            ),
+            "priority": forms.Select(attrs={"class": "form-control"}),
+            "photos": forms.FileInput(
+                attrs={"class": "form-control", "accept": "image/*"}
+            ),
         }
-    
-    def save(self, user=None, commit=True):  # ← CAMBIO DE ORDEN: user primero
+
+    def save(self, user=None, commit=True):
         instance = super().save(commit=False)
         if user:
             instance.reported_by = user
@@ -218,66 +229,83 @@ class MaintenanceRequestForm(forms.ModelForm):
 
 class MaintenanceRequestUpdateForm(forms.ModelForm):
     """Formulario para actualizar el estado del mantenimiento"""
+
     class Meta:
         model = MaintenanceTask
-        fields = ['assigned_to', 'status', 'resolution', 'title', 'description', 'priority']
+        fields = [
+            "room",
+            "assigned_to",
+            "status",
+            "resolution",
+            "title",
+            "description",
+            "priority",
+        ]
         widgets = {
-            'assigned_to': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'status': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'title': forms.TextInput(attrs={
-                'class': 'form-control'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4
-            }),
-            'priority': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'resolution': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Describe cómo se resolvió el problema...'
-            })
+            "room": forms.Select(
+                attrs={"class": "form-select", "disabled": "disabled"}
+            ),
+            "assigned_to": forms.Select(attrs={"class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-control"}),
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+            "priority": forms.Select(attrs={"class": "form-control"}),
+            "resolution": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Describe cómo se resolvió el problema...",
+                }
+            ),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk:
+            self.fields["room"].disabled = True
         # Filtrar solo usuarios del departamento de mantenimiento
         from apps.employees.models import Department
+
         try:
-            mant_dept = Department.objects.get(code='MAN')
+            mant_dept = Department.objects.get(code="MAN")
             maintenance_staff = Employee.objects.filter(
-                department=mant_dept,
-                is_available=True
-            ).select_related('user')
-            self.fields['assigned_to'].queryset = User.objects.filter(
-                id__in=maintenance_staff.values_list('user_id', flat=True)
+                department=mant_dept, is_available=True
+            ).select_related("user")
+            self.fields["assigned_to"].queryset = User.objects.filter(
+                id__in=maintenance_staff.values_list("user_id", flat=True)
             )
-            self.fields['assigned_to'].label_from_instance = lambda obj: obj.get_full_name() or obj.username
+            self.fields["assigned_to"].label_from_instance = (
+                lambda obj: obj.get_full_name() or obj.username
+            )
         except Department.DoesNotExist:
             # Si no existe el departamento, mostrar todos los usuarios
-            self.fields['assigned_to'].queryset = User.objects.all()
-    
+            self.fields["assigned_to"].queryset = User.objects.all()
+
     def save(self, commit=True):
         instance = super().save(commit=False)
-        
+
         # Actualizar fechas según el estado
-        if instance.status == MaintenanceTask.StatusChoices.ASSIGNED and not instance.assigned_at:
+        if (
+            instance.status == MaintenanceTask.StatusChoices.ASSIGNED
+            and not instance.assigned_at
+        ):
             instance.assigned_at = timezone.now()
-        elif instance.status == MaintenanceTask.StatusChoices.IN_PROGRESS and not instance.started_at:
+        elif (
+            instance.status == MaintenanceTask.StatusChoices.IN_PROGRESS
+            and not instance.started_at
+        ):
             instance.started_at = timezone.now()
-        elif instance.status == MaintenanceTask.StatusChoices.COMPLETED and not instance.resolved_at:
+        elif (
+            instance.status == MaintenanceTask.StatusChoices.COMPLETED
+            and not instance.resolved_at
+        ):
             instance.resolved_at = timezone.now()
             # Actualizar estado de la habitación
             if instance.room:
                 instance.room.status = Room.StatusChoices.INSPECTED
                 instance.room.save()
-        
+
         if commit:
             instance.save()
         return instance

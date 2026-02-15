@@ -73,9 +73,9 @@ class Employee(models.Model):
         HOUSEKEEPING_MANAGER = "housekeeping_manager", _("Housekeeping Manager")
         HOUSEKEEPER = "housekeeper", _("Housekeeper")
 
-        # Maitenance
-        MAITENANCE_MANALGER = "maitenance_manager", _("Maitenance Manager")
-        MAITENANCE = "maitenance_staff", _("Maitenance Staff")
+        # Maintenance
+        MAINTENANCE_MANAGER = "maintenance_manager", _("Maintenance Manager")
+        MAINTENANCE = "maintenance_staff", _("Maintenance Staff")
 
         # RRHH
         RRHH = "rrhh", _("Human Resources")
@@ -125,7 +125,7 @@ class Employee(models.Model):
         self.assign_to_group()
 
     def assign_to_group(self):
-        # Assigns the user to the corresponding group based on their role
+        """Assigns the user to the corresponding group based on their role"""
         from django.contrib.auth.models import Group
 
         # Role to group mapping
@@ -148,7 +148,7 @@ class Employee(models.Model):
             self.user.groups.add(group)
 
     def is_supervisor(self):
-        # Checks if the user is a supervisor/manager
+        """Checks if the user is a supervisor/manager"""
         return self.role in [
             "director",
             "reception_manager",
@@ -158,20 +158,20 @@ class Employee(models.Model):
         ]
 
     def can_manage_team(self):
-        # Checks if they can manage their team
+        """Checks if they can manage their team"""
         return self.is_supervisor()
 
     def get_supervised_employees(self):
-        # Gets the employees under their supervision
+        """Gets the employees under their supervision"""
         if not self.can_manage_team():
             return Employee.objects.none()
 
         # Mapping of managers to their subordinates
         supervision_map = {
             "director": Employee.objects.all(),  # Sees everyone
-            "reception_manager": Employee.objects.filter(role="recepcionist"),
+            "reception_manager": Employee.objects.filter(role="receptionist"),
             "housekeeper_manager": Employee.objects.filter(role="housekeeper"),
-            "maintenance_manager": Employee.objects.filter(role="maintenance_staff"),
+            "maintenance_manager": Employee.objects.filter(role="maintenance"),
             "rrhh": Employee.objects.all(),  # Sees everyone
         }
 
@@ -181,15 +181,15 @@ class Employee(models.Model):
         return self.user.get_full_name() or self.user.username
 
     def get_current_attendance(self):
-        # Gets the current active attendance (without check_out)
+        """Gets the current active attendance (without check_out)"""
         return self.attendances.filter(check_out__isnull=True).first()
 
     def is_checked_in(self):
-        # Gets if the employee is currently clocked in
+        """Gets if the employee is currently clocked in"""
         return self.get_current_attendance() is not None
 
     def get_today_work_hours(self):
-        # Calculates hours worked today
+        """Calculates hours worked today"""
         today = timezone.now().date()
         attendances = self.attendances.filter(check_in__date=today)
 

@@ -1,4 +1,6 @@
 {% extends 'layout.html' %}
+
+
 {% load static %}
 
 {% block title %}Dashboard Jefe de Recepción - {{ block.super }}{% endblock %}
@@ -16,7 +18,7 @@
     </div>
 
     <!-- Incluir Widget de Fichaje Rápido -->
-    {% include '_includes/fichaje_rapido.html' %}
+    {% include '_includes/_fichaje_rapido.html' %}
 
 
     <!-- KPIs Principales -->
@@ -92,8 +94,8 @@
         </div>
     </div>
 
- 
-    <!-- Alertas y Acciones Prioritarias A COMPLETARRRRRRRRR-->
+
+    <!-- Alertas y Acciones Prioritarias -->
     {% if urgent_issues %}
     <div class="row mb-4">
         <div class="col-12">
@@ -320,7 +322,7 @@ team
                                     <strong>{{ leave.employee.get_full_name }}</strong>
                                     <br>
                                     <small class="text-muted">
-                                        <i class="bi bi-calendar"></i> 
+                                        <i class="bi bi-calendar"></i>
                                         {{ leave.start_date|date:"d/m" }} - {{ leave.end_date|date:"d/m" }}
                                     </small>
                                 </div>
@@ -377,18 +379,12 @@ team
                                 <span>Aprobar Permisos</span>
                             </a>
                         </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'attendance:report' %}" class="btn btn-outline-info quick-action-btn w-100">
-                                <i class="bi bi-graph-up me-2"></i>
-                                <span>Reportes</span>
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div> 
+</div>
 
 
 

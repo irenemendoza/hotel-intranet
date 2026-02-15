@@ -19,8 +19,8 @@
             <div class="d-flex justify-content-between align-items-start">
                 <div class="d-flex align-items-center">
                     {% if employee.avatar %}
-                        <img src="{{ employee.avatar.url }}" 
-                             alt="{{ employee.get_full_name }}" 
+                        <img src="{{ employee.avatar.url }}"
+                             alt="{{ employee.get_full_name }}"
                              class="rounded-circle me-3"
                              style="width: 80px; height: 80px; object-fit: cover;">
                     {% else %}
@@ -131,7 +131,7 @@
                             <label class="text-muted small mb-1">Departamento</label>
                             <p class="mb-0">
                                 {% if employee.department %}
-                                    <a href="{% url 'department:detail' employee.department.pk %}" class="text-decoration-none">
+                                    <a href="{% url 'departments:detail' employee.department.pk %}" class="text-decoration-none">
                                         <span class="badge" style="background-color: {{ employee.department.color }};">
                                             {{ employee.department.name }}
                                         </span>
@@ -318,7 +318,7 @@
                                     <div>
                                         <span class="badge bg-warning">Pendiente</span>
                                         <br>
-                                        <a href="{% url 'attendance:leave_detail' leave.pk %}" class="btn btn-sm btn-outline-primary mt-2">
+                                        <a href="{% url 'leave:detail' leave.pk %}" class="btn btn-sm btn-outline-primary mt-2">
                                             Ver
                                         </a>
                                     </div>
@@ -379,7 +379,7 @@
                             <span class="fs-4 fw-bold text-primary">{{ monthly_stats.days_worked }}</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-primary" 
+                            <div class="progress-bar bg-primary"
                                  style="width: {% widthratio monthly_stats.days_worked 22 100 %}%"></div>
                         </div>
                         <small class="text-muted">de ~22 días laborables</small>
@@ -422,11 +422,8 @@
                     <a href="{% url 'employees:update' employee.pk %}" class="btn btn-outline-warning">
                         <i class="bi bi-pencil me-2"></i>Editar Empleado
                     </a>
-                    <a href="{% url 'attendance:report' %}?employee={{ employee.pk }}" class="btn btn-outline-primary">
-                        <i class="bi bi-file-text me-2"></i>Ver Reporte Completo
-                    </a>
                     {% if employee.department %}
-                    <a href="{% url 'department:detail' employee.department.pk %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'departments:detail' employee.department.pk %}" class="btn btn-outline-secondary">
                         <i class="bi bi-building me-2"></i>Ver Departamento
                     </a>
                     {% endif %}

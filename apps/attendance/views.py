@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 
 from apps.leave.models import Leave
 
@@ -121,16 +121,17 @@ class AttendanceDashboardView(LoginRequiredMixin, ListView):
         return context
 
 
-class MyAttendanceView(LoginRequiredMixin, View):
+class MyAttendanceView(LoginRequiredMixin, TemplateView):
     """Main attendance view for employees"""
 
     template_name = "attendance/MyAttendance.html"
 
-    def get(self, request):
-        employee = request.user.employee
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        employee = self.request.user.employee
+        today = timezone.now().date()
 
         # Get today's attendance
-        today = timezone.now().date()
         current_attendance = Attendance.objects.filter(
             employee=employee, check_in__date=today
         ).first()
@@ -150,17 +151,19 @@ class MyAttendanceView(LoginRequiredMixin, View):
             "-check_in"
         )[:10]
 
-        context = {
-            "employee": employee,
-            "current_attendance": current_attendance,
-            "is_checked_in": current_attendance is not None
-            and current_attendance.check_out is None,
-            "recent_attendances": recent_attendances,
-            "today_hours_h": today_hours_h,
-            "today_hours_m": today_hours_m,
-        }
+        context.update(
+            {
+                "employee": employee,
+                "current_attendance": current_attendance,
+                "is_checked_in": current_attendance is not None
+                and current_attendance.check_out is None,
+                "recent_attendances": recent_attendances,
+                "today_hours_h": today_hours_h,
+                "today_hours_m": today_hours_m,
+            }
+        )
 
-        return render(request, self.template_name, context)
+        return context
 
 
 class AttendanceCheckInView(LoginRequiredMixin, View):
@@ -267,13 +270,19 @@ class AttendanceHistoryView(LoginRequiredMixin, ListView):
             if attendance.check_out:
                 total_hours += attendance.duration
 
+        # Calcular días laborables del mes
+        workdays = self._count_workdays(first_day_month, today)
+
+        # Absent days = total days - work days
+        absent_days = workdays - monthly_attendances.count()
+
         # Convert to hours
         total_hours_decimal = total_hours.total_seconds() / 3600
 
         context["summary"] = {
             "total_days": monthly_attendances.count(),
             "late_count": monthly_attendances.filter(status="late").count(),
-            "absent_count": 0,  # Adjust based on your logic
+            "absent_count": absent_days,
             "total_hours": round(total_hours_decimal, 1),
         }
 
@@ -281,25 +290,12 @@ class AttendanceHistoryView(LoginRequiredMixin, ListView):
 
         return context
 
-
-class AttendanceReportView(LoginRequiredMixin, View):
-    """View for generating attendance reports"""
-
-    template_name = "attendance/AttendanceReport.html"
-
-    def get(self, request):
-        context = {
-            "years": range(timezone.now().year - 2, timezone.now().year + 1),
-            "current_year": timezone.now().year,
-            "recent_reports": [],  # Add logic for saved reports here
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request):
-        # Implement report generation logic here
-        report_type = request.POST.get("report_type")
-        format_type = request.POST.get("format")
-
-        # For now just redirects back
-        messages.success(request, "Funcionalidad de reportes en desarrollo")
-        return redirect("attendance:report")
+    def _count_workdays(self, start_date, end_date):
+        """Count working days (mon-fri) in a range"""
+        workdays = 0
+        current = start_date
+        while current <= end_date:
+            if current.weekday() < 5:  # 0=lun, 4=vie
+                workdays += 1
+            current += timedelta(days=1)
+        return workdays

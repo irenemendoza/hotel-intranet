@@ -13,11 +13,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.WARNING("Creando departamentos..."))
 
         departments_data = [
-            {"name": "Dirección", "code": "DIR"},
-            {"name": "Recepción", "code": "REC"},
-            {"name": "Limpieza", "code": "LIM"},
-            {"name": "Mantenimiento", "code": "MAN"},
-            {"name": "Restaurante", "code": "RES"},
+            {"name": "Direction", "code": "DIR"},
+            {"name": "Reception", "code": "REC"},
+            {"name": "Housekeeping", "code": "LIM"},
+            {"name": "Maintenance", "code": "MAN"},
         ]
 
         for dept_data in departments_data:

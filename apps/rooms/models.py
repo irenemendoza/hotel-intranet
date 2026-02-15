@@ -12,7 +12,8 @@ from apps.employees.models import Employee
 
 
 class RoomType(models.Model):
-    # Room type (Single, Double, Suite...)
+    """Room type (Single, Double, Suite...)"""
+
     name = models.CharField(_("Name"), max_length=50)
     code = models.CharField(_("Code"), max_length=10, unique=True)
     capacity = models.PositiveIntegerField(
@@ -33,7 +34,7 @@ class RoomType(models.Model):
 
 
 class Reservation(models.Model):
-    # Room reservation
+    """Room reservation"""
 
     class StatusChoices(models.TextChoices):
         PENDING = "pending", _("Pending")
@@ -200,7 +201,7 @@ class Reservation(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        # Generate reservation number if it doesn't exist
+        """Generate reservation number if it doesn't exist"""
         if not self.reservation_number:
             self.reservation_number = self.generate_reservation_number()
 
@@ -217,7 +218,7 @@ class Reservation(models.Model):
         super().save(*args, **kwargs)
 
     def clean(self):
-        # Model validations
+        """Model validations"""
         super().clean()
 
         # Validate dates
@@ -230,15 +231,6 @@ class Reservation(models.Model):
         # Validate room capacity
         if self.room:
             total_guests = self.adults + self.children
-            if total_guests > self.room.room_type.capacity:
-                raise ValidationError(
-                    {
-                        "adults": _(
-                            "This room has a maximum capacity of %(capacity)s guests"
-                        )
-                        % {"capacity": self.room.room_type.capacity}
-                    }
-                )
 
         # Validate room availability
         if self.room and self.check_in_date and self.check_out_date:
@@ -262,31 +254,31 @@ class Reservation(models.Model):
 
     @property
     def is_active(self):
-        # Checks if reservation is active (guest in-house)
+        """Checks if reservation is active (guest in-house)"""
         return self.status == self.StatusChoices.CHECKED_IN
 
     @property
     def is_confirmed(self):
-        # Checks if reservation is confirmed
+        """Checks if reservation is confirmed"""
         return self.status == self.StatusChoices.CONFIRMED
 
     @property
     def is_completed(self):
-        # Checks if reservation is completed
+        """Checks if reservation is completed"""
         return self.status == self.StatusChoices.CHECKED_OUT
 
     @property
     def pending_amount(self):
-        # Pending payment amount
+        """Pending payment amount"""
         return self.total_amount - self.paid_amount
 
     @property
     def is_paid(self):
-        # Checks if fully paid
+        """Checks if fully paid"""
         return self.paid_amount >= self.total_amount
 
     def nights_stayed(self):
-        # Calculates how many nights the guest has stayed
+        """Calculates how many nights the guest has stayed"""
         if self.actual_check_in:
             if self.actual_check_out:
                 delta = self.actual_check_out - self.actual_check_in
@@ -296,11 +288,11 @@ class Reservation(models.Model):
         return 0
 
     def needs_linen_change(self):
-        # Determines if linen change is needed (every 3 days)
+        """Determines if linen change is needed (every 3 days)"""
         return self.nights_stayed() >= 3
 
     def get_cleaning_type_needed(self):
-        # Determines what type of cleaning is needed
+        """Determines what type of cleaning is needed"""
         if not self.is_active:
             return None
 
@@ -321,7 +313,7 @@ class Reservation(models.Model):
         return self.room_rate * self.nights
 
     def update_payment_status(self):
-        # Updates payment status based on paid amount
+        """Updates payment status based on paid amount"""
         if self.paid_amount >= self.total_amount:
             self.payment_status = self.PaymentStatusChoices.PAID
         elif self.paid_amount > 0:
@@ -330,7 +322,7 @@ class Reservation(models.Model):
             self.payment_status = self.PaymentStatusChoices.UNPAID
 
     def generate_reservation_number(self):
-        # Generates unique reservation number
+        """Generates unique reservation number"""
         from datetime import datetime
 
         from django.utils.crypto import get_random_string
@@ -351,7 +343,7 @@ class Reservation(models.Model):
         return reservation_number
 
     def is_room_available(self):
-        # Checks if room is available for selected dates
+        """Checks if room is available for selected dates"""
         # Exclude this reservation if editing
         queryset = Reservation.objects.filter(room=self.room)
         if self.pk:
@@ -366,7 +358,7 @@ class Reservation(models.Model):
         return not overlapping.exists()
 
     def check_in(self, employee):
-        # Processes check-in
+        """Processes check-in"""
         if self.status != self.StatusChoices.CONFIRMED:
             raise ValidationError(_("Only confirmed reservation can be checked in"))
 
@@ -382,7 +374,7 @@ class Reservation(models.Model):
         self.save()
 
     def check_out(self, employee):
-        # Processes check-out
+        """Processes check-out"""
         if self.status != self.StatusChoices.CHECKED_IN:
             raise ValidationError(_("Only checked-in reservations can be checked out"))
 
@@ -408,7 +400,7 @@ class Reservation(models.Model):
         self.save()
 
     def cancel(self, reason=""):
-        # Cancels reservation
+        """Cancels reservation"""
         if self.status == self.StatusChoices.CHECKED_IN:
             raise ValidationError(_("Cannot cancel a checked-in reservation"))
 
@@ -427,7 +419,7 @@ class Reservation(models.Model):
         return self.total_amount - self.amount_paid
 
     def get_status_color(self):
-        # Returns bootstrap color based on status
+        """Returns bootstrap color based on status"""
         colors = {
             self.StatusChoices.PENDING: "secondary",
             self.StatusChoices.CONFIRMED: "primary",
@@ -479,7 +471,7 @@ class Room(models.Model):
     class Meta:
         verbose_name = _("Room")
         verbose_name_plural = _("Rooms")
-        ordering = ["floor, number"]
+        ordering = ["floor", "number"]
 
     def __str__(self):
         return _("Room %(number)s - Floor %(floor)s") % {
@@ -488,7 +480,7 @@ class Room(models.Model):
         }
 
     def get_status_display_color(self):
-        # Returns color based on status
+        """Returns color based on status"""
         colors = {
             self.StatusChoices.CLEAN: "success",
             self.StatusChoices.DIRTY: "warning",
@@ -499,7 +491,7 @@ class Room(models.Model):
         return colors.get(self.status, "secondary")
 
     def get_current_reservation(self):
-        # Gets current active reservation
+        """Gets current active reservation"""
         return self.reservations.filter(
             status=Reservation.StatusChoices.CHECKED_IN,
             actual_check_in__isnull=False,
@@ -507,11 +499,11 @@ class Room(models.Model):
         ).first()
 
     def is_occupied(self):
-        # Checks if room is occupied
+        """Checks if room is occupied"""
         return self.get_current_reservation() is not None
 
     def get_next_reservation(self):
-        # Gets next confirmed reservation
+        """Gets next confirmed reservation"""
         today = timezone.now().date()
         return (
             self.reservations.filter(
@@ -523,7 +515,8 @@ class Room(models.Model):
 
 
 class CleaningTask(models.Model):
-    # Cleaning tasks assigned to rooms
+    """Cleaning tasks assigned to rooms"""
+
     class StatusChoices(models.TextChoices):
         PENDING = "pending", _("Pending")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -591,7 +584,8 @@ class CleaningTask(models.Model):
 
 
 class MaintenanceTask(models.Model):
-    # Maintenance requests for rooms
+    """Maintenance requests for rooms"""
+
     class PriorityChoices(models.TextChoices):
         LOW = "low", _("Low")
         MEDIUM = "medium", _("Medium")
@@ -658,7 +652,7 @@ class MaintenanceTask(models.Model):
         return f"{self.room} - {self.title} [{self.get_priority_display()}]"
 
     def get_priority_color(self):
-        # Returns color based on priority
+        """Returns color based on priority"""
         colors = {
             self.PriorityChoices.LOW: "info",
             self.PriorityChoices.MEDIUM: "warning",

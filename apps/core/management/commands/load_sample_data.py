@@ -5,10 +5,12 @@ from decimal import Decimal
 
 from django.contrib.auth.models import Group, User
 from django.core.management.base import BaseCommand
+from django.db.models.signals import post_save
 from django.utils import timezone
 
 from apps.attendance.models import Attendance
 from apps.employees.models import Department, Employee
+from apps.employees.signals import create_employee_profile
 from apps.leave.models import Leave
 from apps.rooms.models import CleaningTask, MaintenanceTask, Reservation, Room, RoomType
 
@@ -23,50 +25,56 @@ class Command(BaseCommand):
         if not self.clear_data():
             return
 
-        # Crear grupos
-        self.stdout.write("Creando grupos...")
-        self.create_groups()
+        post_save.disconnect(create_employee_profile, sender=User)
 
-        # Crear departamentos
-        self.stdout.write("Creando departamentos...")
-        departments = self.create_departments()
+        try:
+            # Crear grupos
+            self.stdout.write("Creando grupos...")
+            self.create_groups()
 
-        # Crear usuarios y empleados
-        self.stdout.write("Creando usuarios y empleados...")
-        employees = self.create_employees(departments)
+            # Crear departamentos
+            self.stdout.write("Creando departamentos...")
+            departments = self.create_departments()
 
-        # Crear tipos de habitaciones
-        self.stdout.write("Creando tipos de habitaciones...")
-        room_types = self.create_room_types()
+            # Crear usuarios y empleados
+            self.stdout.write("Creando usuarios y empleados...")
+            employees = self.create_employees(departments)
 
-        # Crear habitaciones
-        self.stdout.write("Creando habitaciones...")
-        rooms = self.create_rooms(room_types)
+            # Crear tipos de habitaciones
+            self.stdout.write("Creando tipos de habitaciones...")
+            room_types = self.create_room_types()
 
-        # Crear reservas
-        self.stdout.write("Creando reservas...")
-        reservations = self.create_reservations(rooms, employees)
+            # Crear habitaciones
+            self.stdout.write("Creando habitaciones...")
+            rooms = self.create_rooms(room_types)
 
-        # Crear registros de asistencia
-        self.stdout.write("Creando registros de asistencia...")
-        self.create_attendances(employees)
+            # Crear reservas
+            self.stdout.write("Creando reservas...")
+            reservations = self.create_reservations(rooms, employees)
 
-        # Crear solicitudes de permisos
-        self.stdout.write("Creando solicitudes de permisos...")
-        self.create_leaves(employees)
+            # Crear registros de asistencia
+            self.stdout.write("Creando registros de asistencia...")
+            self.create_attendances(employees)
 
-        # Crear tareas de limpieza
-        self.stdout.write("Creando tareas de limpieza...")
-        self.create_cleaning_tasks(rooms, employees)
+            # Crear solicitudes de permisos
+            self.stdout.write("Creando solicitudes de permisos...")
+            self.create_leaves(employees)
 
-        # Crear tareas de mantenimiento
-        self.stdout.write("Creando tareas de mantenimiento...")
-        self.create_maintenance_tasks(rooms, employees)
+            # Crear tareas de limpieza
+            self.stdout.write("Creando tareas de limpieza...")
+            self.create_cleaning_tasks(rooms, employees)
 
-        self.stdout.write(
-            self.style.SUCCESS("✓ Datos de prueba cargados exitosamente!")
-        )
-        self.print_summary(employees, rooms, reservations)
+            # Crear tareas de mantenimiento
+            self.stdout.write("Creando tareas de mantenimiento...")
+            self.create_maintenance_tasks(rooms, employees)
+
+            self.stdout.write(
+                self.style.SUCCESS("✓ Datos de prueba cargados exitosamente!")
+            )
+            self.print_summary(employees, rooms, reservations)
+
+        finally:
+            post_save.connect(create_employee_profile, sender=User)
 
     def clear_data(self):
         """Limpia datos existentes (excepto superusuarios)"""
@@ -101,12 +109,12 @@ class Command(BaseCommand):
     def create_groups(self):
         """Crea los grupos de usuarios"""
         groups = [
-            "Dirección",
-            "Recepción",
-            "Limpieza",
-            "Mantenimiento",
+            "Director",
+            "Reception",
+            "Housekeeping",
+            "Maintenance",
             "RRHH",
-            "Supervisores",
+            "Supervisors",
         ]
         for group_name in groups:
             Group.objects.get_or_create(name=group_name)
@@ -115,10 +123,10 @@ class Command(BaseCommand):
         """Crea los departamentos del hotel"""
         departments_data = [
             {"name": "Direction", "code": "DIR", "color": "#3B82F6"},
-            {"name": "Recepción", "code": "REC", "color": "#10B981"},
-            {"name": "Limpieza", "code": "LIM", "color": "#F59E0B"},
-            {"name": "Mantenimiento", "code": "MAN", "color": "#EF4444"},
-            {"name": "Recursos Humanos", "code": "RRH", "color": "#8B5CF6"},
+            {"name": "Reception", "code": "REC", "color": "#10B981"},
+            {"name": "Housekeeping", "code": "LIM", "color": "#F59E0B"},
+            {"name": "Maintenance", "code": "MAN", "color": "#EF4444"},
+            {"name": "RRHH", "code": "RRH", "color": "#8B5CF6"},
         ]
 
         departments = {}
@@ -157,7 +165,7 @@ class Command(BaseCommand):
                 "last_name": "García",
                 "email": "maria.garcia@hotel.com",
                 "department": departments["REC"],
-                "role": "jefe_recepcion",
+                "role": "reception_manager",
                 "phone": "+34 600 222 222",
                 "employee_number": "EMP002",
             },
@@ -168,7 +176,7 @@ class Command(BaseCommand):
                 "last_name": "Martínez",
                 "email": "ana.martinez@hotel.com",
                 "department": departments["REC"],
-                "role": "recepcionista",
+                "role": "receptionist",
                 "phone": "+34 600 333 333",
                 "employee_number": "EMP003",
             },
@@ -179,7 +187,7 @@ class Command(BaseCommand):
                 "last_name": "López",
                 "email": "pedro.lopez@hotel.com",
                 "department": departments["REC"],
-                "role": "recepcionista",
+                "role": "receptionist",
                 "phone": "+34 600 444 444",
                 "employee_number": "EMP004",
             },
@@ -191,7 +199,7 @@ class Command(BaseCommand):
                 "last_name": "Fernández",
                 "email": "laura.fernandez@hotel.com",
                 "department": departments["LIM"],
-                "role": "jefe_limpieza",
+                "role": "housekeeper_manager",
                 "phone": "+34 600 555 555",
                 "employee_number": "EMP005",
             },
@@ -202,7 +210,7 @@ class Command(BaseCommand):
                 "last_name": "Ruiz",
                 "email": "carmen.ruiz@hotel.com",
                 "department": departments["LIM"],
-                "role": "camarero_piso",
+                "role": "housekeeper",
                 "phone": "+34 600 666 666",
                 "employee_number": "EMP006",
             },
@@ -213,7 +221,7 @@ class Command(BaseCommand):
                 "last_name": "Sánchez",
                 "email": "isabel.sanchez@hotel.com",
                 "department": departments["LIM"],
-                "role": "camarero_piso",
+                "role": "housekeeper",
                 "phone": "+34 600 777 777",
                 "employee_number": "EMP007",
             },
@@ -224,7 +232,7 @@ class Command(BaseCommand):
                 "last_name": "Moreno",
                 "email": "rosa.moreno@hotel.com",
                 "department": departments["LIM"],
-                "role": "camarero_piso",
+                "role": "housekeeper",
                 "phone": "+34 600 888 888",
                 "employee_number": "EMP008",
             },
@@ -236,7 +244,7 @@ class Command(BaseCommand):
                 "last_name": "Torres",
                 "email": "miguel.torres@hotel.com",
                 "department": departments["MAN"],
-                "role": "jefe_mantenimiento",
+                "role": "maintenance_manager",
                 "phone": "+34 600 999 999",
                 "employee_number": "EMP009",
             },
@@ -247,7 +255,7 @@ class Command(BaseCommand):
                 "last_name": "Díaz",
                 "email": "juan.diaz@hotel.com",
                 "department": departments["MAN"],
-                "role": "mantenimiento",
+                "role": "maintenance",
                 "phone": "+34 601 111 111",
                 "employee_number": "EMP010",
             },
@@ -258,7 +266,7 @@ class Command(BaseCommand):
                 "last_name": "Jiménez",
                 "email": "antonio.jimenez@hotel.com",
                 "department": departments["MAN"],
-                "role": "mantenimiento",
+                "role": "maintenance",
                 "phone": "+34 601 222 222",
                 "employee_number": "EMP011",
             },
@@ -410,7 +418,7 @@ class Command(BaseCommand):
     def create_reservations(self, rooms, employees):
         """Crea reservas de ejemplo"""
         reservations = []
-        reception_staff = [e for e in employees if e.role == "recepcionista"]
+        reception_staff = [e for e in employees if e.role == "receptionist"]
 
         # Datos de huéspedes ficticios
         guests = [
@@ -457,6 +465,14 @@ class Command(BaseCommand):
         for i in range(15):
             guest = random.choice(guests)
             room = random.choice(rooms)
+
+            # ✅ Ajustar adultos y niños según capacidad
+            max_capacity = room.room_type.capacity
+            total_guests = random.randint(1, max_capacity)
+            adults = min(
+                random.randint(1, 2), total_guests
+            )  # Máximo 2 adultos o capacidad
+            children = total_guests - adults  # Resto para niños
 
             # Determinar fechas según el tipo de reserva
             if i < 5:  # Reservas pasadas (checked out)
@@ -505,8 +521,8 @@ class Command(BaseCommand):
                 guest_phone=guest["phone"],
                 guest_dni=guest["dni"],
                 guest_nationality="España",
-                adults=random.randint(1, 3),
-                children=random.randint(0, 2),
+                adults=adults,
+                children=children,
                 status=status,
                 room_rate=room_rate,
                 total_amount=total_amount,
@@ -598,7 +614,6 @@ class Command(BaseCommand):
                         check_in=check_in,
                         check_out=check_out,
                         status=status,
-                        notes=f'Asistencia del {date.strftime("%d/%m/%Y")}',
                     )
 
     def create_leaves(self, employees):
@@ -643,7 +658,7 @@ class Command(BaseCommand):
 
     def create_cleaning_tasks(self, rooms, employees):
         """Crea tareas de limpieza"""
-        cleaning_staff = [e for e in employees if e.role == "camarero_piso"]
+        cleaning_staff = [e for e in employees if e.role == "housekeeper"]
 
         # Crear tareas para habitaciones sucias
         dirty_rooms = [r for r in rooms if r.status == Room.StatusChoices.DIRTY]
@@ -662,9 +677,9 @@ class Command(BaseCommand):
 
     def create_maintenance_tasks(self, rooms, employees):
         """Crea tareas de mantenimiento"""
-        maintenance_staff = [e for e in employees if e.role == "mantenimiento"]
+        maintenance_staff = [e for e in employees if e.role == "maintenance"]
         reception_staff = [
-            e for e in employees if e.role in ["recepcionista", "jefe_recepcion"]
+            e for e in employees if e.role in ["receptionist", "receptionist_manager"]
         ]
 
         issues = [
@@ -734,14 +749,14 @@ class Command(BaseCommand):
         self.stdout.write("=" * 50)
         self.stdout.write("\n🔑 Usuarios creados (username / password):")
         credentials = [
-            ("director", "director123", "Director"),
-            ("jefe.recepcion", "recepcion123", "Jefe de Recepción"),
-            ("ana.recepcion", "recepcion123", "Recepcionista"),
-            ("jefe.limpieza", "limpieza123", "Jefe de Limpieza"),
-            ("carmen.limpieza", "limpieza123", "Camarera de Piso"),
-            ("jefe.mantenimiento", "mantenimiento123", "Jefe de Mantenimiento"),
-            ("juan.mantenimiento", "mantenimiento123", "Mantenimiento"),
-            ("rrhh", "rrhh123", "RRHH"),
+            ("director", "demo123", "director"),
+            ("jefe.recepcion", "demo123", "reception_manager"),
+            ("ana.recepcion", "demo123", "receptionist"),
+            ("jefe.limpieza", "demo123", "housekeeper_manager"),
+            ("carmen.limpieza", "demo23", "housekeeper"),
+            ("jefe.mantenimiento", "demo123", "maintenance_manager"),
+            ("juan.mantenimiento", "demo123", "maintenance"),
+            ("rrhh", "demo123", "RRHH"),
         ]
 
         for username, password, role in credentials:

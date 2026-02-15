@@ -1,0 +1,10 @@
+<!-- dashboard/tasks/default_tasks.html -->
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="alert alert-info">
+    <h2>Panel de Tareas</h2>
+    <p>Bienvenido, {{ employee.get_full_name }}</p>
+    <p>Tu rol no tiene tareas específicas configuradas.</p>
+</div>
+{% endblock %}
