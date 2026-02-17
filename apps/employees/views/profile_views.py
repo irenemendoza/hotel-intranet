@@ -192,7 +192,7 @@ class ProfileStatsView(LoginRequiredMixin, TemplateView):
 
         for attendance in attendances:
             if attendance.check_out:
-                total_hours += attendance.duration()
+                total_hours += attendance.duration
             if attendance.status == "present":
                 on_time += 1
             elif attendance.status == "late":
@@ -257,7 +257,7 @@ class ProfileStatsView(LoginRequiredMixin, TemplateView):
         while current_date <= end_date:
             day_attendances = attendances.filter(check_in__date=current_date)
             total_hours = sum(
-                (att.duration().total_seconds() / 3600)
+                (att.duration.total_seconds() / 3600)
                 for att in day_attendances
                 if att.check_out
             )

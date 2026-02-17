@@ -33,56 +33,41 @@
                     <p class="text-muted mb-4">{{ now|date:"l, d de F de Y" }}</p>
 
                     {% if is_checked_in %}
-                        <!-- Ya está fichado -->
-                        <div class="alert alert-success mb-4">
-                            <h5 class="alert-heading">
-                                <i class="bi bi-check-circle me-2"></i>
-                                ¡Entrada Registrada!
-                            </h5>
-                            <p class="mb-2">Fichaste tu entrada a las <strong>{{ current_attendance.check_in|date:"H:i" }}</strong></p>
-                            <small class="text-muted">
-                                Llevas trabajando: <span id="work-duration"></span>
-                            </small>
-                        </div>
-
                         <!-- Formulario de Salida -->
                         <form method="post" action="{% url 'attendance:check-out' %}">
                             {% csrf_token %}
-                            <div class="mb-3">
-                                {{ check_out_form.notes }}
-                            </div>
-                            <div class="mb-3">
-                                {{ check_out_form.check_out_location }}
-                            </div>
                             <button type="submit" class="btn btn-danger btn-lg">
                                 <i class="bi bi-box-arrow-right me-2"></i>
                                 Fichar Salida
                             </button>
                         </form>
                     {% else %}
+                        <!-- Formulario de Entrada -->
+                         <div class="mb-4">
+                            <form method="post" action="{% url 'attendance:check-in' %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    {{ check_in_form.notes }}
+                                </div>
+                                <div class="mb-3">
+                                    {{ check_in_form.check_in_location }}
+                                </div>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                                    Fichar Entrada
+                                </button>
+                            </form>
+                         </div>
+
+
                         <!-- No ha fichado -->
-                        <div class="alert alert-warning mb-4">
+                        <div class="alert-warning">
                             <h5 class="alert-heading">
                                 <i class="bi bi-exclamation-triangle me-2"></i>
                                 No has fichado tu entrada
                             </h5>
                             <p class="mb-0">Ficha tu entrada para comenzar tu jornada laboral</p>
                         </div>
-
-                        <!-- Formulario de Entrada -->
-                        <form method="post" action="{% url 'attendance:check-in' %}">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                {{ check_in_form.notes }}
-                            </div>
-                            <div class="mb-3">
-                                {{ check_in_form.check_in_location }}
-                            </div>
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>
-                                Fichar Entrada
-                            </button>
-                        </form>
                     {% endif %}
                 </div>
             </div>
@@ -165,8 +150,8 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body text-center">
                     {% if profile.avatar %}
-                        <img src="{{ profile.avatar.url }}" 
-                             alt="{{ profile.get_full_name }}" 
+                        <img src="{{ profile.avatar.url }}"
+                             alt="{{ profile.get_full_name }}"
                              class="rounded-circle mb-3"
                              style="width: 100px; height: 100px; object-fit: cover;">
                     {% else %}
@@ -230,10 +215,10 @@ function updateWorkDuration() {
     const checkInTime = new Date('{{ current_attendance.check_in|date:"c" }}');
     const now = new Date();
     const diff = now - checkInTime;
-    
+
     const hours = Math.floor(diff / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
-    
+
     const durationElement = document.getElementById('work-duration');
     if (durationElement) {
         durationElement.textContent = `${hours}h ${minutes}m`;

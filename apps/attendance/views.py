@@ -136,6 +136,10 @@ class MyAttendanceView(LoginRequiredMixin, TemplateView):
             employee=employee, check_in__date=today
         ).first()
 
+        is_checked_in = (
+            current_attendance is not None and current_attendance.check_out is None
+        )
+
         # Calculate hours worked today
         if current_attendance:
             duration = current_attendance.duration
@@ -155,8 +159,7 @@ class MyAttendanceView(LoginRequiredMixin, TemplateView):
             {
                 "employee": employee,
                 "current_attendance": current_attendance,
-                "is_checked_in": current_attendance is not None
-                and current_attendance.check_out is None,
+                "is_checked_in": is_checked_in,
                 "recent_attendances": recent_attendances,
                 "today_hours_h": today_hours_h,
                 "today_hours_m": today_hours_m,
@@ -183,8 +186,10 @@ class AttendanceCheckInView(LoginRequiredMixin, View):
 
             messages.success(
                 request,
-                f'¡Entrada registrada! Hora: {attendance.check_in.strftime("%H:%M")}',
+                f'Fichaste tu entrada a las {attendance.check_in.strftime("%H:%M")}',
+                extra_tags="¡Entrada Registrada!",
             )
+
         except ValidationError as e:
             messages.error(request, str(e))
 

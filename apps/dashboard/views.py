@@ -162,6 +162,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         total_checkouts_count = pending_checkouts.count() + completed_checkouts.count()
 
+        today_attendances = Attendance.objects.filter(
+            employee=employee, check_in__date=today
+        ).order_by("-check_in")
+
         return {
             # Mi equipo
             "team_size": team.count(),
@@ -200,10 +204,19 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )[:10],
             # Alertas urgentes
             "urgent_issues": self.get_reception_alerts(dirty_rooms, maintenance_rooms),
+            "today_attendances": today_attendances,
+            "latest_attendance": today_attendances.first(),
         }
 
     def get_recepcionista_context(self):
         """Dashboard para Recepcionista"""
+        employee = self.request.user.employee
+        today = timezone.now().date()
+
+        today_attendances = Attendance.objects.filter(
+            employee=employee, check_in__date=today
+        ).order_by("-check_in")
+
         return {
             # Habitaciones
             # Mis datos
@@ -215,6 +228,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "rooms_by_type": Room.objects.values("room_type__name").annotate(
                 total=Count("id"), available=Count("id", filter=Q(status="available"))
             ),
+            "today_attendances": today_attendances,
+            "latest_attendance": today_attendances.first(),
         }
 
     def get_jefe_limpieza_context(self):
@@ -263,6 +278,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         else:
             my_tasks = CleaningTask.objects.filter(assigned_to=employee)
 
+        if employee:
+            today_attendances = Attendance.objects.filter(
+                employee=employee, check_in__date=today
+            ).order_by("-check_in")
+        else:
+            today_attendances = Attendance.objects.none()
+
         return {
             # Mis tareas
             "pending_tasks": my_tasks.filter(status="pending").count(),
@@ -274,6 +296,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "my_attendance": Attendance.objects.filter(
                 employee=employee, check_in__date=today
             ).first(),
+            "today_attendances": today_attendances,
+            "latest_attendance": today_attendances.first(),
             # Estadísticas del mes
             "month_completed": my_tasks.filter(status="completed").count(),
             # Mis tareas del día
@@ -315,6 +339,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         my_tasks = MaintenanceTask.objects.filter(assigned_to=employee)
 
+        today_attendances = Attendance.objects.filter(
+            employee=employee, check_in__date=today
+        ).order_by("-check_in")
+
         return {
             # Mis tareas
             "pending_tasks": my_tasks.filter(status="pending").count(),
@@ -332,6 +360,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             ).first(),
             # Mis tareas del día
             "today_tasks": my_tasks.filter(assigned_to=employee),
+            "today_attendances": today_attendances,
+            "latest_attendance": today_attendances.first(),
         }
 
     def get_rrhh_context(self):
