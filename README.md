@@ -290,21 +290,20 @@ Password: demo123
 
 The project includes comprehensive unit tests covering:
 
-- Model business logic
-- Form validations
-- View permissions
-- Workflow processes
+- **Core Models**: Reservations, Rooms, Employees, Leave requests
+- **Supporting Models**: Departments, Attendance, Cleaning tasks
+- **Authentication**: Login, permissions, role-based access control
+- **Forms**: Validation and business rule enforcement
 
-Run tests with:
+### Running Tests
 ```bash
 python manage.py test
 ```
 
-Run tests with coverage:
-```bash
-coverage run --source='.' manage.py test
-coverage report
-```
+### Coverage Highlights
+- Room availability validation and conflict detection
+- Automatic calculations (reservation totals, leave duration)
+- Role-based permissions and group assignments
 
 ## 🔒 Security Features
 

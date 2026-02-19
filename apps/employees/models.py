@@ -132,7 +132,7 @@ class Employee(models.Model):
         role_group_map = {
             "director": ["Management", "Supervisors"],
             "reception_manager": ["Reception", "Supervisors"],
-            "recepcionist": ["Reception"],
+            "receptionist": ["Reception"],
             "housekeeping_manager": ["Housekeeping", "Supervisors"],
             "housekeeper": ["Housekeeping"],
             "maitenance_manager": ["Maitenance", "Supervisors"],
