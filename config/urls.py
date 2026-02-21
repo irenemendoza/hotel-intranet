@@ -1,23 +1,53 @@
 # config/urls.py
-from django.contrib import admin
-from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
+from django.urls import include, path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-
-    path('', include(('apps.dashboard.urls', "dashboard"), namespace="dashboard")),
-
-    path('auth/', include(('apps.auth.auth_urls', 'auth'), namespace='auth')),
-    path('employees/', include(('apps.employees.urls.employees_urls', "employees"), namespace="employees")),
-    path('attendance/', include(('apps.attendance.urls', "attendance"), namespace="attendance")),
-    path('rooms/', include(('apps.rooms.urls', "rooms"), namespace="rooms")),
-    path('leave/', include(('apps.leave.urls', "leave"), namespace="leave")),
-    path('cleaning/', include(('apps.rooms.urls.rooms_cleaning_urls', "cleaning"), namespace="cleaning")),
-    path('maintenance/', include(('apps.rooms.urls.rooms_maintenance_urls', "maintenance"), namespace="maintenance")),
-    path('departments/', include(('apps.employees.urls.departments_urls', "departments"), namespace="departments")),
-    path('profiles/', include(('apps.employees.urls.profiles_urls', "profiles"), namespace="profiles")),
+    path("admin/", admin.site.urls),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("", include(("apps.dashboard.urls", "dashboard"), namespace="dashboard")),
+    path("auth/", include(("apps.auth.auth_urls", "auth"), namespace="auth")),
+    path(
+        "employees/",
+        include(
+            ("apps.employees.urls.employees_urls", "employees"), namespace="employees"
+        ),
+    ),
+    path(
+        "attendance/",
+        include(("apps.attendance.urls", "attendance"), namespace="attendance"),
+    ),
+    path("rooms/", include(("apps.rooms.urls", "rooms"), namespace="rooms")),
+    path("leave/", include(("apps.leave.urls", "leave"), namespace="leave")),
+    path(
+        "cleaning/",
+        include(
+            ("apps.rooms.urls.rooms_cleaning_urls", "cleaning"), namespace="cleaning"
+        ),
+    ),
+    path(
+        "maintenance/",
+        include(
+            ("apps.rooms.urls.rooms_maintenance_urls", "maintenance"),
+            namespace="maintenance",
+        ),
+    ),
+    path(
+        "departments/",
+        include(
+            ("apps.employees.urls.departments_urls", "departments"),
+            namespace="departments",
+        ),
+    ),
+    path(
+        "profiles/",
+        include(
+            ("apps.employees.urls.profiles_urls", "profiles"), namespace="profiles"
+        ),
+    ),
 ]
 
 # Servir archivos media en desarrollo

@@ -198,7 +198,7 @@
                         <tr>
                             <td>{{ leave.employee.get_full_name }}</td>
                             <td><span class="badge bg-secondary">{{ leave.get_leave_type_display }}</span></td>
-                            <td>{{ leave.start_date|date:"d/m" }} - {{ leave.end_date|date:"d/m" }}</td>
+                            <td>{{ leave.start_date|date:""d/m/Y"" }} - {{ leave.end_date|date:""d/m/Y"" }}</td>
                             <td>{{ leave.duration_days }}</td>
                             <td><span class="badge bg-success">Aprobado</span></td>
                         </tr>

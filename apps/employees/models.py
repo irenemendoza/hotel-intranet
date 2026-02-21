@@ -80,6 +80,11 @@ class Employee(models.Model):
         # RRHH
         RRHH = "rrhh", _("Human Resources")
 
+    class GenderChoices(models.TextChoices):
+        FEMALE = "F", _("Female")
+        MALE = "M", _("Male")
+        PREFER_NOT_TO_SAY = "NTS", _("Prefer not to say")
+
     # User profile with hotel information
     user = models.OneToOneField(
         User, verbose_name=_("User"), on_delete=models.CASCADE, related_name="employee"
@@ -95,6 +100,15 @@ class Employee(models.Model):
         choices=RoleChoices.choices,
         help_text="Employee role in the hotel",
     )
+    dni = models.CharField(
+        _("DNI"), max_length=20, unique=True, blank=True, null=True, default=None
+    )
+    address = models.TextField(_("Address"), blank=True)
+    gender = models.CharField(
+        _("Gender"), max_length=10, choices=GenderChoices.choices, null=True, blank=True
+    )
+    birth_date = models.DateField(null=True, blank=True)
+
     phone = models.CharField(_("Phone"), max_length=20, blank=True)
 
     avatar = models.ImageField(_("Avatar"), upload_to="avatars/", blank=True, null=True)
@@ -110,6 +124,7 @@ class Employee(models.Model):
     bio = models.TextField(
         _("Biography"), blank=True, help_text=_("Additional employee information")
     )
+    salary = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Last updated"), auto_now=True)
 

@@ -27,6 +27,9 @@
         </div>
     </div>
 
+       <!-- Incluir Widget de Fichaje Rápido -->
+    {% include '_includes/_fichaje_rapido.html' %}
+
     <!-- Estado de Habitaciones -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
@@ -104,11 +107,11 @@
                                     </td>
                                     <td>
                                         <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-success" 
+                                            <div class="progress-bar bg-success"
                                                  style="width: {{ room_type.available|percentage:total_rooms }}%">
                                                 {{ room_type.available }}
                                             </div>
-                                            <div class="progress-bar bg-primary" 
+                                            <div class="progress-bar bg-primary"
                                                  style="width: {{ room_type.total|add:room_type.available|percentage:total_rooms }}%">
                                             </div>
                                         </div>
@@ -241,7 +244,7 @@
                                 <p class="text-muted mb-1">Horas</p>
                                 <h4>
                                     {% if my_attendance_today.check_out %}
-                                    {{ my_attendance_today.duration }}
+                                    {{ my_attendance_today.duration_formatted }}
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}

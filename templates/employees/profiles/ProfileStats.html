@@ -1,4 +1,4 @@
-<!-- templates/employees/profile/ProfileStats.html -->
+<!-- templates/employees/profiles/ProfileStats.html -->
 {% extends "layout.html" %}
 {% load static %}
 
@@ -115,9 +115,9 @@
                         <i class="bi bi-pie-chart"></i> Distribución
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="position:relative; height: 100%;">
                     <canvas id="attendanceDistributionChart"></canvas>
-                    
+
                     <div class="mt-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span><i class="bi bi-circle-fill text-success"></i> A tiempo</span>
@@ -226,10 +226,10 @@
                     <div class="progress" style="height: 30px;">
                         {% with completed_pct=task_stats.completed|floatformat:0 total=task_stats.total %}
                         {% widthratio task_stats.completed task_stats.total 100 as completion_rate %}
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: {{ completion_rate }}%;" 
-                             aria-valuenow="{{ completion_rate }}" 
-                             aria-valuemin="0" 
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: {{ completion_rate }}%;"
+                             aria-valuenow="{{ completion_rate }}"
+                             aria-valuemin="0"
                              aria-valuemax="100">
                             {{ completion_rate }}% Completadas
                         </div>
@@ -279,14 +279,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Gráfico de horas diarias
     const dailyHoursCtx = document.getElementById('dailyHoursChart');
+    console.log("labels:", {{ daily_hours_labels|safe }});
+    console.log("values:", {{ daily_hours_values|safe }});
     if (dailyHoursCtx) {
         new Chart(dailyHoursCtx, {
             type: 'bar',
             data: {
-                labels: {{ daily_hours.keys|safe }},
+                labels: {{ daily_hours_labels|safe }},
                 datasets: [{
                     label: 'Horas Trabajadas',
-                    data: {{ daily_hours.values|safe }},
+                    data: {{ daily_hours_values|safe }},
                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2
@@ -318,11 +320,11 @@ document.addEventListener('DOMContentLoaded', function() {
         new Chart(distributionCtx, {
             type: 'doughnut',
             data: {
-                labels: ['A tiempo', 'Tarde'],
+                labels: ['Present', 'Late'],
                 datasets: [{
                     data: [
-                        {{ attendance_by_status.present }},
-                        {{ attendance_by_status.late }}
+                        {{ attendance_present }},
+                        {{ attendance_late }}
                     ],
                     backgroundColor: [
                         'rgba(75, 192, 192, 0.8)',

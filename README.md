@@ -20,6 +20,21 @@ This project was developed as a portfolio piece to demonstrate full-stack develo
 - 📊 Dynamic dashboards adapted to user roles
 - 🔐 Secure authentication and authorization system
 
+## 🎥 Quick Check-in Demo
+
+![Application Demo](docs/images/checkin-gif.gif)
+
+## 📸 Screenshots
+
+### Responsive Dashboard Overview
+![Dashboard](docs/images/responsive-dashboard.png)
+
+### Room Form
+![Rooms](docs/images/rooms-form.png)
+
+### Login Page
+![Login](docs/images/login.png)
+
 ## 🏗️ Architecture
 
 ### Django Apps Structure

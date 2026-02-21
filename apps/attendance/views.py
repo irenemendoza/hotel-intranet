@@ -130,10 +130,11 @@ class MyAttendanceView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         employee = self.request.user.employee
         today = timezone.now().date()
+        profile = self.request.user
 
         # Get today's attendance
         current_attendance = Attendance.objects.filter(
-            employee=employee, check_in__date=today
+            employee=employee, check_out__isnull=True
         ).first()
 
         is_checked_in = (
@@ -158,6 +159,7 @@ class MyAttendanceView(LoginRequiredMixin, TemplateView):
         context.update(
             {
                 "employee": employee,
+                "profile": profile,
                 "current_attendance": current_attendance,
                 "is_checked_in": is_checked_in,
                 "recent_attendances": recent_attendances,
@@ -165,7 +167,6 @@ class MyAttendanceView(LoginRequiredMixin, TemplateView):
                 "today_hours_m": today_hours_m,
             }
         )
-
         return context
 
 

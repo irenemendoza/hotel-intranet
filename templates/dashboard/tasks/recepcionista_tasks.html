@@ -61,7 +61,7 @@
                         <tbody>
                             {% for reservation in pending_checkins %}
                             <tr>
-                                <td><strong>{{ reservation.check_in_date|date:"H:i" }}</strong></td>
+                                <td><strong>{{ reservation.check_in_date|date:"d/m/Y" }}</strong></td>
                                 <td>
                                     <strong>{{ reservation.guest_full_name }}</strong><br>
                                     <small class="text-muted">{{ reservation.adults }}A / {{ reservation.children }}N</small>
@@ -118,7 +118,7 @@
                         <tbody>
                             {% for reservation in pending_checkouts %}
                             <tr>
-                                <td><strong>{{ reservation.check_out_date|date:"H:i" }}</strong></td>
+                                <td><strong>{{ reservation.check_out_date|date:"d/m/Y" }}</strong></td>
                                 <td><strong>{{ reservation.guest_full_name }}</strong></td>
                                 <td>
                                     <strong>{{ reservation.room.number }}</strong><br>

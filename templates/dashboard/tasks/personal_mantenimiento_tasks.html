@@ -121,7 +121,7 @@
                                 {% endif %}
                             </div>
                             <div class="col-md-2">
-                                <small>{{ task.assigned_at|date:"d/m H:i" }}</small>
+                                <small>{{ task.assigned_at|date:"d/m/Y H:i" }}</small>
                             </div>
                             <div class="col-md-2 text-end">
                                 <a href="{% url 'maintenance:update' task.pk %}" class="btn btn-sm btn-primary">

@@ -11,7 +11,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="h3 mb-0">Mi Fichaje</h1>
-                    <p class="text-muted mb-0">{{ profile.get_full_name }} - {{ profile.department.name }}</p>
+                    <p class="text-muted mb-0">{{ profile.get_full_name }} - {{ employee.department.name }}</p>
                 </div>
                 <div>
                     <a href="{% url 'attendance:history' %}" class="btn btn-outline-primary">
@@ -44,22 +44,14 @@
                     {% else %}
                         <!-- Formulario de Entrada -->
                          <div class="mb-4">
-                            <form method="post" action="{% url 'attendance:check-in' %}">
-                                {% csrf_token %}
-                                <div class="mb-3">
-                                    {{ check_in_form.notes }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ check_in_form.check_in_location }}
-                                </div>
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i>
-                                    Fichar Entrada
-                                </button>
+                                <form method="post" action="{% url 'attendance:check-in' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                                        Fichar Entrada
+                                    </button>
                             </form>
                          </div>
-
-
                         <!-- No ha fichado -->
                         <div class="alert-warning">
                             <h5 class="alert-heading">
@@ -157,19 +149,19 @@
                     {% else %}
                         <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
                              style="width: 100px; height: 100px; font-size: 2rem;">
-                            {{ profile.user.first_name.0 }}{{ profile.user.last_name.0 }}
+                            {{ employee.user.first_name.0 }}{{ employee.user.last_name.0 }}
                         </div>
                     {% endif %}
                     <h5 class="mb-1">{{ profile.get_full_name }}</h5>
-                    <p class="text-muted mb-2">{{ profile.role }}</p>
-                    {% if profile.department %}
+                    <p class="text-muted mb-2">{{ employee.role }}</p>
+                    {% if employee.department %}
                         <span class="badge" style="background-color: {{ profile.department.color }};">
-                            {{ profile.department.name }}
+                            {{ employee.department.name }}
                         </span>
                     {% endif %}
-                    {% if profile.employee_number %}
+                    {% if employee.employee_number %}
                         <p class="text-muted mt-2 mb-0">
-                            <small>#{{ profile.employee_number }}</small>
+                            <small>#{{ employee.employee_number }}</small>
                         </p>
                     {% endif %}
                 </div>
@@ -209,20 +201,20 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-{% if is_checked_in and current_attendance %}
-// Calcular duración del trabajo en tiempo real
-function updateWorkDuration() {
-    const checkInTime = new Date('{{ current_attendance.check_in|date:"c" }}');
-    const now = new Date();
-    const diff = now - checkInTime;
+{% if is_checked_in  %}
+    // Calcular duración del trabajo en tiempo real
+    function updateWorkDuration() {
+        const checkInTime = new Date('{{ current_attendance.check_in|date:"c" }}');
+        const now = new Date();
+        const diff = now - checkInTime;
 
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
 
-    const durationElement = document.getElementById('work-duration');
-    if (durationElement) {
-        durationElement.textContent = `${hours}h ${minutes}m`;
-    }
+        const durationElement = document.getElementById('work-duration');
+        if (durationElement) {
+            durationElement.textContent = `${hours}h ${minutes}m`;
+        }
 }
 
 setInterval(updateWorkDuration, 60000); // Actualizar cada minuto

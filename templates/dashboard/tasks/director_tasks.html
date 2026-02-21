@@ -59,7 +59,7 @@
         </div>
     </div>
 
-   
+
     <div class="row">
           <!-- Check-ins y Check-outs -->
     <div class="row">
@@ -76,14 +76,14 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <strong>{{ reservation.guest_full_name }}</strong><br>
-                                        <small>Hab. {{ reservation.room.number }} - {{ reservation.check_in_date|date:"H:i" }}</small>
+                                        <small>Hab. {{ reservation.room.number }} - {{ reservation.check_in_date|date:"d/m/Y" }}</small>
                                     </div>
                                     {% if reservation.status == 'confirmed' or reservation.status == 'primary' or reservation.status == 'success' %}
                                         <span class="badge">
                                         {{ reservation.get_status_display }}
                                         </span>
                                     {% endif %}
-                                    
+
                                 </div>
                             </div>
                             {% endfor %}
@@ -108,7 +108,7 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <strong>{{ reservation.guest_full_name }}</strong><br>
-                                        <small>Hab. {{ reservation.room.number }} - {{ reservation.check_out_date|date:"Y:m:d" }}</small>
+                                        <small>Hab. {{ reservation.room.number }} - {{ reservation.check_out_date|date:"d:m:Y" }}</small>
                                     </div>
                                     <span class="badge bg-success">Check-out</span>
                                 </div>
@@ -122,7 +122,7 @@
             </div>
         </div>
     </div>
-    
+
         <!-- Mantenimiento urgente -->
         <div class="col-md-6">
             <div class="card mb-4 border-danger">
@@ -138,7 +138,7 @@
                                     <div>
                                         <h6 class="mb-1">Habitación {{ task.room.number }} - {{ task.title }}</h6>
                                         <small class="text-muted">
-                                            Reportado por {{ task.reported_by.get_full_name }} - 
+                                            Reportado por {{ task.reported_by.get_full_name }} -
                                             {{ task.created_at|date:"d/m/Y H:i" }}
                                         </small>
                                     </div>
@@ -171,7 +171,7 @@
                                     <div>
                                         <h6 class="mb-1">Habitación {{ task.room.number }}</h6>
                                         <small class="text-muted">
-                                            {{ task.get_cleaning_type_display }} - 
+                                            {{ task.get_cleaning_type_display }} -
                                             {% if task.assigned_to %}
                                                 {{ task.assigned_to.get_full_name }}
                                             {% else %}
@@ -183,7 +183,7 @@
                                         <span class="badge bg">
                                             {{ task.get_status_display }}
                                         </span>
-                                    {% endif %}                            
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}

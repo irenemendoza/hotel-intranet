@@ -164,10 +164,10 @@
                                     </a>
                                     {% if leave.status == 'pending' %}
                                     <a href="{% url 'leave:update' leave.pk %}" class="btn btn-outline-secondary" title="Editar">
-                                        <i class="fas fa-edit"></i>
+                                        <i class="bi bi-pencil"></i>
                                     </a>
                                     <button type="button" class="btn btn-outline-danger" title="Cancelar" onclick="cancelLeave({{ leave.pk }})">
-                                        <i class="fas fa-times"></i>
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                     {% endif %}
                                 </div>
@@ -197,13 +197,13 @@
                         <a class="page-link" href="?page={{ leaves.previous_page_number }}">Anterior</a>
                     </li>
                     {% endif %}
-                    
+
                     {% for num in leaves.paginator.page_range %}
                     <li class="page-item {% if leaves.number == num %}active{% endif %}">
                         <a class="page-link" href="?page={{ num }}">{{ num }}</a>
                     </li>
                     {% endfor %}
-                    
+
                     {% if leaves.has_next %}
                     <li class="page-item">
                         <a class="page-link" href="?page={{ leaves.next_page_number }}">Siguiente</a>

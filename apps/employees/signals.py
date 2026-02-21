@@ -7,8 +7,8 @@ from .models import Employee
 
 @receiver(post_save, sender=User)
 def create_employee_profile(sender, instance, created, **kwargs):
-    # Creates an Employee when a User is created
-    if created:
+    # Creates an Employee when a User is created and is not a superuser
+    if created and not instance.is_superuser:
         # Only create if it doesn't exist
         if not hasattr(instance, "employee"):
             Employee.objects.create(

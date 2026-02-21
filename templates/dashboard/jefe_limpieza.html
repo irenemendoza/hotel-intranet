@@ -24,7 +24,7 @@
     </div>
 
     <!-- Incluir Widget de Fichaje Rápido -->
-    {% include '_includes/fichaje_rapido.html' %}
+    {% include '_includes/_fichaje_rapido.html' %}
 
 
     <!-- KPIs de Limpieza -->
@@ -172,7 +172,7 @@
                                     </td>
                                     <td>
                                         <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-success" 
+                                            <div class="progress-bar bg-success"
                                                  style="width: {{ stat.completed_today|percentage:total_rooms }}%">
                                                 {{ stat.completed_today }}
                                             </div>

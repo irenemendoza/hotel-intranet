@@ -11,7 +11,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="h3 mb-2">{{ greeting }}, {{ user.get_full_name }}</h1>
-                    <p class="text-muted mb-0">Gestión de Recursos Humanos - {{ today|date:"l, d de F de Y" }}</p>
+                    <p class="text-muted mb-0">Gestión de Recursos Humanos - {{ today|date:"d/m/Y" }}</p>
                 </div>
                 <div>
                     <a href="{% url 'employees:create' %}" class="btn btn-primary">
@@ -21,6 +21,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Incluir Widget de Fichaje Rápido -->
+    {% include '_includes/_fichaje_rapido.html' %}
 
     <!-- KPIs de Personal -->
     <div class="row mb-4">
@@ -132,9 +135,6 @@
                                     <td class="text-center">{{ dept.employee_count }}</td>
                                     <td class="text-center">
                                         <span class="badge bg-success">-</span>
-                                    </td>
-                                    <td class="text-center">
-                                        {{ dept.employee_count|mul:100|div:total_employees|floatformat:0 }}%
                                     </td>
                                 </tr>
                                 {% endfor %}

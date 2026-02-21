@@ -34,7 +34,7 @@
                 <div class="card-body p-4">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-                        
+
                         {% if form.non_field_errors %}
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             {{ form.non_field_errors }}
@@ -154,22 +154,6 @@
                                 <div class="text-danger small mt-1">{{ form.salary.errors }}</div>
                                 {% endif %}
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Tipo de Contrato</label>
-                                {{ form.contract_type }}
-                                {% if form.contract_type.errors %}
-                                <div class="text-danger small mt-1">{{ form.contract_type.errors }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Estado</label>
-                                {{ form.status }}
-                                {% if form.status.errors %}
-                                <div class="text-danger small mt-1">{{ form.status.errors }}</div>
-                                {% endif %}
-                            </div>
                         </div>
 
                         <!-- Acceso al Sistema -->
@@ -199,24 +183,6 @@
                                 {% endif %}
                             </div>
                             {% endif %}
-
-                            <div class="col-12 mb-3">
-                                <div class="form-check">
-                                    {{ form.is_active }}
-                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                                        Usuario activo (puede iniciar sesión)
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="col-12 mb-3">
-                                <div class="form-check">
-                                    {{ form.is_staff }}
-                                    <label class="form-check-label" for="{{ form.is_staff.id_for_label }}">
-                                        Acceso al panel de administración
-                                    </label>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Foto de Perfil -->

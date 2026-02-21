@@ -1,4 +1,5 @@
 # apps/dashboard/views.py
+import json
 from datetime import timedelta
 
 from django.contrib import messages
@@ -40,14 +41,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         template = template_map.get(role, "dashboard/home.html")
 
-        print(f"DEBUG: Usuario: {self.request.user.username}")
-        print(f"DEBUG: Rol: {role}")
-        print(f"DEBUG: Template a usar: {template}")
-
         return [template]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # El superusuario sin perfil Employee no necesita contexto de dashboard
+        if not hasattr(self.request.user, "employee"):
+            return context
+
         employee = self.request.user.employee
         today = timezone.now().date()
 
@@ -55,7 +57,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context["employee"] = employee
         context["today"] = today
         context["greeting"] = self.get_greeting()
-        context["total_rooms"] = (Room.objects.filter(status="active").count(),)
+        context["total_rooms"] = Room.objects.filter(status="active").count()
+        context["available_rooms"] = Room.objects.filter(occupancy="vacant").count()
+        context["occupied_rooms"] = Room.objects.filter(occupancy="occupied").count()
 
         # Datos específicos por rol
         role_context_methods = {
@@ -105,12 +109,18 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             # Estadísticas generales
             "total_employees": Employee.objects.filter(is_available=True).count(),
             "total_rooms": Room.objects.count(),
-            "occupied_rooms": Room.objects.filter(status="occupied").count(),
-            "available_rooms": Room.objects.filter(status="available").count(),
             # Asistencia hoy
             "employees_present": Attendance.objects.filter(
                 check_in__date=today, check_out__isnull=True
             ).count(),
+            "today_attendances": Attendance.objects.filter(
+                employee=self.request.user.employee, check_in__date=today
+            ).order_by("-check_in"),
+            "latest_attendance": Attendance.objects.filter(
+                employee=self.request.user.employee, check_in__date=today
+            )
+            .order_by("-check_in")
+            .first(),
             # Permisos pendientes
             "pending_leaves": Leave.objects.filter(status="pending").count(),
             # Tareas pendientes
@@ -175,8 +185,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "team_members": team.select_related("user", "department"),
             "team_total": team.select_related("user", "department").count(),
             # Habitaciones
-            "available_rooms": Room.objects.filter(status="available").count(),
-            "occupied_rooms": Room.objects.filter(status="occupied").count(),
             "clean_rooms": Room.objects.filter(status="clean").count(),
             "dirty_rooms": dirty_rooms,
             "total_rooms": Room.objects.filter(is_active=True).count(),
@@ -265,6 +273,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             ).count(),
             # Productividad del equipo
             "team_productivity": self.get_cleaning_team_stats(team),
+            # Mi asistencia
+            "today_attendances": Attendance.objects.filter(
+                employee=self.request.user.employee, check_in__date=today
+            ).order_by("-check_in"),
+            "latest_attendance": Attendance.objects.filter(
+                employee=self.request.user.employee, check_in__date=today
+            )
+            .order_by("-check_in")
+            .first(),
         }
 
     def get_camarero_piso_context(self):
@@ -330,6 +347,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "pending_team_leaves": Leave.objects.filter(
                 employee__in=team, status="pending"
             ).count(),
+            # Mi asistencia
+            "today_attendances": Attendance.objects.filter(
+                employee=self.request.user.employee, check_in__date=today
+            ).order_by("-check_in"),
+            "latest_attendance": Attendance.objects.filter(
+                employee=self.request.user.employee, check_in__date=today
+            )
+            .order_by("-check_in")
+            .first(),
         }
 
     def get_mantenimiento_context(self):
@@ -382,6 +408,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "late_today": Attendance.objects.filter(
                 check_in__date=today, status="late"
             ).count(),
+            "today_attendances": Attendance.objects.filter(
+                employee=self.request.user.employee, check_in__date=today
+            ).order_by("-check_in"),
+            "latest_attendance": Attendance.objects.filter(
+                employee=self.request.user.employee, check_in__date=today
+            )
+            .order_by("-check_in")
+            .first(),
             # Permisos
             "pending_leaves": Leave.objects.filter(status="pending").count(),
             "approved_leaves_month": Leave.objects.filter(
@@ -478,32 +512,32 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     "start_date y end_date son requeridos para period='custom"
                 )
             date_filter = Q(
-                cleaningtask__completed_at__date__gte=start_date,
-                cleaningtask__completed_at__date__lte=end_date,
+                cleaning_tasks__completed_at__date__gte=start_date,
+                cleaning_tasks__completed_at__date__lte=end_date,
             )
         elif period == "today":
-            date_filter = Q(cleaningtask__completed_at__date=today)
+            date_filter = Q(cleaning_tasks__completed_at__date=today)
         elif period == "month":
             first_day_month = today.replace(day=1)
             date_filter = Q(
-                cleaningtask__completed_at__date__gte=first_day_month,
-                cleaningtask__completed_at__date__lte=today,
+                cleaning_tasks__completed_at__date__gte=first_day_month,
+                cleaning_tasks__completed_at__date__lte=today,
             )
         elif period == "year":
             first_day_year = today.replace(month=1, day=1)
             date_filter = Q(
-                cleaningtask__completed_at__date__gte=first_day_year,
-                cleaningtask__completed_at__date__lte=today,
+                cleaning_tasks__completed_at__date__gte=first_day_year,
+                cleaning_tasks__completed_at__date__lte=today,
             )
         else:
             date_filter = Q()
 
         # Construir filtro dinámico
-        filters = Q(cleaningtast__status="completed") & date_filter
+        filters = Q(cleaning_tasks__status="completed") & date_filter
 
         # Query optimizada
         team_with_stats = team.annotate(
-            completed_tasks=Count("cleaningtask", filter=filters)
+            completed_tasks=Count("cleaning_tasks", filter=filters)
         ).order_by("-completed_tasks")[:5]
 
         return [
@@ -899,154 +933,3 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         context["title"] = "Actualizar Mi Perfil"
         context["button_text"] = "Guardar Cambios"
         return context
-
-
-class ProfileStatsView(LoginRequiredMixin, TemplateView):
-    """Vista detallada de estadísticas del perfil"""
-
-    template_name = "employees/profile/ProfileStats.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        employee = self.request.user.employee
-        today = timezone.now().date()
-
-        # Período seleccionado (por defecto mes actual)
-        period = self.request.GET.get("period", "month")
-
-        if period == "week":
-            start_date = today - timedelta(days=7)
-            period_name = "Última Semana"
-        elif period == "year":
-            start_date = today.replace(month=1, day=1)
-            period_name = "Este Año"
-        else:  # month
-            start_date = today.replace(day=1)
-            period_name = "Este Mes"
-
-        context["period"] = period
-        context["period_name"] = period_name
-        context["start_date"] = start_date
-
-        # Asistencias del período
-        attendances = employee.attendances.filter(
-            check_in__date__gte=start_date, check_in__date__lte=today
-        )
-
-        # Estadísticas de asistencia
-        total_hours = timedelta()
-        on_time = 0
-        late = 0
-
-        for attendance in attendances:
-            if attendance.check_out:
-                total_hours += attendance.duration()
-            if attendance.status == "present":
-                on_time += 1
-            elif attendance.status == "late":
-                late += 1
-
-        total_days = attendances.count()
-        avg_hours = total_hours / total_days if total_days > 0 else timedelta()
-
-        context["attendance_stats"] = {
-            "total_days": total_days,
-            "on_time": on_time,
-            "late": late,
-            "total_hours": self._format_timedelta(total_hours),
-            "average_hours": self._format_timedelta(avg_hours),
-            "punctuality_rate": round((on_time / total_days * 100), 1)
-            if total_days > 0
-            else 0,
-        }
-
-        # Datos para gráficos
-        context["daily_hours"] = self._get_daily_hours_data(
-            attendances, start_date, today
-        )
-        context["attendance_by_status"] = self._get_attendance_by_status(attendances)
-
-        # Permisos del período
-        leaves = employee.leaves.filter(
-            start_date__gte=start_date, start_date__lte=today
-        )
-
-        context["leave_stats"] = {
-            "total": leaves.count(),
-            "approved": leaves.filter(status="approved").count(),
-            "pending": leaves.filter(status="pending").count(),
-            "rejected": leaves.filter(status="rejected").count(),
-        }
-
-        # Tareas específicas por rol
-        if employee.role in ["housekeeper_manager", "housekeeper"]:
-            context["task_stats"] = self._get_cleaning_task_stats(
-                employee, start_date, today
-            )
-        elif employee.role in ["maintenance_manager", "maintenance"]:
-            context["task_stats"] = self._get_maintenance_task_stats(
-                employee, start_date, today
-            )
-
-        return context
-
-    def _format_timedelta(self, td):
-        """Formatea un timedelta"""
-        total_seconds = int(td.total_seconds())
-        hours = total_seconds // 3600
-        minutes = (total_seconds % 3600) // 60
-        return {"hours": hours, "minutes": minutes}
-
-    def _get_daily_hours_data(self, attendances, start_date, end_date):
-        """Obtiene datos de horas trabajadas por día"""
-        daily_data = {}
-        current_date = start_date
-
-        while current_date <= end_date:
-            day_attendances = attendances.filter(check_in__date=current_date)
-            total_hours = sum(
-                (att.duration().total_seconds() / 3600)
-                for att in day_attendances
-                if att.check_out
-            )
-            daily_data[current_date.strftime("%d/%m")] = round(total_hours, 2)
-            current_date += timedelta(days=1)
-
-        return daily_data
-
-    def _get_attendance_by_status(self, attendances):
-        """Obtiene distribución de asistencias por estado"""
-        return {
-            "present": attendances.filter(status="present").count(),
-            "late": attendances.filter(status="late").count(),
-        }
-
-    def _get_cleaning_task_stats(self, employee, start_date, end_date):
-        """Estadísticas de tareas de limpieza"""
-        tasks = CleaningTask.objects.filter(
-            assigned_to=employee,
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date,
-        )
-
-        return {
-            "total": tasks.count(),
-            "completed": tasks.filter(status="completed").count(),
-            "pending": tasks.filter(status="pending").count(),
-            "in_progress": tasks.filter(status="in_progress").count(),
-        }
-
-    def _get_maintenance_task_stats(self, employee, start_date, end_date):
-        """Estadísticas de tareas de mantenimiento"""
-        tasks = MaintenanceTask.objects.filter(
-            assigned_to=employee,
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date,
-        )
-
-        return {
-            "total": tasks.count(),
-            "completed": tasks.filter(status="completed").count(),
-            "pending": tasks.filter(status="pending").count(),
-            "urgent": tasks.filter(priority="urgent").count(),
-        }

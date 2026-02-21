@@ -71,18 +71,20 @@
                         <label for="id_password" class="form-label">
                             <i class="bi bi-lock-fill me-1"></i>Contraseña
                         </label>
-                        <input
-                            type="password"
-                            class="form-control password-input"
-                            id="id_password"
-                            name="password"
-                            placeholder="Ingresa tu contraseña"
-                            required
-                            autocomplete="current-password"
-                        >
-                        <span class="password-toggle" onclick="togglePassword()">
-                            <i class="bi bi-eye" id="toggleIcon"></i>
-                        </span>
+                        <div class="position-relative">
+                            <input
+                                type="password"
+                                class="form-control password-input"
+                                id="id_password"
+                                name="password"
+                                placeholder="Ingresa tu contraseña"
+                                required
+                                autocomplete="current-password"
+                            >
+                            <span class="password-toggle align-items-center" onclick="togglePassword()">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </span>
+                        </div>
                     </div>
 
                     <div class="form-check mb-3">

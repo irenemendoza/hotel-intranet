@@ -575,8 +575,8 @@ class CleaningTask(models.Model):
     completed_at = models.DateTimeField(_("Completed at"), auto_now=True)
 
     class Meta:
-        verbose_name = (_("Cleaning Task"),)
-        verbose_name_plural = (_("Cleaning Tasks"),)
+        verbose_name = _("Cleaning Task")
+        verbose_name_plural = _("Cleaning Tasks")
         ordering = ["-created_at"]
 
     def __str__(self):

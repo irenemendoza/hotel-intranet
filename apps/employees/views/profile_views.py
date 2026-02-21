@@ -1,4 +1,6 @@
 # apps/employees/views/profile_views.py
+
+import json
 from datetime import timedelta
 
 from django.contrib import messages
@@ -213,10 +215,14 @@ class ProfileStatsView(LoginRequiredMixin, TemplateView):
         }
 
         # Datos para gráficos
-        context["daily_hours"] = self._get_daily_hours_data(
-            attendances, start_date, today
-        )
-        context["attendance_by_status"] = self._get_attendance_by_status(attendances)
+        daily_hours_data = self._get_daily_hours_data(attendances, start_date, today)
+
+        context["daily_hours_labels"] = json.dumps(list(daily_hours_data.keys()))
+        context["daily_hours_values"] = json.dumps(list(daily_hours_data.values()))
+
+        attendance_by_status = self._get_attendance_by_status(attendances)
+        context["attendance_present"] = attendance_by_status["present"]
+        context["attendance_late"] = attendance_by_status["late"]
 
         # Permisos del período
         leaves = employee.leaves.filter(

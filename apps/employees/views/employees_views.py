@@ -132,16 +132,16 @@ class EmployeeCreateView(LoginRequiredMixin, CreateView):
         username = form.cleaned_data["email"].split("@")[0]
 
         # Verificar si el usuario ya existe
-        if User.objects.filter(username=username).exists():
-            form.add_error("email", "Ya existe un usuario con este email")
+        if User.objects.filter(username=form.cleaned_data["username"]).exists():
+            form.add_error("username", "Este nombre de usuario ya existe")
             return self.form_invalid(form)
 
         user = User.objects.create_user(
-            username=username,
+            username=form.cleaned_data["username"],
             email=form.cleaned_data["email"],
             first_name=form.cleaned_data["first_name"],
             last_name=form.cleaned_data["last_name"],
-            password="temporal123",
+            password=form.cleaned_data["password"],
         )
 
         # Asignar el usuario al perfil
