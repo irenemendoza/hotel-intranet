@@ -3,9 +3,12 @@
 A comprehensive Django-based intranet system for hotel operations management, designed to streamline daily workflows across departments including reception, housekeeping, maintenance, and human resources.
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
-![Django](https://img.shields.io/badge/django-5.0+-green.svg)
+![Django](https://img.shields.io/badge/django-6.0+-green.svg)
 ![Bootstrap](https://img.shields.io/badge/bootstrap-5.3-purple.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
+## 🚀 Live Demo
+[intranethotelera.irenemendoza.dev](https://intranethotelera.irenemendoza.dev)
 
 ## 🎯 Project Overview
 
@@ -369,6 +372,12 @@ Potential features for expansion:
 - [ ] Calendar view for schedules
 - [ ] Multi-language support
 
+## ☁️ Deployment
+Deployed on a DigitalOcean droplet using:
+- **CloudPanel** for server management
+- **Nginx** as web server
+- **uWSGI** as application server
+- **PostgreSQL** as production database
 ## 🤝 Contributing
 
 This is a portfolio project, but feedback and suggestions are welcome:
@@ -385,7 +394,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**[Your Name]**
+** Irene Mendoza González **
 - GitHub: [@irenemendoza](https://github.com/irenemendoza)
 - LinkedIn: [Irene Mendoza González](https://linkedin.com/in/irenemendozagonzalez)
 
