@@ -8,7 +8,7 @@ A comprehensive Django-based intranet system for hotel operations management, de
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## 🚀 Live Demo
-[intranethotelera.irenemendoza.dev](https://intranethotelera.irenemendoza.dev)
+<a href="https://intranethotelera.irenemendoza.dev" target="_blank">intranethotelera.irenemendoza.dev</a>
 
 ## 🎯 Project Overview
 
@@ -59,8 +59,8 @@ levante-waves-hotel/
 ### Technology Stack
 
 **Backend:**
-- Django 5.0+
-- SQLite (development) / PostgreSQL-ready
+- Django 6.0+
+- SQLite (development) / PostgreSQL (production)
 - Django ORM for database operations
 
 **Frontend:**
@@ -70,7 +70,7 @@ levante-waves-hotel/
 - Chart.js for data visualization
 
 **Development Tools:**
-- Python 3.11+
+- Python 3.12+
 - Git for version control
 - Django management commands for data generation
 
@@ -78,9 +78,10 @@ levante-waves-hotel/
 
 ### Prerequisites
 
-- Python 3.11 or higher
+- Python 3.12 or higher
 - pip (Python package manager)
 - Virtual environment (recommended)
+- PostgreSQL
 
 ### Installation
 
@@ -113,6 +114,11 @@ Create a `.env` file in the project root:
 SECRET_KEY=your-secret-key-here
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
+DB_NAME=hotel_intranet
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_HOST=localhost
+DB_PORT=5432
 ```
 
 5. **Run migrations**
