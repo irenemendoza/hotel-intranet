@@ -18,6 +18,11 @@ main {
     flex: 1;
 }
 
+.logoIrene svg{
+    height: 0.8em;
+    width: auto;
+}
+
 /* Dashboard Cards */
 .stat-card {
     border-left: 4px solid var(--primary-color);
