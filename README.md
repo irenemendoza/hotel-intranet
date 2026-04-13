@@ -208,7 +208,7 @@ The system supports multiple employee roles with customized dashboards and permi
 
 ### Demo Credentials
 
-After running `populate_data`, you can use these credentials:
+After running `load_sample_data`, you can use these credentials:
 
 ```
 Director:
@@ -216,14 +216,49 @@ Username: director
 Password: demo123
 
 Reception Manager:
-Username: jefe_recepcion
+Username: jefe.recepcion
 Password: demo123
 
-Housekeeper:
-Username: camarera1
+Receptionist 1:
+Username: recepcion1
 Password: demo123
 
-(Additional demo accounts are created for each role)
+Receptionist 2:
+Username: recepcion2
+Password: demo123
+
+Housekeeper Manager:
+Username: jefe.limpieza
+Password: demo123
+
+Housekeeper 1:
+Username: limpieza1
+Password: demo123
+
+Housekeeper 2:
+Username: limpieza1
+Password: demo123
+
+Housekeeper 3:
+Username: limpieza1
+Password: demo123
+
+Maintenance Manager:
+Username: jefe.mantenimiento
+Password: demo123
+
+Maintenance Staff 1:
+Username: mantenimiento1
+Password: demo123
+
+Maintenance Staff 2:
+Username: mantenimiento2
+Password: demo123
+
+RRHH:
+Username: rrhh
+Password: demo123
+
 ```
 
 ## 🎨 Key Features
